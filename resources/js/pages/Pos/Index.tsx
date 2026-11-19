@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ChefHat, LogOut, Search, Ticket, X } from 'lucide-react';
+import { ArrowLeft, ChefHat, LogOut, ReceiptText, Search, Ticket, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Logo } from '@/components/Logo';
 import { OptionsPanel } from '@/components/pos/OptionsPanel';
@@ -9,7 +9,7 @@ import { ProductTile } from '@/components/pos/ProductTile';
 import { Flash } from '@/components/ui/Flash';
 import { useNow } from '@/hooks/useNow';
 import { cn } from '@/lib/cn';
-import { time } from '@/lib/format';
+import { money, time } from '@/lib/format';
 import { hasOptions, needsChoice, signature, unitPrice, type PosLine, type PosLineInput } from '@/lib/pos';
 import type { Category, ComboOffer, PosReceipt, Product } from '@/types';
 
@@ -45,6 +45,8 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
     const [receipt, setReceipt] = useState<PosReceipt | null>(null);
+    // Phones show the menu full-screen and the order as a sheet opened from the bottom bar.
+    const [ticketOpen, setTicketOpen] = useState(false);
 
     // A page reload (or a dropped connection) must not lose a half-built order.
     useEffect(() => {
@@ -67,6 +69,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
             setType('pickup');
             setPaying(false);
             setErrors({});
+            setTicketOpen(true);
         }
     }, [flash.receipt?.uuid]);
 
@@ -181,14 +184,14 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
         );
 
     return (
-        <div className="flex min-h-dvh flex-col bg-ink-950 md:h-dvh">
+        <div className="flex h-dvh flex-col bg-ink-950">
             <Head title="Take Order" />
 
             <header className="flex items-center gap-3 border-b border-ink-700 bg-ink-900 px-3 py-2">
                 <Link href={auth.user?.home_url ?? '/'} aria-label="Back to workspace">
                     <Logo compact />
                 </Link>
-                <h1 className="hidden font-display text-2xl leading-none text-white uppercase sm:block">Take Order</h1>
+                <h1 className="hidden font-display text-2xl leading-none whitespace-nowrap text-white uppercase lg:block">Take Order</h1>
 
                 <label className="relative mx-auto block w-full max-w-md">
                     <span className="sr-only">Search the menu</span>
@@ -237,7 +240,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                 </nav>
             </header>
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[minmax(0,1fr)_21rem] md:grid-rows-[auto_minmax(0,1fr)] lg:grid-cols-[9rem_minmax(0,1fr)_24rem] lg:grid-rows-[minmax(0,1fr)]">
+            <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_21rem] lg:grid-cols-[9rem_minmax(0,1fr)_24rem] lg:grid-rows-[minmax(0,1fr)]">
                 <nav
                     className="scrollbar-none flex gap-2 overflow-x-auto border-b border-ink-700 bg-ink-900 p-2 md:col-span-2 lg:col-span-1 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:border-r lg:border-b-0"
                     aria-label="Menu categories"
@@ -259,7 +262,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                     ))}
                 </nav>
 
-                <main className="relative min-h-[55dvh] md:row-start-2 md:min-h-0 lg:col-start-2 lg:row-start-1">
+                <main className="relative min-h-0 md:row-start-2 lg:col-start-2 lg:row-start-1">
                     <div className="h-full overflow-y-auto p-3">
                         {visible.length === 0 ? (
                             <p className="py-16 text-center text-sm text-ink-400">Nothing on the menu matches “{query}”.</p>
@@ -294,7 +297,15 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                     )}
                 </main>
 
-                <div className="flex min-h-0 flex-col md:row-start-2 lg:col-start-3 lg:row-start-1">
+                <div
+                    className={cn(
+                        'min-h-0 flex-col md:static md:z-auto md:row-start-2 md:flex lg:col-start-3 lg:row-start-1',
+                        ticketOpen ? 'fixed inset-0 z-30 flex bg-ink-900 pb-safe' : 'hidden',
+                    )}
+                >
+                    <button type="button" onClick={() => setTicketOpen(false)} className="flex h-12 shrink-0 items-center gap-2 border-b border-ink-700 px-3 text-sm font-bold text-ink-100 md:hidden">
+                        <ArrowLeft className="size-4" aria-hidden /> Back to menu
+                    </button>
                     <PosTicket
                         lines={lines}
                         combo={combo}
@@ -307,7 +318,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                         onType={setType}
                         onCustomerName={setCustomerName}
                         onQuantity={setQuantity}
-                        onEdit={(line) => setOptions({ product: line.product, line })}
+                        onEdit={(line) => (setTicketOpen(false), setOptions({ product: line.product, line }))}
                         onRemove={(key) => setQuantity(key, 0)}
                         onClear={() => setLines([])}
                         onCharge={() => (setErrors({}), setPaying(true))}
@@ -315,6 +326,22 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                     />
                 </div>
             </div>
+
+            {/* Phones: the order is one tap away, with its total always visible. */}
+            <button
+                type="button"
+                onClick={() => setTicketOpen(true)}
+                className={cn(
+                    'flex h-16 shrink-0 items-center justify-between px-4 pb-safe text-white md:hidden',
+                    lines.length > 0 ? 'bg-brand-600' : 'border-t border-ink-700 bg-ink-900 text-ink-300',
+                )}
+            >
+                <span className="flex items-center gap-2 text-sm font-extrabold">
+                    <ReceiptText className="size-5" aria-hidden />
+                    {lines.length > 0 ? `View order · ${totals.count} item${totals.count === 1 ? '' : 's'}` : 'Order is empty'}
+                </span>
+                <span className="font-display text-3xl leading-none">{money(totals.total)}</span>
+            </button>
 
             {paying && <PaymentDialog total={totals.total} processing={processing} errors={errors} onConfirm={charge} onClose={() => setPaying(false)} />}
 

@@ -62,15 +62,15 @@ export function CounterOrderCard({ order, selected, onSelect }: CounterOrderCard
                 </p>
             )}
 
-            <div className="mt-2.5 flex items-center justify-between border-t border-ink-700 pt-2">
+            <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-ink-700 pt-2">
                 <span className={cn('text-[11px]', waiting >= 30 ? 'font-bold text-brand-400' : waiting >= 15 ? 'font-bold text-flame-400' : 'text-ink-400')}>
                     {order.ready_at
-                        ? `Ready ${time(order.ready_at)}${order.status === 'ready' && waiting >= 5 ? ` · waiting ${waiting} min` : ''}`
+                        ? `Ready ${time(order.ready_at)}${order.status === 'ready' && waiting >= 5 ? ` · ${waiting} min wait` : ''}`
                         : order.estimated_ready_at
                           ? `Due ${time(order.estimated_ready_at)}`
                           : `In ${time(order.created_at)}`}
                 </span>
-                <span className="flex items-center gap-1 text-sm font-extrabold text-flame-400">
+                <span className="flex shrink-0 items-center gap-1 text-sm font-extrabold whitespace-nowrap text-flame-400">
                     {money(order.total)}
                     <ChevronRight className="size-4 text-ink-500 transition-transform group-hover:translate-x-0.5" aria-hidden />
                 </span>

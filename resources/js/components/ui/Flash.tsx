@@ -22,7 +22,7 @@ export function Flash() {
 
         setToasts((current) => [...current, ...incoming]);
         const ids = incoming.map((toast) => toast.id);
-        const timer = window.setTimeout(() => setToasts((current) => current.filter((toast) => !ids.includes(toast.id))), 5000);
+        const timer = window.setTimeout(() => setToasts((current) => current.filter((toast) => !ids.includes(toast.id))), incoming.some((toast) => toast.kind === 'error') ? 6000 : 3000);
 
         return () => window.clearTimeout(timer);
     }, [flash]);
@@ -30,8 +30,9 @@ export function Flash() {
     if (toasts.length === 0) return null;
 
     return (
-        <div className="no-print pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4" aria-live="polite">
-            {toasts.map((toast) => (
+        <div className="no-print pointer-events-none fixed inset-x-0 top-3 z-[60] flex flex-col items-center gap-2 px-4 lg:top-auto lg:bottom-4" aria-live="polite">
+            {/* Only the latest two: a burst of taps must not bury the screen. */}
+            {toasts.slice(-2).map((toast) => (
                 <div
                     key={toast.id}
                     role="status"

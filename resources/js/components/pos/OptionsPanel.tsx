@@ -89,17 +89,18 @@ export function OptionsPanel({ product, combo, quickNotes, editing, onSubmit, on
     };
 
     return (
-        <section className="absolute inset-0 z-20 flex animate-slide-up flex-col bg-ink-900" aria-label={`Options for ${product.name}`}>
+        <section className="fixed inset-0 z-40 flex animate-slide-up flex-col bg-ink-900 pb-safe md:absolute md:z-20 md:pb-0" aria-label={`Options for ${product.name}`}>
             <header className="flex items-center gap-3 border-b border-ink-700 px-4 py-3">
                 <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">{editing ? 'Edit item' : 'Add item'}</p>
-                    <h2 className="truncate font-display text-3xl leading-none text-white uppercase">
+                    <h2 className="truncate font-display text-2xl leading-none text-white uppercase sm:text-3xl">
                         {product.code && <span className="mr-2 text-ink-400">{product.code}</span>}
                         {product.name}
                     </h2>
                 </div>
                 <button type="button" onClick={onClose} className="flex h-11 items-center gap-1.5 rounded-lg bg-ink-700 px-3 text-sm font-bold text-ink-100 hover:bg-ink-600" aria-label="Close options">
-                    <X className="size-4" /> Esc
+                    <X className="size-4" /> <span className="hidden md:inline">Esc</span>
+                    <span className="md:hidden">Close</span>
                 </button>
             </header>
 
@@ -169,13 +170,13 @@ export function OptionsPanel({ product, combo, quickNotes, editing, onSubmit, on
 
             <footer className="flex items-center gap-3 border-t border-ink-700 px-4 py-3">
                 <div className="flex items-center rounded-xl border border-ink-600 bg-ink-850">
-                    <button type="button" className="flex size-14 items-center justify-center text-ink-200 hover:text-white disabled:opacity-30" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)} aria-label="Decrease quantity">
+                    <button type="button" className="flex h-14 w-11 items-center justify-center text-ink-200 hover:text-white disabled:opacity-30 sm:w-14" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)} aria-label="Decrease quantity">
                         <Minus className="size-5" />
                     </button>
-                    <span className="w-10 text-center font-display text-3xl leading-none text-white" aria-live="polite">
+                    <span className="w-8 text-center font-display text-3xl leading-none text-white sm:w-10" aria-live="polite">
                         {quantity}
                     </span>
-                    <button type="button" className="flex size-14 items-center justify-center text-ink-200 hover:text-white disabled:opacity-30" disabled={quantity >= 50} onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">
+                    <button type="button" className="flex h-14 w-11 items-center justify-center text-ink-200 hover:text-white disabled:opacity-30 sm:w-14" disabled={quantity >= 50} onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">
                         <Plus className="size-5" />
                     </button>
                 </div>
@@ -183,14 +184,17 @@ export function OptionsPanel({ product, combo, quickNotes, editing, onSubmit, on
                     type="button"
                     onClick={submit}
                     disabled={missing !== undefined}
-                    className="flex h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-go-500 px-4 text-base font-extrabold text-ink-950 transition-colors hover:bg-go-400 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400"
+                    className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-xl bg-go-500 px-3 text-sm leading-tight font-extrabold text-ink-950 transition-colors hover:bg-go-400 disabled:cursor-not-allowed disabled:bg-ink-700 disabled:text-ink-400 sm:px-4 sm:text-base"
                 >
                     {missing ? (
                         `Choose ${missing.name}`
                     ) : (
                         <>
-                            <Check className="size-5" aria-hidden />
-                            {editing ? 'Update item' : 'Add to order'} · {money(unitPrice(line, combo) * quantity)}
+                            <Check className="size-5 shrink-0" aria-hidden />
+                            <span className="whitespace-nowrap">
+                                {editing ? 'Update' : 'Add'}
+                                <span className="hidden sm:inline">{editing ? ' item' : ' to order'}</span> · {money(unitPrice(line, combo) * quantity)}
+                            </span>
                             <kbd className="ml-1 hidden rounded bg-ink-950/20 px-1.5 py-0.5 text-[11px] font-bold sm:inline">Enter</kbd>
                         </>
                     )}

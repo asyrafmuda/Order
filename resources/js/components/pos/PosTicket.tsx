@@ -223,7 +223,7 @@ export function PosTicket(props: PosTicketProps) {
                             <span className="block text-base leading-tight font-extrabold">Charge</span>
                             <kbd className="text-[10px] font-bold opacity-70">F2</kbd>
                         </span>
-                        <span className="font-display text-4xl leading-none">{money(totals.total)}</span>
+                        <span className="font-display text-3xl leading-none whitespace-nowrap lg:text-4xl">{money(totals.total)}</span>
                     </button>
                 </div>
             </div>

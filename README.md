@@ -34,6 +34,15 @@ Semua password ialah `password`. **Tukar sebelum go live.**
 | Rider | rider@bossburger.test | `/rider` |
 | Customer | customer@bossburger.test | storefront |
 
+## Telefon dan tablet
+
+Kebanyakan pelanggan guna telefon, dan krew guna tablet atau telefon, jadi setiap skrin direka untuk sentuhan:
+
+- **Storefront di telefon:** header satu baris, bar tab di bawah (Menu, My Order, Kitchen, Account), kad menu padat, bar *View ticket* yang sentiasa nampak, dan butang bayar yang melekat di bawah semasa checkout.
+- **POS di telefon:** menu skrin penuh dengan bar *View order* di bawah; tiket dan pilihan item dibuka sebagai helaian skrin penuh. Di tablet, menu dan tiket bersebelahan.
+- **Kaunter di telefon:** order yang sedia diserah dipaparkan dahulu, dan tindakan (kutip cash, serah) berada di atas senarai item.
+- Medan input 16px di skrin kecil supaya iOS Safari tak zoom bila ditekan, dan bar bawah menghormati *safe area* telefon.
+
 ## POS kaunter (`/pos`)
 
 Untuk order walk-in yang diambil oleh staf. Direka untuk laju:

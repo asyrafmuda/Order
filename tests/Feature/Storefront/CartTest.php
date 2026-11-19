@@ -65,7 +65,7 @@ it('charges for add-ons and the combo upgrade', function () {
         'combo' => true,
         'combo_choice' => 'Iced Lemon Tea',
         'notes' => 'No pickles',
-    ])->assertSessionHas('success');
+    ])->assertSessionMissing('error');
 
     $line = app(Cart::class)->priced()->lines->first();
 

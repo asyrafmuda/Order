@@ -82,8 +82,8 @@ export function PaymentDialog({ total, processing, errors, onConfirm, onClose }:
         >
             <div className="space-y-5">
                 <div className="flex items-end justify-between rounded-xl bg-ink-900 px-4 py-3">
-                    <span className="text-xs font-extrabold tracking-[0.15em] text-ink-400 uppercase">Total due</span>
-                    <span className="font-display text-6xl leading-none text-flame-400">{money(total)}</span>
+                    <span className="text-xs font-extrabold tracking-[0.15em] whitespace-nowrap text-ink-400 uppercase">Total due</span>
+                    <span className="font-display text-5xl leading-none whitespace-nowrap text-flame-400 sm:text-6xl">{money(total)}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="Payment method">
@@ -135,8 +135,8 @@ export function PaymentDialog({ total, processing, errors, onConfirm, onClose }:
                         </div>
                         <div className={cn('flex items-end justify-between rounded-xl px-4 py-3', short ? 'bg-brand-900' : 'bg-go-900')} aria-live="polite">
                             <span className={cn('text-xs font-extrabold tracking-[0.15em] uppercase', short ? 'text-brand-400' : 'text-go-400')}>{short ? 'Still short by' : 'Change'}</span>
-                            <span className={cn('font-display text-5xl leading-none', short ? 'text-brand-400' : 'text-white')}>
-                                {short ? money(total - (received ?? 0)) : change !== null ? money(change) : '—'}
+                            <span className={cn('font-display text-4xl leading-none whitespace-nowrap sm:text-5xl', short ? 'text-brand-400' : 'text-white')}>
+                                {short ? money(total - (received ?? 0)) : change !== null ? money(change) : <span className="text-ink-500">RM 0.00</span>}
                             </span>
                         </div>
                         {errors.tendered && <p className="text-xs font-medium text-brand-400">{errors.tendered}</p>}

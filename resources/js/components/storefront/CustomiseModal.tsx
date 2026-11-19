@@ -76,7 +76,7 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
 
     const option = (active: boolean) =>
         cn(
-            'flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors',
+            'flex min-h-11 w-full flex-wrap items-center justify-between gap-x-2 rounded-lg border px-3 py-2 text-left text-sm leading-tight transition-colors',
             active ? 'border-brand-500 bg-brand-900 text-white' : 'border-ink-600 bg-ink-900 text-ink-200 hover:border-ink-400',
         );
 
@@ -115,7 +115,7 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
                 {variants.length > 0 && (
                     <fieldset>
                         <legend className="mb-2 text-xs font-extrabold tracking-wider text-ink-300 uppercase">Choose size</legend>
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="grid grid-cols-2 gap-2">
                             {variants.map((variant) => (
                                 <button key={variant.id} type="button" className={option(variantId === variant.id)} onClick={() => setVariantId(variant.id)} aria-pressed={variantId === variant.id}>
                                     <span className="font-semibold">{variant.name}</span>
@@ -135,7 +135,7 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
                                 {group.max_select > 1 && ` · up to ${group.max_select}`}
                             </span>
                         </legend>
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="grid grid-cols-2 gap-2">
                             {(group.modifiers ?? [])
                                 .filter((modifier) => modifier.is_available)
                                 .map((modifier) => (
