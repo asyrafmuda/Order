@@ -202,6 +202,7 @@ export interface OrderItem {
     started_at: string | null;
     done_at: string | null;
     image_url: string | null;
+    icon: string | null;
     station: { id: number; name: string } | null;
     modifiers: { name: string; price: number }[];
 }

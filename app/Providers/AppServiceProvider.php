@@ -6,6 +6,7 @@ use App\Contracts\MessageChannel;
 use App\Contracts\PaymentGateway;
 use App\Contracts\PosProvider;
 use App\Services\Cart\Cart;
+use App\Services\Cart\CartPricer;
 use App\Services\Messaging\WhatsAppChannel;
 use App\Services\Pos\LoyversePosProvider;
 use App\Support\KitchenLoad;
@@ -23,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(KitchenLoad::class);
         $this->app->scoped(Cart::class, fn ($app) => new Cart(
             $app['session.store'],
-            $app->make(\App\Services\Cart\CartPricer::class),
+            $app->make(CartPricer::class),
             $app->make(Settings::class),
         ));
 

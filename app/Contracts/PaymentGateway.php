@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Data\PaymentCallback;
+use App\Exceptions\PaymentException;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,7 @@ interface PaymentGateway
     /**
      * Verify and normalise a return / webhook request from the gateway.
      *
-     * @throws \App\Exceptions\PaymentException when the request is not authentic
+     * @throws PaymentException when the request is not authentic
      */
     public function parseCallback(Request $request): PaymentCallback;
 

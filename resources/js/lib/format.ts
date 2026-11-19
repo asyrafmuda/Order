@@ -17,16 +17,22 @@ export function inputToSen(value: string): number {
     return Number.isFinite(parsed) ? Math.round(parsed * 100) : 0;
 }
 
+/**
+ * Times are always shown in the shop's timezone (set by the server in a meta
+ * tag), so a ticket reads the same on every device.
+ */
+const timeZone = typeof document === 'undefined' ? undefined : (document.querySelector<HTMLMetaElement>('meta[name="shop-timezone"]')?.content ?? undefined);
+
 export function time(iso: string | null | undefined): string {
     if (!iso) return '—';
 
-    return new Date(iso).toLocaleTimeString('en-MY', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone });
 }
 
 export function date(iso: string | null | undefined): string {
     if (!iso) return '—';
 
-    return new Date(iso).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone });
 }
 
 export function dateTime(iso: string | null | undefined): string {

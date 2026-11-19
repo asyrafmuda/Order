@@ -86,6 +86,9 @@ class OrderResource extends JsonResource
                 'started_at' => $item->started_at?->toIso8601String(),
                 'done_at' => $item->done_at?->toIso8601String(),
                 'image_url' => $item->relationLoaded('product') ? $item->product?->image_url : null,
+                'icon' => $item->relationLoaded('product') && $item->product?->relationLoaded('category')
+                    ? $item->product->category?->icon
+                    : null,
                 'station' => $item->relationLoaded('station') && $item->station ? [
                     'id' => $item->station->id,
                     'name' => $item->station->name,
@@ -144,7 +147,7 @@ class OrderResource extends JsonResource
     {
         return [
             'items.modifiers',
-            'items.product',
+            'items.product.category',
             'items.station',
             'delivery.zone',
             'delivery.rider.user',

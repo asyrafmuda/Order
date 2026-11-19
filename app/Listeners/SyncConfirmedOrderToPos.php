@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Actions\Pos\PushOrderToPos;
 use App\Enums\OrderStatus;
 use App\Events\OrderStatusChanged;
+use App\Exceptions\PosException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 /**
@@ -25,8 +26,25 @@ class SyncConfirmedOrderToPos implements ShouldQueue
         return $event->to === OrderStatus::Confirmed;
     }
 
+    /**
+     * @throws PosException so the queue retries with backoff
+     */
     public function handle(OrderStatusChanged $event): void
     {
-        $this->push->handle($event->order);
+        try {
+            $this->push->handle($event->order);
+        } catch (PosException $exception) {
+            // On the "sync" queue this runs inside the customer's request,
+            // where a POS outage must not turn into an error page. The
+            // failure is already logged on the order and can be retried
+            // from Admin → Orders.
+            if (config('queue.default') === 'sync') {
+                report($exception);
+
+                return;
+            }
+
+            throw $exception;
+        }
     }
 }

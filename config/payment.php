@@ -1,5 +1,7 @@
 <?php
 
+use App\Services\Payments\FakeGateway;
+
 return [
 
     /*
@@ -16,7 +18,7 @@ return [
     'default' => env('PAYMENT_GATEWAY', 'fake'),
 
     'drivers' => [
-        'fake' => App\Services\Payments\FakeGateway::class,
+        'fake' => FakeGateway::class,
     ],
 
 ];

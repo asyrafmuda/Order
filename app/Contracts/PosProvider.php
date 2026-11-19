@@ -4,6 +4,7 @@ namespace App\Contracts;
 
 use App\Data\PosCatalogItem;
 use App\Data\PosReceipt;
+use App\Exceptions\PosException;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
@@ -23,14 +24,14 @@ interface PosProvider
      * Check connectivity; returns a short human readable description of the
      * connected account or throws PosException.
      *
-     * @throws \App\Exceptions\PosException
+     * @throws PosException
      */
     public function testConnection(): string;
 
     /**
      * Create a sales receipt for a confirmed order.
      *
-     * @throws \App\Exceptions\PosException
+     * @throws PosException
      */
     public function pushOrder(Order $order): PosReceipt;
 
@@ -39,7 +40,7 @@ interface PosProvider
      *
      * @return array<int, PosCatalogItem>
      *
-     * @throws \App\Exceptions\PosException
+     * @throws PosException
      */
     public function catalog(): array;
 

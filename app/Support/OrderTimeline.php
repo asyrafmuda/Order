@@ -18,7 +18,6 @@ final class OrderTimeline
     public static function for(Order $order): array
     {
         $delivery = $order->isDelivery();
-        $cancelled = $order->status === OrderStatus::Cancelled;
 
         $steps = [
             self::step('placed', 'Order Placed', 'Online Kiosk', $order->created_at),
@@ -39,26 +38,41 @@ final class OrderTimeline
                 $order->pos_synced_at,
             ),
             self::step('kitchen', 'Grill & Station', 'Cooking your order', $order->preparing_at, done: $order->ready_at !== null),
-            self::step('ready', $delivery ? 'Packed for Rider' : 'Ready for Pickup', $delivery ? 'Waiting for rider' : 'Collect at counter', $order->ready_at),
+            // "Ready" stays the current step until the order is handed over.
+            self::step(
+                'ready',
+                $delivery ? 'Packed for Rider' : 'Ready for Pickup',
+                $delivery ? 'Waiting for rider' : 'Collect at counter',
+                $order->ready_at,
+                done: $order->dispatched_at !== null || $order->completed_at !== null,
+            ),
         ];
 
         if ($delivery) {
-            $steps[] = self::step('dispatched', 'Out for Delivery', 'Rider on the way', $order->dispatched_at);
+            $steps[] = self::step('dispatched', 'Out for Delivery', 'Rider on the way', $order->dispatched_at, done: $order->completed_at !== null);
         }
 
         $steps[] = self::step('completed', 'Order Fulfilled', $delivery ? 'Delivered' : 'Collected', $order->completed_at);
 
-        // The first step that is not done yet is the one in progress.
-        $activeMarked = false;
+        if ($order->status === OrderStatus::Cancelled) {
+            return $steps;
+        }
 
+        // The first unfinished step is the one in progress. Paying at the
+        // counter and a slow POS sync never hold up the kitchen, so those two
+        // are skipped once the order has moved on without them.
         foreach ($steps as $index => $step) {
             if ($step['state'] === 'done') {
                 continue;
             }
 
-            if (! $activeMarked && ! $cancelled && ! ($step['key'] === 'payment' && ! $order->payment_method->isOnline())) {
+            $skippable = ($step['key'] === 'payment' && ! $order->payment_method->isOnline())
+                || ($step['key'] === 'pos' && $order->preparing_at !== null);
+
+            if (! $skippable) {
                 $steps[$index]['state'] = 'active';
-                $activeMarked = true;
+
+                break;
             }
         }
 

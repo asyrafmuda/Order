@@ -1,5 +1,8 @@
 <?php
 
+use App\Services\Messaging\LogChannel;
+use App\Services\Messaging\WhatsAppChannel;
+
 return [
 
     /*
@@ -16,8 +19,8 @@ return [
     'default' => env('MESSAGING_CHANNEL', 'log'),
 
     'drivers' => [
-        'log' => App\Services\Messaging\LogChannel::class,
-        'whatsapp' => App\Services\Messaging\WhatsAppChannel::class,
+        'log' => LogChannel::class,
+        'whatsapp' => WhatsAppChannel::class,
     ],
 
     'whatsapp' => [

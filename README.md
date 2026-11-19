@@ -1,58 +1,135 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Boss Burger — Sistem Order Online
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem order online untuk kedai burger: menu & cart, checkout, tiket digital dengan tracking live, Kitchen Display (KDS), kaunter pickup, delivery dengan rider, dan admin panel. Order yang disahkan dihantar ke Loyverse POS sebagai resit.
 
-## About Laravel
+- **Backend:** Laravel 13, PHP 8.3+, MySQL 8
+- **Frontend:** Inertia 3 + React 19 + TypeScript + Tailwind 4
+- **Real-time:** Laravel Reverb (websocket); kalau Reverb tak dihidupkan, skrin live guna polling
+- **Ujian:** Pest
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Setup
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Perlu PHP 8.3+, Composer, Node 22+ dan MySQL 8.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cp .env.example .env
+# isi DB_DATABASE / DB_USERNAME / DB_PASSWORD dalam .env, kemudian:
+composer setup          # install, key, kunci Reverb, migrate + seed, storage:link, npm install, build
+composer dev            # server, queue worker, log, Vite dan Reverb serentak
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Buka http://localhost:8000.
 
-## Contributing
+`composer setup` seed menu Boss Burger, zon delivery dan satu akaun untuk setiap role. Untuk data jualan contoh (dashboard & laporan): `php artisan db:seed --class=DemoOrderSeeder`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Akaun demo
 
-## Code of Conduct
+Semua password ialah `password`. **Tukar sebelum go live.**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Role | Email | Skrin |
+|---|---|---|
+| Admin | admin@bossburger.test | `/admin` |
+| Cashier | cashier@bossburger.test | `/counter` |
+| Kitchen | kitchen@bossburger.test | `/kitchen` |
+| Rider | rider@bossburger.test | `/rider` |
+| Customer | customer@bossburger.test | storefront |
 
-## Security Vulnerabilities
+## Aliran order
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+Pending Payment → Confirmed → Preparing → Ready → (Out for Delivery) → Completed
+                      └────────────── Cancelled (refund kalau dah bayar) ──┘
+```
 
-## License
+- **Online (FPX / kad / e-wallet):** order ditahan sebagai *Pending Payment* sehingga gateway sahkan bayaran. Order yang tak dibayar dalam 30 minit dibatalkan oleh `orders:cancel-unpaid`.
+- **Cash at counter (pickup sahaja):** terus *Confirmed*; cashier kutip bayaran masa serah.
+- Bila *Confirmed*: resit dihantar ke POS dan pelanggan dapat mesej (kedua-duanya atas queue).
+- Dapur tukar status item; item pertama dimasak → *Preparing*, item terakhir siap → *Ready*.
+- Pickup: cashier scan QR / masukkan kod pickup dan serah. Delivery: cashier assign rider, rider tekan *Picked up* dan *Delivered*.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Semua pertukaran status melalui `App\Actions\Orders\TransitionOrder`, yang kuatkuasakan peta dalam `OrderStatus::allowedTransitions()`.
+
+## Struktur kod
+
+| Lokasi | Isi |
+|---|---|
+| `app/Enums` | Status dan jenis (order, payment, kitchen, delivery, role) |
+| `app/Actions` | Logik bisnes: `PlaceOrder`, `TransitionOrder`, `CancelOrder`, `ConfirmPayment`, `UpdateKitchenItem`, `AssignRider`, `PushOrderToPos`… |
+| `app/Services/Cart` | Cart dalam session + `CartPricer` (harga sentiasa dikira di server) |
+| `app/Contracts` + `app/Services/{Payments,Pos,Messaging}` | Interface dan driver integrasi |
+| `app/Http/Controllers` | Controller nipis; validation dalam `app/Http/Requests` |
+| `app/Http/Resources` | Bentuk data yang dihantar ke React |
+| `app/Support` | `Settings`, `Money`, `ShopHours`, `KitchenLoad`, `OrderTimeline` |
+| `routes/web.php`, `auth.php`, `staff.php`, `admin.php` | Route ikut kawasan |
+| `resources/js/pages` | Halaman Inertia (React) |
+| `resources/js/components`, `layouts` | UI kit, layout storefront / back office |
+
+Nota penting:
+
+- **Duit disimpan sebagai integer sen.** Guna `App\Support\Money` (PHP) dan `money()` (TS) untuk paparan.
+- **Harga disalin ke order** (`order_items`), jadi perubahan menu tak ubah order lama.
+- **Timezone aplikasi** ialah `Asia/Kuala_Lumpur` (`APP_TIMEZONE`). Nombor giliran (A001…) reset setiap hari.
+- **Tetapan kedai** (waktu operasi, SST, ETA, prefix giliran) diubah di Admin → Settings; default dalam `config/shop.php`.
+
+## Integrasi
+
+Setiap integrasi ada interface dan driver yang dipilih melalui `.env`.
+
+### Payment gateway — `PAYMENT_GATEWAY`
+
+Default `fake`: halaman bank simulasi (Approve / Decline) supaya aliran penuh boleh diuji tanpa akaun merchant.
+
+Untuk gateway sebenar (ToyyibPay, Billplz, Stripe…):
+
+1. Buat class dalam `app/Services/Payments` yang implement `App\Contracts\PaymentGateway`:
+   - `checkoutUrl(Payment)` — cipta bil di gateway, pulangkan URL untuk redirect pelanggan.
+   - `parseCallback(Request)` — sahkan signature dan pulangkan `PaymentCallback`.
+   - `refund(Payment)`.
+2. Daftar dalam `config/payment.php` → `drivers`, set `PAYMENT_GATEWAY`.
+3. Set return URL dan callback URL gateway kepada `/payments/callback` (dikecualikan daripada CSRF).
+
+### Loyverse POS — `POS_PROVIDER`
+
+Default `fake` (resit simulasi). Untuk Loyverse sebenar:
+
+```env
+POS_PROVIDER=loyverse
+LOYVERSE_ACCESS_TOKEN=...       # Loyverse Back Office → Access Tokens
+LOYVERSE_STORE_ID=...
+LOYVERSE_PAYMENT_TYPE_ID=...    # payment type untuk order online
+LOYVERSE_WEBHOOK_SECRET=...     # pilihan, untuk /webhooks/loyverse
+```
+
+Kemudian pautkan menu: `php artisan pos:sync-menu` (atau Admin → Integrations). Padanan dibuat ikut SKU = kod produk (`B4`; untuk variant `B1-1`, `B1-2` ikut susunan), kemudian ikut nama item. Produk yang tak berpaut tak boleh dihantar sebagai resit; kegagalan direkod dalam log sync dan boleh dicuba semula dari Admin → Orders.
+
+> Driver Loyverse ditulis ikut dokumentasi API dan diuji dengan HTTP fake sahaja — belum diuji dengan akaun Loyverse sebenar. Semak format signature webhook dengan akaun anda sebelum bergantung padanya.
+
+### Mesej pelanggan — `MESSAGING_CHANNEL`
+
+Default `log` (mesej ditulis ke `storage/logs` dan `notification_logs`). `whatsapp` guna WhatsApp Cloud API (`WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`). Mesej teks bebas hanya sampai dalam tetingkap 24 jam; di luar itu Meta perlukan template yang diluluskan.
+
+## Real-time
+
+Event `OrderUpdated` di-broadcast ke channel `orders.{uuid}` (tiket pelanggan), `shop` (papan status awam) dan private `staff` (KDS, kaunter, rider). Skrin memuat semula data bila event sampai.
+
+`composer setup` hidupkan Reverb melalui `php artisan shop:enable-realtime` (jana kunci dalam `.env` dan set `BROADCAST_CONNECTION=reverb`). Kalau `BROADCAST_CONNECTION=log`, frontend guna polling setiap 8 saat — sistem tetap berfungsi tanpa websocket.
+
+## Arahan berguna
+
+```bash
+php artisan test                 # semua ujian (SQLite in-memory)
+npm run types                    # semak TypeScript
+vendor/bin/pint                  # format kod PHP
+php artisan pos:sync-menu        # pautkan menu dengan katalog POS
+php artisan orders:cancel-unpaid # batal order online yang tak dibayar
+php artisan shop:enable-realtime # jana kunci Reverb dan hidupkan websocket
+```
+
+## Production
+
+- `APP_ENV=production`, `APP_DEBUG=false`, `npm run build`, `php artisan optimize`.
+- Queue worker mesti jalan (`php artisan queue:work`) — sync POS, mesej pelanggan dan broadcast semuanya atas queue. Guna Supervisor.
+- Scheduler: `* * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1`.
+- Reverb: `php artisan reverb:start` di belakang reverse proxy dengan TLS; set `REVERB_HOST` / `REVERB_SCHEME=https`.
+- `php artisan storage:link` untuk gambar produk.
+- Tukar semua password akaun seed.

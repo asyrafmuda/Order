@@ -1,5 +1,8 @@
 <?php
 
+use App\Services\Pos\FakePosProvider;
+use App\Services\Pos\LoyversePosProvider;
+
 return [
 
     /*
@@ -16,8 +19,8 @@ return [
     'default' => env('POS_PROVIDER', 'fake'),
 
     'drivers' => [
-        'fake' => App\Services\Pos\FakePosProvider::class,
-        'loyverse' => App\Services\Pos\LoyversePosProvider::class,
+        'fake' => FakePosProvider::class,
+        'loyverse' => LoyversePosProvider::class,
     ],
 
     'loyverse' => [

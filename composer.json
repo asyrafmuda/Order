@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "bossburger/order",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Boss Burger online ordering, kitchen display and delivery system.",
+    "keywords": ["laravel", "inertia", "react", "food-ordering", "pos"],
     "license": "MIT",
     "require": {
         "php": "^8.3",
@@ -42,7 +42,9 @@
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
             "@php artisan key:generate",
-            "@php artisan migrate --force",
+            "@php artisan shop:enable-realtime",
+            "@php artisan migrate --force --seed",
+            "@php artisan storage:link --force",
             "npm install --ignore-scripts",
             "npm run build"
         ],
