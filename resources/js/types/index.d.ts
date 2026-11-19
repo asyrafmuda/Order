@@ -149,7 +149,7 @@ export interface Product {
     prep_minutes: number;
     sort_order: number;
     pos_linked: boolean;
-    category?: { id: number; name: string };
+    category?: { id: number; name: string; icon: string | null };
     variants?: Variant[];
     modifier_groups?: ModifierGroup[];
 }
