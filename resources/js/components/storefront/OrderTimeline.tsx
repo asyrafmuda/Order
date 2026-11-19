@@ -1,12 +1,25 @@
 import { Check } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/cn';
 import { time } from '@/lib/format';
 import type { TimelineStep } from '@/types';
 
 /** The "Live Order Lifecycle" strip: one cell per step, the current one highlighted. */
 export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
+    const list = useRef<HTMLOListElement>(null);
+    const activeKey = steps.find((step) => step.state === 'active')?.key;
+
+    // On narrow screens the strip scrolls sideways; keep the current step in view.
+    useEffect(() => {
+        const active = list.current?.querySelector<HTMLElement>('[aria-current="step"]');
+
+        if (list.current && active) {
+            list.current.scrollTo({ left: active.offsetLeft - list.current.offsetLeft - 16, behavior: 'smooth' });
+        }
+    }, [activeKey]);
+
     return (
-        <ol className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
+        <ol ref={list} className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
             {steps.map((step, index) => (
                 <li
                     key={step.key}

@@ -128,6 +128,7 @@ php artisan shop:enable-realtime # jana kunci Reverb dan hidupkan websocket
 ## Production
 
 - `APP_ENV=production`, `APP_DEBUG=false`, `npm run build`, `php artisan optimize`.
+- Set `PAYMENT_GATEWAY` kepada gateway sebenar. Driver `fake` meluluskan bayaran dengan satu klik — untuk demo dan ujian sahaja.
 - Queue worker mesti jalan (`php artisan queue:work`) — sync POS, mesej pelanggan dan broadcast semuanya atas queue. Guna Supervisor.
 - Scheduler: `* * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1`.
 - Reverb: `php artisan reverb:start` di belakang reverse proxy dengan TLS; set `REVERB_HOST` / `REVERB_SCHEME=https`.

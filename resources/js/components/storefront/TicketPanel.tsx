@@ -158,7 +158,7 @@ export function Totals({ cart }: { cart: Pick<Cart, 'subtotal' | 'delivery_fee' 
             )}
             <div className="flex items-end justify-between pt-2">
                 <dt className="text-sm font-bold text-white">Total Amount</dt>
-                <dd className="font-display text-4xl leading-none text-flame-400">{money(cart.total)}</dd>
+                <dd className="font-display text-4xl leading-none whitespace-nowrap text-flame-400">{money(cart.total)}</dd>
             </div>
         </dl>
     );

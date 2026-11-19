@@ -209,7 +209,7 @@ export default function OrderShow({ order }: { order: Order }) {
                                         {order.is_paid ? `Payment settled via ${order.payment_method_label}` : order.payment_status === 'refunded' ? 'Refunded' : `${order.payment_method_label} · ${order.payment_status_label}`}
                                     </span>
                                 </dt>
-                                <dd className="font-display text-4xl leading-none text-flame-400">{money(order.total)}</dd>
+                                <dd className="font-display text-4xl leading-none whitespace-nowrap text-flame-400">{money(order.total)}</dd>
                             </div>
                         </dl>
 
