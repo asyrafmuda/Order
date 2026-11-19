@@ -24,7 +24,7 @@ class UpdateKitchenItem
      */
     public function handle(OrderItem $item, KitchenItemStatus $status, ?User $by = null): OrderItem
     {
-        $order = $item->order;
+        $order = $item->loadMissing('order')->order;
 
         if (! in_array($order->status, OrderStatus::kitchenQueue(), true)) {
             throw new OrderException("Order {$order->order_number} is not in the kitchen queue.");

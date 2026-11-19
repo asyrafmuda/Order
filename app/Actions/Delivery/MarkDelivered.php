@@ -18,7 +18,7 @@ class MarkDelivered
      */
     public function handle(Delivery $delivery, ?User $by = null): Delivery
     {
-        $order = $this->transition->handle($delivery->order, OrderStatus::Completed, $by, 'Delivered to customer');
+        $order = $this->transition->handle($delivery->loadMissing('order')->order, OrderStatus::Completed, $by, 'Delivered to customer');
 
         $delivery->update(['status' => DeliveryStatus::Delivered, 'delivered_at' => now()]);
 

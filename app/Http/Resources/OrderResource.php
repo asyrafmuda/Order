@@ -108,7 +108,7 @@ class OrderResource extends JsonResource
                 'assigned_at' => $this->delivery->assigned_at?->toIso8601String(),
                 'picked_up_at' => $this->delivery->picked_up_at?->toIso8601String(),
                 'delivered_at' => $this->delivery->delivered_at?->toIso8601String(),
-                'rider' => $this->delivery->relationLoaded('rider') && $this->delivery->rider ? [
+                'rider' => $this->delivery->relationLoaded('rider') && $this->delivery->rider?->relationLoaded('user') ? [
                     'id' => $this->delivery->rider->id,
                     'name' => $this->delivery->rider->user->name,
                     'phone' => $this->delivery->rider->user->phone,

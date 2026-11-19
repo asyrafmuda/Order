@@ -15,7 +15,8 @@ class AssignRider
      */
     public function handle(Order $order, ?Rider $rider): Order
     {
-        $delivery = $order->delivery;
+        $delivery = $order->loadMissing('delivery')->delivery;
+        $rider?->loadMissing('user');
 
         if (! $delivery || $order->status->isFinal()) {
             throw new OrderException("Order {$order->order_number} has no open delivery.");

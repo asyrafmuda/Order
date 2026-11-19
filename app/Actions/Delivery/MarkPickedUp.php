@@ -25,7 +25,7 @@ class MarkPickedUp
             throw new OrderException('Assign a rider before dispatching this order.');
         }
 
-        $order = $this->transition->handle($delivery->order, OrderStatus::OutForDelivery, $by, 'Rider dispatched');
+        $order = $this->transition->handle($delivery->loadMissing('order')->order, OrderStatus::OutForDelivery, $by, 'Rider dispatched');
 
         $delivery->update(['status' => DeliveryStatus::PickedUp, 'picked_up_at' => now()]);
 

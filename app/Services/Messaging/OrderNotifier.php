@@ -26,6 +26,8 @@ class OrderNotifier
             return;
         }
 
+        $order->loadMissing('delivery.rider.user');
+
         $message = $this->compose($order, $status);
 
         if ($message === null) {

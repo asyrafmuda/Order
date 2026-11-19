@@ -23,7 +23,7 @@ class FailPayment
 
         $payment->update(['status' => PaymentStatus::Failed, 'payload' => $payload]);
 
-        $order = $payment->order;
+        $order = $payment->loadMissing('order')->order;
 
         if (! $order->isPaid()) {
             $order->update(['payment_status' => PaymentStatus::Failed]);
