@@ -49,7 +49,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
                 <Stat icon={<ChefHat className="size-5" />} label="Kitchen load" value={kitchen.label} valueClassName={loadTone[kitchen.level]} hint={`${kitchen.active_orders} order${kitchen.active_orders === 1 ? '' : 's'} in the queue`} />
                 <Stat icon={<Timer className="size-5" />} label="Current wait" value={`${kitchen.eta_min}–${kitchen.eta_max} min`} hint="For a new pickup order" />
                 <Stat icon={<Flame className="size-5" />} label="On the grill" value={String(kitchen.cooking_items)} hint="Items cooking right now" />
-                <Stat icon={<Plug className="size-5" />} label={`POS (${pos.provider})`} value={pos.connected ? 'Connected' : 'Offline'} valueClassName={pos.connected ? 'text-go-400' : 'text-brand-400'} hint={sync.last_synced_at ? `Last ticket synced ${time(sync.last_synced_at)}` : 'No tickets synced yet'} />
+                <Stat icon={<Plug className="size-5" />} label={`POS (${pos.label})`} value={pos.simulated ? 'Demo mode' : pos.connected ? 'Connected' : 'Offline'} valueClassName={pos.connected ? 'text-go-400' : 'text-brand-400'} hint={sync.last_synced_at ? `Last ticket synced ${time(sync.last_synced_at)}` : 'No tickets synced yet'} />
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">

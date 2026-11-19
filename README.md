@@ -20,6 +20,8 @@ composer dev            # server, queue worker, log, Vite dan Reverb serentak
 
 Buka http://localhost:8000.
 
+> **Waktu operasi.** Default ialah 12:00 PM – 11:00 PM (last order). Di luar waktu itu storefront papar "closed" dan butang order dimatikan. Tukar di Admin → Settings → Hours — contohnya sebelum demo pada waktu pagi. POS kaunter tak terikat dengan waktu ini.
+
 `composer setup` seed menu Boss Burger, zon delivery dan satu akaun untuk setiap role. Untuk data jualan contoh (dashboard & laporan): `php artisan db:seed --class=DemoOrderSeeder`.
 
 ### Akaun demo

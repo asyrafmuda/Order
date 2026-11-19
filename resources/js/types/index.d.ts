@@ -109,7 +109,7 @@ export interface SharedProps {
     flash: { success: string | null; error: string | null; receipt: PosReceipt | null };
     shop: Shop;
     kitchen: KitchenLoad;
-    pos: { provider: string; connected: boolean };
+    pos: { provider: string; label: string; connected: boolean; simulated: boolean };
     cart: Cart | null;
     realtime: boolean;
     [key: string]: unknown;

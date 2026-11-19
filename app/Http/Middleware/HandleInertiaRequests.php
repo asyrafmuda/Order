@@ -34,10 +34,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'shop' => fn () => $this->shop(),
             'kitchen' => fn () => app(KitchenLoad::class)->snapshot(),
-            'pos' => fn () => [
-                'provider' => app(PosProvider::class)->name(),
-                'connected' => app(PosProvider::class)->isConfigured(),
-            ],
+            'pos' => fn () => $this->pos(app(PosProvider::class)),
             'cart' => fn () => $isBackOffice ? null : app(Cart::class)->toArray(),
             'realtime' => filled(config('broadcasting.connections.reverb.key'))
                 && config('broadcasting.default') === 'reverb',
@@ -61,6 +58,24 @@ class HandleInertiaRequests extends Middleware
             'is_staff' => $user->isStaff(),
             'home_url' => route($user->role->homeRoute()),
         ] : null;
+    }
+
+    /**
+     * The stand-in POS is labelled as a simulation on every screen, so nobody
+     * mistakes a demo for a live Loyverse connection.
+     *
+     * @return array{provider: string, label: string, connected: bool, simulated: bool}
+     */
+    private function pos(PosProvider $pos): array
+    {
+        $simulated = $pos->name() === 'fake';
+
+        return [
+            'provider' => $pos->name(),
+            'label' => $simulated ? 'Simulated' : ucfirst($pos->name()),
+            'connected' => $pos->isConfigured(),
+            'simulated' => $simulated,
+        ];
     }
 
     /**

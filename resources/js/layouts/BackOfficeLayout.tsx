@@ -190,7 +190,7 @@ export default function BackOfficeLayout({ title, description, actions, children
                     </span>
                     <span className="flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-xs font-semibold text-ink-200">
                         <span className={cn('size-2 rounded-full', pos.connected ? 'bg-go-400' : 'bg-brand-500')} />
-                        POS: {pos.provider}
+                        POS: {pos.label}
                     </span>
                 </div>
                 {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

@@ -54,7 +54,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             ) : (
                                 !cancelled && order.status !== 'pending_payment' && <span className="rounded-md bg-flame-900 px-2 py-1 font-bold text-flame-400">POS sync {order.pos.status}</span>
                             )}
-                            <span className="hidden sm:inline">POS: {pos.provider}</span>
+                            <span className="hidden sm:inline">POS: {pos.label}</span>
                         </p>
                     </div>
                 </div>
