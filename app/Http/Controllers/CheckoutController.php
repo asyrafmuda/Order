@@ -6,10 +6,10 @@ use App\Actions\Orders\PlaceOrder;
 use App\Actions\Payments\StartPayment;
 use App\Data\CheckoutData;
 use App\Enums\OrderType;
-use App\Enums\PaymentMethod;
 use App\Http\Requests\CheckoutRequest;
 use App\Models\DeliveryZone;
 use App\Services\Cart\Cart;
+use App\Support\PaymentOptions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,9 +18,11 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class CheckoutController extends Controller
 {
-    public function create(Request $request, Cart $cart): Response|RedirectResponse
+    public function create(Request $request, Cart $cart, PaymentOptions $paymentOptions): Response|RedirectResponse
     {
-        if ($cart->priced()->isEmpty()) {
+        $priced = $cart->priced();
+
+        if ($priced->isEmpty()) {
             return redirect()->route('menu.index')->with('error', 'Your ticket is empty. Add something tasty first.');
         }
 
@@ -28,11 +30,7 @@ class CheckoutController extends Controller
 
         return Inertia::render('Checkout/Create', [
             'zones' => DeliveryZone::query()->active()->orderBy('sort_order')->get(['id', 'name', 'areas', 'fee', 'min_order', 'eta_minutes']),
-            'paymentMethods' => array_map(fn (PaymentMethod $method) => [
-                'value' => $method->value,
-                'label' => $method->label(),
-                'pickup_only' => ! $method->isOnline(),
-            ], PaymentMethod::cases()),
+            'paymentMethods' => $paymentOptions->for($priced->type, $user, $priced->total()),
             'customer' => [
                 'name' => $user?->name ?? '',
                 'phone' => $user?->phone ?? '',

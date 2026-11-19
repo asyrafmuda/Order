@@ -5,6 +5,8 @@ use App\Http\Controllers\Counter\CounterOrderController;
 use App\Http\Controllers\Kitchen\KitchenController;
 use App\Http\Controllers\Kitchen\KitchenItemController;
 use App\Http\Controllers\Kitchen\KitchenOrderController;
+use App\Http\Controllers\Kitchen\KitchenStockController;
+use App\Http\Controllers\Pos\PosController;
 use App\Http\Controllers\Rider\RiderController;
 use App\Http\Controllers\Rider\RiderDeliveryController;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +21,12 @@ Route::middleware('role:admin,kitchen,cashier')->prefix('kitchen')->name('kitche
     Route::patch('/items/{item}', [KitchenItemController::class, 'update'])->name('items.update');
     Route::post('/orders/{order}/start', [KitchenOrderController::class, 'start'])->name('orders.start');
     Route::post('/orders/{order}/ready', [KitchenOrderController::class, 'ready'])->name('orders.ready');
+    Route::patch('/products/{product}/status', [KitchenStockController::class, 'update'])->name('products.status');
+});
+
+Route::middleware('role:admin,cashier')->prefix('pos')->name('pos.')->group(function () {
+    Route::get('/', [PosController::class, 'index'])->name('index');
+    Route::post('/orders', [PosController::class, 'store'])->name('orders.store');
 });
 
 Route::middleware('role:admin,cashier')->prefix('counter')->name('counter.')->group(function () {

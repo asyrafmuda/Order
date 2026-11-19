@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', MenuController::class)->name('menu.index');
 Route::get('/kitchen-status', KitchenStatusController::class)->name('status.index');
+Route::inertia('/terms', 'Legal/Terms')->name('legal.terms');
+Route::inertia('/privacy', 'Legal/Privacy')->name('legal.privacy');
 
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::put('/preferences', CartPreferenceController::class)->name('preferences');

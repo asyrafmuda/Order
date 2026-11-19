@@ -29,10 +29,28 @@ Semua password ialah `password`. **Tukar sebelum go live.**
 | Role | Email | Skrin |
 |---|---|---|
 | Admin | admin@bossburger.test | `/admin` |
-| Cashier | cashier@bossburger.test | `/counter` |
+| Cashier | cashier@bossburger.test | `/pos` (ambil order), `/counter` (serah order) |
 | Kitchen | kitchen@bossburger.test | `/kitchen` |
 | Rider | rider@bossburger.test | `/rider` |
 | Customer | customer@bossburger.test | storefront |
+
+## POS kaunter (`/pos`)
+
+Untuk order walk-in yang diambil oleh staf. Direka untuk laju:
+
+- Satu ketuk untuk tambah item biasa. Item yang ada pilihan wajib (saiz, sos) buka satu skrin pilihan — saiz, "No Veggies / No Sauce", "Extra Mayo", combo, nota dapur dan kuantiti semuanya di situ.
+- Ketuk baris dalam tiket untuk ubah; `+` / `−` untuk kuantiti.
+- Papan kekunci: `/` cari (nama atau kod, `Enter` pilih padanan pertama), `Enter` tambah / sahkan, `F2` bayar, `Esc` tutup.
+- Bayaran: Cash (dengan kiraan baki), Card, QR / E-wallet, atau *Pay later* (kutip masa serah di `/counter`).
+- Order terus masuk dapur dengan nombor giliran yang sama seperti order online. Takeaway atau Dine-in; nama / meja dan telefon adalah pilihan.
+- Nota pantas ("Pedas", "Potong dua"…) boleh diubah di Admin → Settings → Counter POS. Pilihan seperti "No Sauce" ialah modifier biasa — urus di Admin → Options & Add-ons.
+
+Tiket disimpan dalam tab browser, jadi reload tak hilangkan order yang separuh siap. Harga dikira semula di server semasa hantar.
+
+## Dapur
+
+- **Bunyi amaran** bila order baru masuk (butang *Sound* di KDS). Browser hanya benarkan bunyi selepas skrin disentuh sekali.
+- **Stock**: krew boleh tanda item *Sold out* terus dari KDS; ia hilang dari jualan online dan POS serta-merta.
 
 ## Aliran order
 
@@ -42,10 +60,11 @@ Pending Payment → Confirmed → Preparing → Ready → (Out for Delivery) →
 ```
 
 - **Online (FPX / kad / e-wallet):** order ditahan sebagai *Pending Payment* sehingga gateway sahkan bayaran. Order yang tak dibayar dalam 30 minit dibatalkan oleh `orders:cancel-unpaid`.
-- **Cash at counter (pickup sahaja):** terus *Confirmed*; cashier kutip bayaran masa serah.
+- **Cash at counter (pickup sahaja):** terus *Confirmed*; cashier kutip bayaran masa serah. Order begini sampai ke dapur sebelum dibayar, jadi secara default ia hanya untuk pelanggan yang login dan dihadkan kepada RM 150. Kaedah bayaran dan had ini diubah di Admin → Settings → Payment methods.
 - Bila *Confirmed*: resit dihantar ke POS dan pelanggan dapat mesej (kedua-duanya atas queue).
 - Dapur tukar status item; item pertama dimasak → *Preparing*, item terakhir siap → *Ready*.
 - Pickup: cashier scan QR / masukkan kod pickup dan serah. Delivery: cashier assign rider, rider tekan *Picked up* dan *Delivered*.
+- Order *Ready* yang tak ditanda sebagai diambil ditutup oleh `orders:close-stale` selepas beberapa jam (Admin → Settings): yang dah dibayar jadi *Completed*, yang belum dibayar dibatalkan sebagai tak diambil.
 
 Semua pertukaran status melalui `App\Actions\Orders\TransitionOrder`, yang kuatkuasakan peta dalam `OrderStatus::allowedTransitions()`.
 
@@ -122,6 +141,7 @@ npm run types                    # semak TypeScript
 vendor/bin/pint                  # format kod PHP
 php artisan pos:sync-menu        # pautkan menu dengan katalog POS
 php artisan orders:cancel-unpaid # batal order online yang tak dibayar
+php artisan orders:close-stale   # tutup order Ready yang tak diambil
 php artisan shop:enable-realtime # jana kunci Reverb dan hidupkan websocket
 ```
 

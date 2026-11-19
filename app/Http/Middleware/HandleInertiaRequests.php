@@ -22,7 +22,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $isBackOffice = $request->routeIs('admin.*', 'kitchen.*', 'counter.*', 'rider.*');
+        $isBackOffice = $request->routeIs('admin.*', 'kitchen.*', 'counter.*', 'rider.*', 'pos.*');
 
         return [
             ...parent::share($request),
@@ -30,6 +30,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => fn () => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
+                'receipt' => $request->session()->get('receipt'),
             ],
             'shop' => fn () => $this->shop(),
             'kitchen' => fn () => app(KitchenLoad::class)->snapshot(),

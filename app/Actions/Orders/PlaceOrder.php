@@ -2,9 +2,11 @@
 
 namespace App\Actions\Orders;
 
+use App\Actions\Payments\CollectCashPayment;
 use App\Data\CheckoutData;
 use App\Enums\DeliveryStatus;
 use App\Enums\KitchenItemStatus;
+use App\Enums\OrderSource;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentStatus;
@@ -15,6 +17,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Cart\PricedCart;
 use App\Services\Cart\PricedLine;
+use App\Support\PaymentOptions;
 use App\Support\Phone;
 use App\Support\Settings;
 use App\Support\ShopHours;
@@ -30,7 +33,9 @@ class PlaceOrder
     public function __construct(
         private readonly Settings $settings,
         private readonly ShopHours $hours,
+        private readonly PaymentOptions $paymentOptions,
         private readonly TransitionOrder $transition,
+        private readonly CollectCashPayment $collectPayment,
     ) {}
 
     /**
@@ -38,12 +43,19 @@ class PlaceOrder
      */
     public function handle(PricedCart $cart, CheckoutData $data, ?User $user = null): Order
     {
-        $this->guard($cart, $data);
+        $this->guard($cart, $data, $user);
 
         // Retried on deadlock / duplicate queue number under concurrent checkouts.
         $order = DB::transaction(fn () => $this->create($cart, $data, $user), attempts: 3);
 
-        // Cash orders go straight to the kitchen; online orders wait for payment.
+        // Counter sales go straight to the kitchen, paid or to be paid at hand-over.
+        if ($data->source === OrderSource::Pos) {
+            $order = $this->transition->handle($order, OrderStatus::Confirmed, $data->placedBy, 'Taken at the counter');
+
+            return $data->paidAtCounter ? $this->collectPayment->handle($order, $data->placedBy) : $order;
+        }
+
+        // Online: cash orders go straight to the kitchen; the rest wait for payment.
         if (! $data->paymentMethod->isOnline()) {
             $order = $this->transition->handle($order, OrderStatus::Confirmed, note: 'Pay at counter');
         }
@@ -54,14 +66,26 @@ class PlaceOrder
     /**
      * @throws OrderException
      */
-    private function guard(PricedCart $cart, CheckoutData $data): void
+    private function guard(PricedCart $cart, CheckoutData $data, ?User $user): void
     {
         if ($cart->isEmpty()) {
             throw OrderException::emptyCart();
         }
 
+        // Staff at the counter decide for themselves when to take an order
+        // and how it is paid; the rules below are for online customers.
+        if ($data->source === OrderSource::Pos) {
+            return;
+        }
+
         if (! $this->hours->isAcceptingOrders()) {
             throw OrderException::shopClosed($this->hours->closedMessage());
+        }
+
+        $reason = $this->paymentOptions->unavailableReason($data->paymentMethod, $cart->type, $user, $cart->total());
+
+        if ($reason !== null) {
+            throw new OrderException("{$data->paymentMethod->label()} cannot be used for this order: {$reason}.");
         }
 
         if ($cart->type === OrderType::Delivery) {
@@ -73,9 +97,6 @@ class PlaceOrder
                 throw new OrderException("The minimum order for {$cart->zone->name} has not been reached.");
             }
 
-            if (! $data->paymentMethod->isOnline()) {
-                throw new OrderException('Delivery orders must be paid online.');
-            }
         }
     }
 
@@ -95,8 +116,10 @@ class PlaceOrder
             'order_number' => sprintf('%s%03d', $this->settings->string('ordering.queue_prefix'), $queueNumber),
             'pickup_code' => $this->pickupCode(),
             'user_id' => $user?->id,
+            'placed_by_id' => $data->placedBy?->id,
+            'source' => $data->source,
             'customer_name' => $data->customerName,
-            'customer_phone' => Phone::normalize($data->customerPhone),
+            'customer_phone' => filled($data->customerPhone) ? Phone::normalize($data->customerPhone) : null,
             'customer_email' => $data->customerEmail,
             'type' => $cart->type,
             'status' => OrderStatus::PendingPayment,
@@ -156,8 +179,8 @@ class PlaceOrder
 
         $order->histories()->create([
             'status' => OrderStatus::PendingPayment,
-            'user_id' => $user?->id,
-            'note' => 'Order placed online',
+            'user_id' => $data->placedBy?->id ?? $user?->id,
+            'note' => $data->source === OrderSource::Pos ? 'Order keyed in at the counter' : 'Order placed online',
         ]);
 
         return $order;

@@ -182,11 +182,16 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
                             <Row
                                 label="Phone"
                                 value={
-                                    <a href={`tel:+${order.customer_phone}`} className="text-flame-400 hover:underline">
-                                        +{order.customer_phone}
-                                    </a>
+                                    order.customer_phone ? (
+                                        <a href={`tel:+${order.customer_phone}`} className="text-flame-400 hover:underline">
+                                            +{order.customer_phone}
+                                        </a>
+                                    ) : (
+                                        'Walk-in, none given'
+                                    )
                                 }
                             />
+                            <Row label="Taken" value={order.source_label} />
                             {order.customer_email && <Row label="Email" value={order.customer_email} />}
                             <Row label="Pickup code" value={<span className="font-mono font-bold tracking-widest text-white">{order.pickup_code}</span>} />
                         </dl>

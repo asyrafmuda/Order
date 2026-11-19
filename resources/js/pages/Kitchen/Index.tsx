@@ -1,9 +1,12 @@
 import { Head, router } from '@inertiajs/react';
-import { Bike, ChefHat, CircleCheckBig, ShoppingBag } from 'lucide-react';
+import { Bell, BellOff, BellRing, Bike, ChefHat, CircleCheckBig, PackageX, ShoppingBag } from 'lucide-react';
+import { useState } from 'react';
 import { KitchenTicket } from '@/components/staff/KitchenTicket';
+import { StockPanel, type StockCategory } from '@/components/staff/StockPanel';
 import { EmptyState } from '@/components/ui/Card';
 import { useLiveReload } from '@/hooks/useLiveReload';
 import { useNow } from '@/hooks/useNow';
+import { useOrderChime } from '@/hooks/useOrderChime';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
 import { cn } from '@/lib/cn';
 import { minutesSince, plural, time } from '@/lib/format';
@@ -21,12 +24,16 @@ interface KitchenProps {
     ready: Order[];
     stations: StationLoad[];
     filters: { station: number | null };
+    menu: StockCategory[];
 }
 
-export default function KitchenIndex({ orders, ready, stations, filters }: KitchenProps) {
+export default function KitchenIndex({ orders, ready, stations, filters, menu }: KitchenProps) {
     const now = useNow(15000);
+    const [stockOpen, setStockOpen] = useState(false);
+    const { fresh, sound, toggle: toggleSound } = useOrderChime(orders.map((order) => order.uuid));
+    const soldOut = menu.flatMap((category) => category.products).filter((product) => product.status === 'sold_out').length;
 
-    useLiveReload([{ name: 'staff', private: true }], { only: ['orders', 'ready', 'stations', 'kitchen'] });
+    useLiveReload([{ name: 'staff', private: true }], { only: ['orders', 'ready', 'stations', 'kitchen', 'menu'] });
 
     const selectStation = (stationId: number | null) =>
         router.get(route('kitchen.index'), stationId ? { station: stationId } : {}, { preserveScroll: true, preserveState: true, replace: true });
@@ -39,9 +46,39 @@ export default function KitchenIndex({ orders, ready, stations, filters }: Kitch
             title="Kitchen Display"
             description={`${plural(orders.length, 'ticket')} in the queue · ${plural(totals.cooking, 'portion')} cooking · ${totals.queued} waiting`}
             actions={
-                <span className="hidden rounded-lg border border-ink-700 bg-ink-850 px-3 py-1.5 font-display text-2xl leading-none text-flame-400 tabular-nums sm:block" aria-label="Current time">
-                    {time(new Date(now).toISOString())}
-                </span>
+                <>
+                    <button
+                        type="button"
+                        onClick={() => setStockOpen(true)}
+                        className={cn(
+                            'flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-bold',
+                            soldOut > 0 ? 'border-brand-600 bg-brand-900 text-brand-400' : 'border-ink-700 bg-ink-850 text-ink-200 hover:border-ink-500',
+                        )}
+                    >
+                        <PackageX className="size-4" aria-hidden />
+                        <span className="hidden sm:inline">Stock</span>
+                        {soldOut > 0 && <span className="rounded bg-brand-600 px-1.5 text-xs text-white">{soldOut}</span>}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={toggleSound}
+                        aria-pressed={sound !== 'off'}
+                        title={sound === 'blocked' ? 'Tap anywhere once so the browser allows sound' : undefined}
+                        className={cn(
+                            // Fixed width: the label changes on the first tap, and nothing next to it may move under the finger.
+                            'flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-sm font-bold sm:w-48',
+                            sound === 'on' && 'border-go-500/40 bg-go-900 text-go-400',
+                            sound === 'blocked' && 'animate-pulse-soft border-flame-500/50 bg-flame-900 text-flame-300',
+                            sound === 'off' && 'border-ink-700 bg-ink-850 text-ink-400',
+                        )}
+                    >
+                        {sound === 'on' ? <BellRing className="size-4" aria-hidden /> : sound === 'blocked' ? <Bell className="size-4" aria-hidden /> : <BellOff className="size-4" aria-hidden />}
+                        <span className="hidden sm:inline">{sound === 'on' ? 'Sound on' : sound === 'blocked' ? 'Tap to enable sound' : 'Sound off'}</span>
+                    </button>
+                    <span className="hidden rounded-lg border border-ink-700 bg-ink-850 px-3 py-1.5 font-display text-2xl leading-none text-flame-400 tabular-nums sm:block" aria-label="Current time">
+                        {time(new Date(now).toISOString())}
+                    </span>
+                </>
             }
         >
             <Head title="Kitchen Display" />
@@ -69,7 +106,9 @@ export default function KitchenIndex({ orders, ready, stations, filters }: Kitch
             ) : (
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,21rem),1fr))] items-start gap-4">
                     {orders.map((order) => (
-                        <KitchenTicket key={order.uuid} order={order} now={now} stationId={filters.station} />
+                        <div key={order.uuid} className={cn('rounded-2xl transition-shadow duration-500', fresh.has(order.uuid) && 'animate-pulse-soft ring-4 ring-flame-400')}>
+                            <KitchenTicket order={order} now={now} stationId={filters.station} />
+                        </div>
                     ))}
                 </div>
             )}
@@ -98,6 +137,8 @@ export default function KitchenIndex({ orders, ready, stations, filters }: Kitch
                     </ul>
                 </section>
             )}
+
+            {stockOpen && <StockPanel menu={menu} onClose={() => setStockOpen(false)} />}
         </BackOfficeLayout>
     );
 }

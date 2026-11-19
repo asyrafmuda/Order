@@ -117,3 +117,10 @@ it('cancels unpaid online orders that timed out', function () {
     expect($stale->refresh()->status)->toBe(OrderStatus::Cancelled)
         ->and($fresh->refresh()->status)->toBe(OrderStatus::PendingPayment);
 });
+
+it('publishes the terms and the privacy notice', function (string $routeName, string $component) {
+    $this->get(route($routeName))->assertOk()->assertInertia(fn (Assert $page) => $page->component($component));
+})->with([
+    ['legal.terms', 'Legal/Terms'],
+    ['legal.privacy', 'Legal/Privacy'],
+]);

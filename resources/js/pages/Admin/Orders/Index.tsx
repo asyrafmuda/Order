@@ -43,7 +43,7 @@ export default function OrdersIndex({ orders, filters, statuses, types }: Orders
                     ))}
                 </Select>
                 <Select label="Type" value={values.type} onChange={(event) => set('type', event.target.value)}>
-                    <option value="">Pickup &amp; delivery</option>
+                    <option value="">All types</option>
                     {types.map((type) => (
                         <option key={type.value} value={type.value}>
                             {type.label}
@@ -87,7 +87,7 @@ export default function OrdersIndex({ orders, filters, statuses, types }: Orders
                                     <Td className="text-xs whitespace-nowrap text-ink-300">{dateTime(order.created_at)}</Td>
                                     <Td>
                                         {order.customer_name}
-                                        <span className="block text-xs text-ink-400">+{order.customer_phone}</span>
+                                        <span className="block text-xs text-ink-400">{order.customer_phone ? `+${order.customer_phone}` : order.source_label}</span>
                                     </Td>
                                     <Td>
                                         <Badge tone={order.type === 'delivery' ? 'blue' : 'neutral'}>{order.type_label}</Badge>

@@ -1,5 +1,6 @@
 export type Role = 'admin' | 'cashier' | 'kitchen' | 'rider' | 'customer';
-export type OrderType = 'pickup' | 'delivery';
+export type OrderType = 'pickup' | 'delivery' | 'dine_in';
+export type OrderSource = 'online' | 'pos';
 export type OrderStatus =
     | 'pending_payment'
     | 'confirmed'
@@ -93,9 +94,19 @@ export interface Cart {
     upsells: { id: number; name: string; price: number }[];
 }
 
+/** Result of the last order rung up on the counter POS. */
+export interface PosReceipt {
+    uuid: string;
+    order_number: string;
+    total: number;
+    paid: boolean;
+    method_label: string;
+    change: number | null;
+}
+
 export interface SharedProps {
     auth: { user: AuthUser | null };
-    flash: { success: string | null; error: string | null };
+    flash: { success: string | null; error: string | null; receipt: PosReceipt | null };
     shop: Shop;
     kitchen: KitchenLoad;
     pos: { provider: string; connected: boolean };
@@ -231,6 +242,8 @@ export interface Order {
     pickup_code: string;
     type: OrderType;
     type_label: string;
+    source: OrderSource;
+    source_label: string;
     status: OrderStatus;
     status_label: string;
     is_final: boolean;
@@ -240,7 +253,8 @@ export interface Order {
     payment_method_label: string;
     is_paid: boolean;
     customer_name: string;
-    customer_phone: string;
+    /** Null for walk-in counter orders taken without a phone number. */
+    customer_phone: string | null;
     customer_email: string | null;
     notes: string | null;
     subtotal: number;

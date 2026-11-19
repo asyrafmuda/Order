@@ -1,15 +1,19 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Bell, Clock, Percent, ShoppingBag, Store } from 'lucide-react';
+import { Bell, Clock, Percent, ShoppingBag, Store, Wallet, Zap } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
-import { Input, Toggle } from '@/components/ui/Form';
+import { MoneyInput } from '@/components/admin/MoneyInput';
+import { Input, Textarea, Toggle } from '@/components/ui/Form';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
+import { inputToSen, senToInput } from '@/lib/format';
 
 interface Settings {
     shop: { name: string; tagline: string | null; address: string; phone: string; whatsapp: string; maps_url: string | null; counter: string };
     hours: { open: string; close: string; last_order: string };
-    ordering: { enabled: boolean; pickup_enabled: boolean; delivery_enabled: boolean; pickup_eta_min: number; pickup_eta_max: number; queue_prefix: string };
+    ordering: { enabled: boolean; pickup_enabled: boolean; delivery_enabled: boolean; pickup_eta_min: number; pickup_eta_max: number; queue_prefix: string; auto_close_hours: number };
+    payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number };
+    pos: { quick_notes: string[] };
     tax: { rate: number; inclusive: boolean };
     notifications: { enabled: boolean };
 }
@@ -18,7 +22,14 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
     const form = useForm({
         shop: { ...settings.shop, tagline: settings.shop.tagline ?? '', maps_url: settings.shop.maps_url ?? '' },
         hours: settings.hours,
-        ordering: { ...settings.ordering, pickup_eta_min: String(settings.ordering.pickup_eta_min), pickup_eta_max: String(settings.ordering.pickup_eta_max) },
+        ordering: {
+            ...settings.ordering,
+            pickup_eta_min: String(settings.ordering.pickup_eta_min),
+            pickup_eta_max: String(settings.ordering.pickup_eta_max),
+            auto_close_hours: String(settings.ordering.auto_close_hours),
+        },
+        payments: { ...settings.payments, cash_max_amount: senToInput(settings.payments.cash_max_amount) },
+        pos: { quick_notes: (settings.pos?.quick_notes ?? []).join('\n') },
         tax: { ...settings.tax, rate: String(settings.tax.rate) },
         notifications: settings.notifications,
     });
@@ -32,6 +43,11 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
+        form.transform((current) => ({
+            ...current,
+            payments: { ...current.payments, cash_max_amount: inputToSen(current.payments.cash_max_amount) },
+            pos: { quick_notes: current.pos.quick_notes.split('\n').map((note) => note.trim()).filter(Boolean) },
+        }));
         form.put(route('admin.settings.update'), { preserveScroll: true });
     };
 
@@ -144,7 +160,66 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
                                 error={errors['ordering.queue_prefix']}
                             />
                         </div>
+                        <Input
+                            label="Close uncollected orders after (hours)"
+                            type="number"
+                            min={0}
+                            max={72}
+                            required
+                            wrapperClassName="sm:max-w-xs"
+                            hint="Ready pickup orders nobody marked as collected: paid ones are completed, unpaid ones cancelled. 0 switches this off."
+                            value={data.ordering.auto_close_hours}
+                            onChange={(event) => set('ordering', 'auto_close_hours', event.target.value)}
+                            error={errors['ordering.auto_close_hours']}
+                        />
                     </div>
+                </Section>
+
+                <Section title="Payment methods (online checkout)" icon={<Wallet className="size-4" />}>
+                    <div className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <Toggle checked={data.payments.fpx_enabled} onChange={(checked) => set('payments', 'fpx_enabled', checked)} label="FPX online banking" />
+                            <Toggle checked={data.payments.card_enabled} onChange={(checked) => set('payments', 'card_enabled', checked)} label="Credit / debit card" />
+                            <Toggle checked={data.payments.ewallet_enabled} onChange={(checked) => set('payments', 'ewallet_enabled', checked)} label="E-wallet" />
+                        </div>
+                        <div className="rounded-lg border border-ink-700 bg-ink-900 p-4">
+                            <Toggle
+                                checked={data.payments.cash_enabled}
+                                onChange={(checked) => set('payments', 'cash_enabled', checked)}
+                                label="Cash at counter"
+                                description="These orders reach the kitchen before anyone has paid, so keep the limits below tight."
+                            />
+                            {errors['payments.cash_enabled'] && <p className="mt-2 text-xs font-medium text-brand-400">{errors['payments.cash_enabled']}</p>}
+                            {data.payments.cash_enabled && (
+                                <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:items-start">
+                                    <Toggle
+                                        checked={data.payments.cash_requires_account}
+                                        onChange={(checked) => set('payments', 'cash_requires_account', checked)}
+                                        label="Only for signed-in customers"
+                                        description="Guests must pay online."
+                                    />
+                                    <MoneyInput
+                                        label="Largest cash order"
+                                        hint="Bigger orders must be paid online. 0 means no limit."
+                                        value={data.payments.cash_max_amount}
+                                        onChange={(value) => set('payments', 'cash_max_amount', value)}
+                                        error={errors['payments.cash_max_amount']}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Section>
+
+                <Section title="Counter POS" icon={<Zap className="size-4" />}>
+                    <Textarea
+                        label="Quick kitchen notes"
+                        rows={5}
+                        hint="One per line, up to 12. They appear as one-tap buttons when taking an order at the counter."
+                        value={data.pos.quick_notes}
+                        onChange={(event) => set('pos', 'quick_notes', event.target.value)}
+                        error={errors['pos.quick_notes'] ?? Object.entries(errors).find(([key]) => key.startsWith('pos.quick_notes.'))?.[1]}
+                    />
                 </Section>
 
                 <Section title="Tax" icon={<Percent className="size-4" />}>

@@ -3,12 +3,9 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/react';
 import type { ComponentType } from 'react';
 import { createRoot } from 'react-dom/client';
-import { bootEcho } from './echo';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Boss Burger';
 const pages = import.meta.glob<{ default: ComponentType }>('./pages/**/*.tsx');
-
-bootEcho();
 
 createInertiaApp({
     title: (title) => (title ? `${title} · ${appName}` : appName),

@@ -26,7 +26,7 @@ interface SavedAddress {
 
 interface CheckoutProps {
     zones: (CartZone & { areas: string | null })[];
-    paymentMethods: { value: PaymentMethod; label: string; pickup_only: boolean }[];
+    paymentMethods: { value: PaymentMethod; label: string; available: boolean; reason: string | null }[];
     customer: { name: string; phone: string; email: string };
     addresses: SavedAddress[];
 }
@@ -54,7 +54,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
         customer_phone: customer.phone,
         customer_email: customer.email,
         notes: '',
-        payment_method: 'fpx' as PaymentMethod,
+        payment_method: (paymentMethods.find((option) => option.available)?.value ?? 'fpx') as PaymentMethod,
         recipient_name: '',
         recipient_phone: '',
         line1: '',
@@ -67,8 +67,10 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
 
     if (!cart) return null;
 
-    const method = delivery && form.data.payment_method === 'cash' ? 'fpx' : form.data.payment_method;
-    const blocked = cart.lines.length === 0 || cart.min_order_shortfall > 0 || !shop.is_open;
+    // Switching to delivery (or a bigger total) can make the chosen method unavailable: fall back to the first that works.
+    const usable = paymentMethods.filter((option) => option.available);
+    const method = usable.some((option) => option.value === form.data.payment_method) ? form.data.payment_method : usable[0]?.value;
+    const blocked = cart.lines.length === 0 || cart.min_order_shortfall > 0 || !shop.is_open || !method;
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -221,7 +223,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Payment method">
                             {paymentMethods.map((option) => {
                                 const Icon = paymentIcons[option.value];
-                                const unavailable = option.pickup_only && delivery;
+                                const unavailable = !option.available;
 
                                 return (
                                     <button
@@ -236,13 +238,26 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                         <Icon className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                         <span>
                                             <span className="block text-sm font-bold text-white">{option.label}</span>
-                                            <span className="block text-xs text-ink-400">{unavailable ? 'Pickup orders only' : paymentHints[option.value]}</span>
+                                            <span className="block text-xs text-ink-400">{option.reason ?? paymentHints[option.value]}</span>
                                         </span>
                                     </button>
                                 );
                             })}
                         </div>
                         {form.errors.payment_method && <p className="mt-2 text-xs font-medium text-brand-400">{form.errors.payment_method}</p>}
+                        {!auth.user && paymentMethods.some((option) => option.value === 'cash' && option.reason?.startsWith('Sign in')) && (
+                            <p className="mt-3 text-xs text-ink-400">
+                                Want to pay at the counter?{' '}
+                                <Link href={route('login')} className="font-semibold text-flame-400 hover:underline">
+                                    Sign in
+                                </Link>{' '}
+                                or{' '}
+                                <Link href={route('register')} className="font-semibold text-flame-400 hover:underline">
+                                    create an account
+                                </Link>{' '}
+                                — your ticket is kept.
+                            </p>
+                        )}
                     </Section>
 
                     <Section step={4} title="Anything else?">
@@ -258,6 +273,17 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                             </Button>
                         }
                     />
+                    <p className="mt-3 text-center text-[11px] text-ink-500">
+                        By placing this order you agree to our{' '}
+                        <Link href={route('legal.terms')} className="underline hover:text-ink-200">
+                            Terms
+                        </Link>{' '}
+                        and{' '}
+                        <Link href={route('legal.privacy')} className="underline hover:text-ink-200">
+                            Privacy Notice
+                        </Link>
+                        .
+                    </p>
                 </aside>
             </form>
         </StorefrontLayout>

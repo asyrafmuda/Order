@@ -15,7 +15,7 @@ interface StorefrontLayoutProps {
 }
 
 const tabs = [
-    { label: 'Menu & Ordering', route: 'menu.index', match: ['menu.*', 'checkout.*'] },
+    { label: 'Menu & Ordering', route: 'menu.index', match: ['menu.*', 'checkout.*', 'legal.*'] },
     { label: 'Order Tracking & Digital Ticket', route: 'orders.track', match: ['orders.*', 'payments.*'] },
     { label: 'Kitchen & POS Status', route: 'status.index', match: ['status.*'] },
 ];
@@ -130,8 +130,16 @@ export default function StorefrontLayout({ children, search, subheader }: Storef
                         </Link>
                     </FooterBlock>
                 </div>
-                <div className="border-t border-ink-800 px-4 py-4 text-center text-xs text-ink-500">
-                    © {new Date().getFullYear()} {shop.name}. All rights reserved.
+                <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-ink-800 px-4 py-4 text-xs text-ink-500">
+                    <span>
+                        © {new Date().getFullYear()} {shop.name}. All rights reserved.
+                    </span>
+                    <Link href={route('legal.terms')} className="hover:text-ink-200">
+                        Terms of Service
+                    </Link>
+                    <Link href={route('legal.privacy')} className="hover:text-ink-200">
+                        Privacy Notice
+                    </Link>
                 </div>
             </footer>
 

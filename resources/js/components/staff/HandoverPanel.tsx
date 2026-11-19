@@ -112,9 +112,13 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                 <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <Fact label="Customer">
                         {order.customer_name}
-                        <a href={`tel:+${order.customer_phone}`} className="flex items-center gap-1 text-xs font-normal text-flame-400 hover:underline">
-                            <Phone className="size-3" aria-hidden />+{order.customer_phone}
-                        </a>
+                        {order.customer_phone ? (
+                            <a href={`tel:+${order.customer_phone}`} className="flex items-center gap-1 text-xs font-normal text-flame-400 hover:underline">
+                                <Phone className="size-3" aria-hidden />+{order.customer_phone}
+                            </a>
+                        ) : (
+                            <span className="block text-xs font-normal text-ink-400">Walk-in, no phone</span>
+                        )}
                     </Fact>
                     <Fact label="Pickup code">
                         <span className="font-mono text-lg tracking-[0.2em] text-flame-400">{order.pickup_code}</span>

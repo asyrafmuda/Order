@@ -19,6 +19,7 @@ import {
     Users,
     UtensilsCrossed,
     X,
+    Zap,
     type LucideIcon,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
@@ -45,6 +46,7 @@ const sections: NavSection[] = [
         title: 'Service',
         items: [
             { label: 'Dashboard', route: 'admin.dashboard', icon: LayoutDashboard, roles: ['admin'] },
+            { label: 'Take Order (POS)', route: 'pos.index', match: 'pos.*', icon: Zap, roles: ['admin', 'cashier'] },
             { label: 'Kitchen Display', route: 'kitchen.index', match: 'kitchen.*', icon: ChefHat, roles: ['admin', 'kitchen', 'cashier'] },
             { label: 'Counter', route: 'counter.index', match: 'counter.*', icon: Ticket, roles: ['admin', 'cashier'] },
             { label: 'My Deliveries', route: 'rider.index', match: 'rider.*', icon: Bike, roles: ['rider'] },

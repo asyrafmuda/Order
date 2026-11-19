@@ -101,11 +101,12 @@ class MenuSeeder extends Seeder
     private function seedModifierGroups(): void
     {
         $groups = [
+            'Hold the...' => [0, 5, [['No Veggies', 0], ['No Sauce', 0], ['No Mayo', 0], ['No Onion', 0], ['No Pickles', 0]]],
+            'A Little Extra' => [0, 3, [['Extra Mayo', 0], ['Extra Chili Sauce', 0], ['Extra Cheese Sauce', 150]]],
             'Burger Add-ons' => [0, 5, [
                 ['Extra Beef Patty', 600], ['Extra Cheddar Slice', 200], ['Fried Sunny Egg', 150],
                 ['Smoked Beef Bacon', 350], ['Extra Boss Sauce', 100],
             ]],
-            'Hold the...' => [0, 3, [['No Pickles', 0], ['No Onion', 0], ['No Sauce', 0]]],
             'Choice of Sauce' => [1, 1, [['Black Pepper', 0], ['Mushroom', 0], ['Smoky BBQ', 0]]],
             'Spice Level' => [1, 1, [['Normal', 0], ['Pedas', 0], ['Extra Pedas', 0]]],
             'Roti John Extras' => [0, 3, [['Extra Cheese Leleh', 300], ['Extra Egg', 150], ['Extra Meat', 400]]],
@@ -139,7 +140,7 @@ class MenuSeeder extends Seeder
      */
     private function menu(): array
     {
-        $burgerGroups = ['Burger Add-ons', 'Hold the...'];
+        $burgerGroups = ['Hold the...', 'A Little Extra', 'Burger Add-ons'];
 
         return [
             [
@@ -172,7 +173,7 @@ class MenuSeeder extends Seeder
                     [
                         'code' => 'B5 / B6', 'name' => 'Burger Ayam Goreng', 'station' => 'Deep Fryer',
                         'description' => 'Signature spiced crunchy chicken fillet with pickled gherkins and garlic tartar spread.',
-                        'combo' => true, 'groups' => ['Hold the...'],
+                        'combo' => true, 'groups' => ['Hold the...', 'A Little Extra'],
                         'variants' => [['Single Fillet', 1390], ['Double Stack', 1990]],
                     ],
                     [
@@ -186,13 +187,13 @@ class MenuSeeder extends Seeder
                 'name' => 'Roti John Padu 12-Inci', 'icon' => '🥖', 'eyebrow' => 'Street Legend Original',
                 'tagline' => 'Foot-long egg-soaked loaf, grilled on the flat top', 'station' => 'Bun & Roti John Padu',
                 'products' => [
-                    ['code' => 'R1', 'name' => 'Roti John Ustaz Daging', 'price' => 1290, 'groups' => ['Roti John Extras'],
+                    ['code' => 'R1', 'name' => 'Roti John Ustaz Daging', 'price' => 1290, 'groups' => ['Hold the...', 'A Little Extra', 'Roti John Extras'],
                         'description' => 'Minced beef, egg, onion and our sweet chilli mayo drizzle on a 12-inch loaf.', 'badge' => 'Best Seller'],
-                    ['code' => 'R2', 'name' => 'Roti John Ustaz Ayam', 'price' => 1190, 'groups' => ['Roti John Extras'],
+                    ['code' => 'R2', 'name' => 'Roti John Ustaz Ayam', 'price' => 1190, 'groups' => ['Hold the...', 'A Little Extra', 'Roti John Extras'],
                         'description' => 'Spiced minced chicken and egg, folded hot with chilli and mayo.'],
-                    ['code' => 'R3', 'name' => 'Roti John Cheese Leleh', 'price' => 1590, 'groups' => ['Roti John Extras'],
+                    ['code' => 'R3', 'name' => 'Roti John Cheese Leleh', 'price' => 1590, 'groups' => ['Hold the...', 'A Little Extra', 'Roti John Extras'],
                         'description' => 'Beef roti john flooded with melted cheddar cheese sauce.'],
-                    ['code' => 'R4', 'name' => 'Roti John Kambing', 'price' => 1690, 'groups' => ['Roti John Extras'],
+                    ['code' => 'R4', 'name' => 'Roti John Kambing', 'price' => 1690, 'groups' => ['Hold the...', 'A Little Extra', 'Roti John Extras'],
                         'description' => 'Tender minced lamb with black pepper, egg and caramelised onion.'],
                 ],
             ],

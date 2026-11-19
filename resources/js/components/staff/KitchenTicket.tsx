@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { Bike, Check, CheckCheck, Flame, Play, ShoppingBag, StickyNote, Timer, Undo2 } from 'lucide-react';
+import { Bike, Check, CheckCheck, Flame, Play, ShoppingBag, StickyNote, Timer, Undo2, UtensilsCrossed } from 'lucide-react';
 import { useState } from 'react';
 import { Badge, KitchenStatusBadge, OrderStatusBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -62,13 +62,14 @@ export function KitchenTicket({ order, now, stationId }: KitchenTicketProps) {
                     </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <Badge tone={order.type === 'delivery' ? 'blue' : 'neutral'}>
-                        {order.type === 'delivery' ? <Bike className="size-3" aria-hidden /> : <ShoppingBag className="size-3" aria-hidden />}
-                        {order.type === 'delivery' ? 'Delivery' : 'Pickup'}
+                    {/* Plating differs: dine-in goes on a tray, the rest is packed. */}
+                    <Badge tone={order.type === 'delivery' ? 'blue' : order.type === 'dine_in' ? 'solid-flame' : 'neutral'}>
+                        {order.type === 'delivery' ? <Bike className="size-3" aria-hidden /> : order.type === 'dine_in' ? <UtensilsCrossed className="size-3" aria-hidden /> : <ShoppingBag className="size-3" aria-hidden />}
+                        {order.type === 'delivery' ? 'Delivery' : order.type === 'dine_in' ? 'Dine-in' : order.source === 'pos' ? 'Takeaway' : 'Pickup'}
                     </Badge>
                     <OrderStatusBadge status={order.status} label={order.status_label} />
                     <span className="min-w-0 truncate text-xs font-semibold text-ink-300">
-                        {order.customer_name.split(' ')[0]} · in at {time(order.confirmed_at ?? order.created_at)}
+                        {order.source === 'pos' ? order.customer_name : order.customer_name.split(' ')[0]} · in at {time(order.confirmed_at ?? order.created_at)}
                     </span>
                 </div>
             </header>

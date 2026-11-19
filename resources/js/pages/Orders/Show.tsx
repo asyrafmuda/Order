@@ -180,7 +180,7 @@ export default function OrderShow({ order }: { order: Order }) {
                         <CardHeader icon={<FileText className="size-4" />} title="Itemized Order Manifest" action={<Badge>{items.length} line item{items.length === 1 ? '' : 's'}</Badge>} />
                         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-700 px-4 py-2.5 text-xs">
                             <p className="flex items-center gap-1.5 font-semibold text-ink-100">
-                                <User className="size-3.5 text-flame-400" aria-hidden /> {order.customer_name} <span className="font-normal text-ink-400">(+{order.customer_phone})</span>
+                                <User className="size-3.5 text-flame-400" aria-hidden /> {order.customer_name} {order.customer_phone && <span className="font-normal text-ink-400">(+{order.customer_phone})</span>}
                             </p>
                             <p className="font-bold tracking-wider text-flame-400 uppercase">{delivery ? 'Delivery' : `Station: ${shop.counter}`}</p>
                         </div>

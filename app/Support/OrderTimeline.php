@@ -19,14 +19,18 @@ final class OrderTimeline
     {
         $delivery = $order->isDelivery();
 
+        // Online gateways confirm the order when they are paid; anything
+        // settled at the till is done once the cashier has the money.
+        $paidOnline = ! $order->isCounterSale() && $order->payment_method->isOnline();
+
         $steps = [
-            self::step('placed', 'Order Placed', 'Online Kiosk', $order->created_at),
+            self::step('placed', 'Order Placed', $order->isCounterSale() ? 'Counter' : 'Online Kiosk', $order->created_at),
             self::step(
                 'payment',
-                $order->payment_method->isOnline() ? 'Payment Verified' : 'Pay at Counter',
+                $paidOnline ? 'Payment Verified' : ($order->isPaid() ? 'Paid at Counter' : 'Pay at Counter'),
                 $order->payment_method->label(),
-                $order->payment_method->isOnline() ? $order->confirmed_at : ($order->isPaid() ? $order->confirmed_at : null),
-                done: $order->payment_method->isOnline() ? $order->confirmed_at !== null : $order->isPaid(),
+                $paidOnline || $order->isPaid() ? $order->confirmed_at : null,
+                done: $paidOnline ? $order->confirmed_at !== null : $order->isPaid(),
             ),
             self::step(
                 'pos',
@@ -66,7 +70,7 @@ final class OrderTimeline
                 continue;
             }
 
-            $skippable = ($step['key'] === 'payment' && ! $order->payment_method->isOnline())
+            $skippable = ($step['key'] === 'payment' && ! $paidOnline)
                 || ($step['key'] === 'pos' && $order->preparing_at !== null);
 
             if (! $skippable) {
