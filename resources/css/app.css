@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+@source '../js/**/*.{ts,tsx}';
+@source '../views/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+    --font-display: 'Bebas Neue', 'Arial Narrow', 'Impact', ui-sans-serif, sans-serif;
+
+    /* Surfaces: near-black with a warm tint, like a grill at night. */
+    --color-ink-950: #09090b;
+    --color-ink-900: #0f0f12;
+    --color-ink-850: #141418;
+    --color-ink-800: #1a1a1f;
+    --color-ink-750: #202026;
+    --color-ink-700: #292930;
+    --color-ink-600: #383841;
+    --color-ink-500: #55555f;
+    --color-ink-400: #8b8b96;
+    --color-ink-300: #b4b4bd;
+    --color-ink-200: #d6d6dc;
+    --color-ink-100: #ededf0;
+
+    /* Brand red and flame amber. */
+    --color-brand-400: #ff5a5f;
+    --color-brand-500: #ee2b32;
+    --color-brand-600: #d91f27;
+    --color-brand-700: #b3151c;
+    --color-brand-900: #3d0d10;
+    --color-flame-300: #ffd27a;
+    --color-flame-400: #ffb938;
+    --color-flame-500: #f59e0b;
+    --color-flame-900: #3a2a08;
+    --color-go-400: #34d399;
+    --color-go-500: #10b981;
+    --color-go-900: #06281f;
+
+    --shadow-glow: 0 0 0 1px rgb(238 43 50 / 0.35), 0 8px 30px -8px rgb(238 43 50 / 0.45);
+
+    --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+    --animate-slide-up: slide-up 0.2s ease-out;
+
+    @keyframes pulse-soft {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.45; }
+    }
+
+    @keyframes slide-up {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}
+
+@layer base {
+    html {
+        color-scheme: dark;
+        scroll-behavior: smooth;
+        scroll-padding-top: 11rem;
+    }
+
+    body {
+        @apply bg-ink-950 font-sans text-ink-100;
+    }
+
+    ::selection {
+        @apply bg-brand-600 text-white;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-flame-400;
+    }
+
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    input[type='number']::-webkit-inner-spin-button {
+        appearance: none;
+    }
+}
+
+@utility scrollbar-none {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@utility font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+}
+
+@media print {
+    body {
+        @apply bg-white text-black;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
