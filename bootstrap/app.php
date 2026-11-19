@@ -31,6 +31,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
 
+        // Honour X-Forwarded-* only when the request arrives from a private
+        // address (nginx on the same host, a load balancer, a preview proxy),
+        // so generated URLs use the public scheme and host.
+        $middleware->trustProxies(at: ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']);
+
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);
