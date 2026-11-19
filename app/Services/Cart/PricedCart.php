@@ -44,7 +44,12 @@ final readonly class PricedCart implements Arrayable
 
     public function deliveryFee(): int
     {
-        return $this->type === OrderType::Delivery ? (int) ($this->zone?->fee ?? 0) : 0;
+        // An empty ticket costs nothing, whatever delivery area is selected.
+        if ($this->isEmpty() || $this->type !== OrderType::Delivery) {
+            return 0;
+        }
+
+        return (int) ($this->zone?->fee ?? 0);
     }
 
     /**

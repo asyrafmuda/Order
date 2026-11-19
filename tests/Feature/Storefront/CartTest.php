@@ -135,3 +135,14 @@ it('adds the delivery fee of the chosen zone', function () {
 
     expect(app(Cart::class)->priced()->total())->toBe(3200);
 });
+
+it('shows an empty ticket as RM 0.00 even when delivery is selected', function () {
+    DeliveryZone::factory()->create(['fee' => 500]);
+
+    $this->put(route('cart.preferences'), ['type' => 'delivery']);
+
+    $this->get(route('menu.index'))->assertInertia(fn (Assert $page) => $page
+        ->where('cart.type', 'delivery')
+        ->where('cart.delivery_fee', 0)
+        ->where('cart.total', 0));
+});

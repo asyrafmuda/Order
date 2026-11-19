@@ -141,7 +141,8 @@ export default function OrderShow({ order }: { order: Order }) {
                             )}
                         </div>
 
-                        {!cancelled && order.status !== 'pending_payment' && (
+                        {/* The pass is only useful until the order has been handed over. */}
+                        {!order.is_final && order.status !== 'pending_payment' && (
                             <div className="flex items-center gap-4 rounded-xl border border-ink-700 bg-ink-900 p-4 md:flex-col md:justify-center md:text-center">
                                 <div>
                                     <Badge tone="flame" className="mb-2">
