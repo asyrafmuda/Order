@@ -21,6 +21,14 @@ it('shows the digital ticket to anyone with the link, masking the phone number',
             ->has('order.timeline', 6));
 });
 
+it('shows contact details to the guest who placed the order', function () {
+    $order = placeOrder();
+
+    $this->withSession(['guest_orders' => [$order->uuid]])
+        ->get(route('orders.show', $order))
+        ->assertInertia(fn (Assert $page) => $page->where('order.customer_phone', '60123456789'));
+});
+
 it('shows contact details to the owner and to staff', function () {
     $customer = userWithRole(UserRole::Customer);
     $order = placeOrder(['user' => $customer]);

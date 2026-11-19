@@ -30,12 +30,13 @@ class OrderController extends Controller
         ]);
     }
 
-    public function invoice(Order $order, Settings $settings): SymfonyResponse
+    public function invoice(Request $request, Order $order, Settings $settings): SymfonyResponse
     {
         $order->load(['items.modifiers', 'delivery', 'latestPayment']);
 
         return Pdf::loadView('pdf.invoice', [
             'order' => $order,
+            'showContact' => OrderResource::showsContactDetails($request, $order),
             'shop' => [
                 'name' => $settings->string('shop.name'),
                 'tagline' => $settings->string('shop.tagline'),

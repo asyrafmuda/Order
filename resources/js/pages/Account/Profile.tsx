@@ -92,9 +92,9 @@ export default function AccountProfile({ addresses, zones }: ProfileProps) {
                             Save an address to fill in delivery details with one tap at checkout.
                         </EmptyState>
                     ) : (
-                        <ul className="grid gap-px bg-ink-700 sm:grid-cols-2">
+                        <ul className="grid sm:grid-cols-2">
                             {addresses.map((address) => (
-                                <li key={address.id} className="flex items-start justify-between gap-3 bg-ink-850 p-4">
+                                <li key={address.id} className="flex items-start justify-between gap-3 border-t border-ink-800 p-4 first:border-t-0 sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(2n)]:border-l">
                                     <div className="min-w-0 text-sm">
                                         <p className="flex items-center gap-2 font-bold text-white">
                                             {address.label} {address.is_default && <Badge tone="green">Default</Badge>}

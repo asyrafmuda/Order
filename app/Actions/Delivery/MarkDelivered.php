@@ -18,6 +18,12 @@ class MarkDelivered
      */
     public function handle(Delivery $delivery, ?User $by = null): Delivery
     {
+        // A Ready order can be completed directly at the counter, so make
+        // sure a delivery was actually collected before it is marked delivered.
+        if ($delivery->status !== DeliveryStatus::PickedUp) {
+            throw new OrderException('Collect the order from the counter before marking it delivered.');
+        }
+
         $order = $this->transition->handle($delivery->loadMissing('order')->order, OrderStatus::Completed, $by, 'Delivered to customer');
 
         $delivery->update(['status' => DeliveryStatus::Delivered, 'delivered_at' => now()]);

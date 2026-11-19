@@ -20,8 +20,7 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $viewer = $request->user();
-        $seesContact = $viewer && ($viewer->isStaff() || $viewer->id === $this->user_id);
+        $seesContact = self::showsContactDetails($request, $this->resource);
 
         return [
             'id' => $this->id,
@@ -103,7 +102,7 @@ class OrderResource extends JsonResource
                 'status_label' => $this->delivery->status->label(),
                 'recipient_name' => $this->delivery->recipient_name,
                 'phone' => $seesContact ? $this->delivery->phone : Phone::mask($this->delivery->phone),
-                'address' => $this->delivery->full_address,
+                'address' => $seesContact ? $this->delivery->full_address : $this->delivery->city,
                 'notes' => $this->delivery->notes,
                 'fee' => $this->delivery->fee,
                 'zone' => $this->delivery->relationLoaded('zone') ? $this->delivery->zone?->name : null,
@@ -136,6 +135,23 @@ class OrderResource extends JsonResource
                 'at' => $history->created_at?->toIso8601String(),
             ])->all()),
         ];
+    }
+
+    /**
+     * Ticket links can be shared, so phone numbers and email are only shown
+     * to staff, the account that placed the order, or the browser session
+     * that placed (or looked up) it as a guest.
+     */
+    public static function showsContactDetails(Request $request, Order $order): bool
+    {
+        $viewer = $request->user();
+
+        if ($viewer && ($viewer->isStaff() || $viewer->id === $order->user_id)) {
+            return true;
+        }
+
+        return $request->hasSession()
+            && in_array($order->uuid, $request->session()->get('guest_orders', []), true);
     }
 
     /**

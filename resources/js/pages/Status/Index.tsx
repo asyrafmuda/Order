@@ -93,12 +93,12 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
 
             <Card className="mt-5">
                 <CardHeader icon={<ChefHat className="size-4" />} title="Kitchen Station Monitor" action={<span className="text-xs text-ink-400">{sync.completed_today} orders served today · {sync.synced_today} synced to POS</span>} />
-                <ul className="grid gap-px bg-ink-700 sm:grid-cols-2 lg:grid-cols-3">
+                <ul className="grid sm:grid-cols-2 lg:grid-cols-3">
                     {stations.map((station, index) => {
                         const busy = station.cooking > 0;
 
                         return (
-                            <li key={station.id} className="bg-ink-850 p-4">
+                            <li key={station.id} className="border-t border-ink-800 p-4 first:border-t-0 sm:border-l sm:[&:nth-child(-n+2)]:border-t-0 sm:[&:nth-child(2n+1)]:border-l-0 lg:[&:nth-child(-n+3)]:border-t-0 lg:[&:nth-child(2n+1)]:border-l lg:[&:nth-child(3n+1)]:border-l-0">
                                 <div className="flex items-center justify-between gap-2">
                                     <p className="flex items-center gap-2 text-sm font-bold text-white">
                                         <span className={cn('size-2 rounded-full', busy ? 'animate-pulse-soft bg-brand-500' : station.queued > 0 ? 'bg-flame-400' : 'bg-go-400')} />
