@@ -10,6 +10,8 @@ use App\Services\Cart\CartPricer;
 use App\Services\Messaging\WhatsAppChannel;
 use App\Services\Pos\LoyversePosProvider;
 use App\Support\KitchenLoad;
+use App\Support\OutletContext;
+use App\Support\OutletStock;
 use App\Support\Settings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,11 +23,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(Settings::class);
+        $this->app->scoped(OutletContext::class);
+        $this->app->scoped(OutletStock::class);
         $this->app->scoped(KitchenLoad::class);
         $this->app->scoped(Cart::class, fn ($app) => new Cart(
             $app['session.store'],
             $app->make(CartPricer::class),
             $app->make(Settings::class),
+            $app->make(OutletContext::class),
+            $app->make(OutletStock::class),
         ));
 
         // Integrations are chosen by name in config, so swapping a provider

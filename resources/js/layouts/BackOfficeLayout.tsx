@@ -1,6 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     BarChart3,
+    Building2,
     Bike,
     ChefHat,
     ClipboardList,
@@ -46,12 +47,12 @@ const sections: NavSection[] = [
     {
         title: 'Service',
         items: [
-            { label: 'Dashboard', route: 'admin.dashboard', icon: LayoutDashboard, roles: ['admin'] },
-            { label: 'Take Order (POS)', route: 'pos.index', match: 'pos.*', icon: Zap, roles: ['admin', 'cashier', 'waiter'] },
-            { label: 'Kitchen Display', route: 'kitchen.index', match: 'kitchen.*', icon: ChefHat, roles: ['admin', 'kitchen', 'cashier', 'waiter'] },
-            { label: 'Counter', route: 'counter.index', match: 'counter.*', icon: Ticket, roles: ['admin', 'cashier', 'waiter'] },
+            { label: 'Dashboard', route: 'admin.dashboard', icon: LayoutDashboard, roles: ['admin', 'manager'] },
+            { label: 'Take Order (POS)', route: 'pos.index', match: 'pos.*', icon: Zap, roles: ['admin', 'manager', 'cashier', 'waiter'] },
+            { label: 'Kitchen Display', route: 'kitchen.index', match: 'kitchen.*', icon: ChefHat, roles: ['admin', 'manager', 'kitchen', 'cashier', 'waiter'] },
+            { label: 'Counter', route: 'counter.index', match: 'counter.*', icon: Ticket, roles: ['admin', 'manager', 'cashier', 'waiter'] },
             { label: 'My Deliveries', route: 'rider.index', match: 'rider.*', icon: Bike, roles: ['rider'] },
-            { label: 'Orders', route: 'admin.orders.index', match: 'admin.orders.*', icon: ClipboardList, roles: ['admin'] },
+            { label: 'Orders', route: 'admin.orders.index', match: 'admin.orders.*', icon: ClipboardList, roles: ['admin', 'manager'] },
         ],
     },
     {
@@ -67,15 +68,17 @@ const sections: NavSection[] = [
         title: 'Operations',
         items: [
             { label: 'Kitchen Stations', route: 'admin.kitchen-stations.index', match: 'admin.kitchen-stations.*', icon: Layers, roles: ['admin'] },
-            { label: 'Tables & QR', route: 'admin.tables.index', match: 'admin.tables.*', icon: QrCode, roles: ['admin'] },
-            { label: 'Delivery Zones', route: 'admin.delivery-zones.index', match: 'admin.delivery-zones.*', icon: MapPinned, roles: ['admin'] },
-            { label: 'Riders', route: 'admin.riders.index', match: 'admin.riders.*', icon: Bike, roles: ['admin'] },
+            { label: 'Outlet Details', route: 'admin.outlet.edit', match: 'admin.outlet.*', icon: Store, roles: ['manager'] },
+            { label: 'Tables & QR', route: 'admin.tables.index', match: 'admin.tables.*', icon: QrCode, roles: ['admin', 'manager'] },
+            { label: 'Delivery Zones', route: 'admin.delivery-zones.index', match: 'admin.delivery-zones.*', icon: MapPinned, roles: ['admin', 'manager'] },
+            { label: 'Riders', route: 'admin.riders.index', match: 'admin.riders.*', icon: Bike, roles: ['admin', 'manager'] },
         ],
     },
     {
         title: 'System',
         items: [
-            { label: 'Reports', route: 'admin.reports.index', match: 'admin.reports.*', icon: BarChart3, roles: ['admin'] },
+            { label: 'Reports', route: 'admin.reports.index', match: 'admin.reports.*', icon: BarChart3, roles: ['admin', 'manager'] },
+            { label: 'Outlets', route: 'admin.outlets.index', match: 'admin.outlets.*', icon: Building2, roles: ['admin'] },
             { label: 'Users', route: 'admin.users.index', match: 'admin.users.*', icon: Users, roles: ['admin'] },
             { label: 'Integrations', route: 'admin.integrations.index', match: 'admin.integrations.*', icon: Plug, roles: ['admin'] },
             { label: 'Settings', route: 'admin.settings.edit', match: 'admin.settings.*', icon: Settings, roles: ['admin'] },
@@ -94,7 +97,7 @@ interface BackOfficeLayoutProps {
 }
 
 export default function BackOfficeLayout({ title, description, actions, children, wide }: BackOfficeLayoutProps) {
-    const { auth, kitchen, pos } = usePage().props;
+    const { auth, kitchen, pos, outlet } = usePage().props;
     const [open, setOpen] = useState(false);
     const role = auth.user?.role ?? 'customer';
 
@@ -171,7 +174,7 @@ export default function BackOfficeLayout({ title, description, actions, children
                 </div>
             )}
 
-            <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink-700 bg-ink-900/95 px-4 py-3 backdrop-blur">
+            <header className="sticky top-0 z-30 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-ink-700 bg-ink-900/95 px-4 py-3 backdrop-blur">
                 <button type="button" className="rounded-lg p-2 text-ink-300 hover:bg-ink-800 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
                     <MenuIcon className="size-5" />
                 </button>
@@ -179,6 +182,31 @@ export default function BackOfficeLayout({ title, description, actions, children
                     <h1 className="truncate font-display text-2xl leading-none text-white uppercase">{title}</h1>
                     {description && <p className="mt-0.5 truncate text-xs text-ink-400">{description}</p>}
                 </div>
+                {/* On phones the outlet sits on its own row under the title, so the title keeps its room. */}
+                {outlet.multi &&
+                    (outlet.can_switch ? (
+                        <label className="order-last flex h-9 basis-full items-center gap-1.5 rounded-lg border border-flame-500/40 bg-flame-900 pr-1 pl-2.5 text-xs font-bold text-flame-300 sm:order-none sm:shrink-0 sm:basis-auto">
+                            <Building2 className="size-3.5 shrink-0" aria-hidden />
+                            <span className="sr-only">Outlet being viewed</span>
+                            <select
+                                value={outlet.current.id}
+                                onChange={(event) => router.post(route('admin.outlets.switch'), { outlet_id: Number(event.target.value) }, { preserveScroll: true })}
+                                className="h-full min-w-0 flex-1 bg-transparent font-bold text-flame-300 focus:outline-none sm:max-w-52 sm:flex-none"
+                            >
+                                {outlet.options.map((option) => (
+                                    <option key={option.id} value={option.id} className="bg-ink-850 text-ink-100">
+                                        {option.name}
+                                        {option.is_active ? '' : ' (inactive)'}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    ) : (
+                        <span className="order-last flex h-8 basis-full items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 text-xs font-bold text-ink-100 sm:order-none sm:h-9 sm:shrink-0 sm:basis-auto">
+                            <Building2 className="size-3.5 shrink-0 text-flame-400" aria-hidden />
+                            <span className="truncate sm:max-w-48">{outlet.current.name}</span>
+                        </span>
+                    ))}
                 <div className="hidden items-center gap-2 xl:flex">
                     <span className="flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-xs font-semibold text-ink-200">
                         <span

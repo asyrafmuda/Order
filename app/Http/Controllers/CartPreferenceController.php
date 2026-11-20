@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\OrderType;
 use App\Models\DeliveryZone;
 use App\Services\Cart\Cart;
+use App\Support\OutletContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -19,7 +20,7 @@ class CartPreferenceController extends Controller
     {
         $validated = $request->validate([
             'type' => ['sometimes', Rule::enum(OrderType::class)->only(OrderType::online())],
-            'zone_id' => ['sometimes', 'nullable', Rule::exists(DeliveryZone::class, 'id')->where('is_active', true)],
+            'zone_id' => ['sometimes', 'nullable', Rule::exists(DeliveryZone::class, 'id')->where('is_active', true)->where('outlet_id', app(OutletContext::class)->current()->id)],
         ]);
 
         if (isset($validated['type'])) {

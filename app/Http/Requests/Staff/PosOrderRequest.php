@@ -5,6 +5,7 @@ namespace App\Http\Requests\Staff;
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
 use App\Models\DiningTable;
+use App\Support\OutletContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +26,7 @@ class PosOrderRequest extends FormRequest
     {
         return [
             'type' => ['required', Rule::in([OrderType::Pickup->value, OrderType::DineIn->value])],
-            'dining_table_id' => ['nullable', Rule::exists(DiningTable::class, 'id')->where('is_active', true)],
+            'dining_table_id' => ['nullable', Rule::exists(DiningTable::class, 'id')->where('is_active', true)->where('outlet_id', app(OutletContext::class)->current()->id)],
             'customer_name' => ['nullable', 'string', 'max:80'],
             'customer_phone' => ['nullable', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/'],
             'notes' => ['nullable', 'string', 'max:500'],

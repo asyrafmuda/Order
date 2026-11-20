@@ -38,10 +38,10 @@ export function TicketPanel({ action, className }: TicketPanelProps) {
             {cart.lines.length === 0 ? (
                 <div className="px-4 py-10 text-center">
                     <p className="text-3xl" aria-hidden>
-                        🍔
+                        {shop.icon}
                     </p>
                     <p className="mt-2 text-sm font-semibold text-ink-200">Your ticket is empty</p>
-                    <p className="text-xs text-ink-400">Pick something from the menu to get the grill going.</p>
+                    <p className="text-xs text-ink-400">Pick something from the menu to get started.</p>
                 </div>
             ) : (
                 <>

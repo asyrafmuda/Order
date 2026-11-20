@@ -19,13 +19,13 @@ class KitchenStatusController extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $board = Order::query()
+        $board = Order::query()->forOutlet($this->outlet())
             ->whereIn('status', [OrderStatus::Confirmed, OrderStatus::Preparing, OrderStatus::Ready])
             ->orderBy('confirmed_at')
             ->get(['id', 'order_number', 'status', 'type', 'confirmed_at', 'estimated_ready_at', 'ready_at']);
 
         $itemCounts = OrderItem::query()
-            ->whereHas('order', fn ($query) => $query->inKitchen())
+            ->whereHas('order', fn ($query) => $query->forOutlet($this->outlet())->inKitchen())
             ->selectRaw('kitchen_station_id, kitchen_status, sum(quantity) as total')
             ->groupBy('kitchen_station_id', 'kitchen_status')
             ->get()
@@ -44,7 +44,7 @@ class KitchenStatusController extends Controller
                 ];
             });
 
-        $today = Order::query()->where('business_date', now()->toDateString());
+        $today = Order::query()->forOutlet($this->outlet())->where('business_date', now()->toDateString());
 
         return Inertia::render('Status/Index', [
             'board' => $board->map(fn (Order $order) => [
@@ -59,7 +59,7 @@ class KitchenStatusController extends Controller
                 'synced_today' => (clone $today)->where('pos_sync_status', SyncStatus::Synced)->count(),
                 'failed_today' => (clone $today)->where('pos_sync_status', SyncStatus::Failed)->count(),
                 'completed_today' => (clone $today)->where('status', OrderStatus::Completed)->count(),
-                'last_synced_at' => Order::query()->whereNotNull('pos_synced_at')->latest('pos_synced_at')->first()
+                'last_synced_at' => Order::query()->forOutlet($this->outlet())->whereNotNull('pos_synced_at')->latest('pos_synced_at')->first()
                     ?->pos_synced_at->toIso8601String(),
             ],
         ]);

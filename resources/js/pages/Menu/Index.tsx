@@ -43,7 +43,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
             .filter((category) => category.products.length > 0);
     }, [categories, query, activeCategory]);
 
-    // "Add with Burger": upgrade a burger already on the ticket, otherwise start customising the first eligible one.
+    // Hot deal: upgrade an eligible item already on the ticket, otherwise start customising the first eligible one.
     const applyHotDeal = () => {
         const eligibleIds = categories.flatMap((category) => category.products ?? []).filter((product) => product.is_combo_eligible);
         const line = cart?.lines.find((item) => !item.combo && eligibleIds.some((product) => product.id === item.product_id));
@@ -63,7 +63,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search burgers, sauces..."
+                placeholder="Search the menu..."
                 className="h-10 w-full rounded-lg border border-ink-600 bg-ink-850 pr-3 pl-9 text-sm text-ink-100 placeholder:text-ink-500 focus:border-flame-400 focus:outline-none"
             />
         </label>
@@ -91,7 +91,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                     </p>
                     <span className="text-sm font-extrabold text-flame-400">+{money(combo.price)}</span>
                     <Button size="sm" onClick={applyHotDeal} disabled={!shop.is_open}>
-                        Add with Burger <ArrowRight className="size-4" aria-hidden />
+                        Get the combo <ArrowRight className="size-4" aria-hidden />
                     </Button>
                 </div>
             )}

@@ -23,6 +23,8 @@ interface UserRow {
     role: Role;
     role_label: string;
     is_active: boolean;
+    outlet_id: number | null;
+    outlet_name: string | null;
     orders_count: number;
     created_at: string | null;
 }
@@ -31,10 +33,14 @@ interface UsersProps {
     users: Paginated<UserRow>;
     filters: { search: string; role: string };
     roles: Option<Role>[];
+    outlets: { id: number; name: string; is_active: boolean; is_default: boolean }[];
+    /** Multi-outlet is on: staff are assigned to an outlet. */
+    multi: boolean;
 }
 
 const roleTones: Record<Role, Tone> = {
     admin: 'solid-red',
+    manager: 'solid-flame',
     cashier: 'flame',
     waiter: 'flame',
     kitchen: 'blue',
@@ -42,7 +48,7 @@ const roleTones: Record<Role, Tone> = {
     customer: 'neutral',
 };
 
-export default function UsersIndex({ users, filters, roles }: UsersProps) {
+export default function UsersIndex({ users, filters, roles, outlets, multi }: UsersProps) {
     const { auth } = usePage().props;
     const { values, set, reset, active } = useFilters('admin.users.index', filters);
     const [editing, setEditing] = useState<UserRow | 'new' | null>(null);
@@ -115,6 +121,7 @@ export default function UsersIndex({ users, filters, roles }: UsersProps) {
                                         <Td>{user.phone ? `+${user.phone}` : '—'}</Td>
                                         <Td>
                                             <Badge tone={roleTones[user.role]}>{user.role_label}</Badge>
+                                            {multi && user.outlet_name && <span className="mt-1 block text-xs text-ink-400">{user.outlet_name}</span>}
                                         </Td>
                                         <Td>{user.orders_count}</Td>
                                         <Td className="text-xs text-ink-300">{date(user.created_at)}</Td>
@@ -143,7 +150,7 @@ export default function UsersIndex({ users, filters, roles }: UsersProps) {
                 <UserForm
                     key={editing === 'new' ? 'new' : editing.id}
                     user={editing === 'new' ? null : editing}
-                    roles={roles}
+                    roles={roles} outlets={outlets} multi={multi}
                     self={editing !== 'new' && editing.id === auth.user?.id}
                     onClose={() => setEditing(null)}
                 />
@@ -152,13 +159,15 @@ export default function UsersIndex({ users, filters, roles }: UsersProps) {
     );
 }
 
-function UserForm({ user, roles, self, onClose }: { user: UserRow | null; roles: Option<Role>[]; self: boolean; onClose: () => void }) {
+function UserForm({ user, roles, outlets, multi, self, onClose }: { user: UserRow | null; roles: Option<Role>[]; outlets: UsersProps['outlets']; multi: boolean; self: boolean; onClose: () => void }) {
     const form = useForm({
         name: user?.name ?? '',
         email: user?.email ?? '',
         phone: user?.phone ?? '',
         role: user?.role ?? ('cashier' as Role),
         is_active: user?.is_active ?? true,
+        // New staff start at the main outlet until another one is picked.
+        outlet_id: (user?.outlet_id ?? outlets.find((outlet) => outlet.is_default)?.id ?? '') as number | '',
         password: '',
     });
 
@@ -195,6 +204,23 @@ function UserForm({ user, roles, self, onClose }: { user: UserRow | null; roles:
                             </option>
                         ))}
                     </Select>
+                    {multi && form.data.role !== 'admin' && form.data.role !== 'customer' && (
+                        <Select
+                            label="Works at"
+                            wrapperClassName="sm:col-span-2"
+                            hint="Staff only see and handle orders of their own outlet."
+                            value={form.data.outlet_id}
+                            onChange={(event) => form.setData('outlet_id', event.target.value ? Number(event.target.value) : '')}
+                            error={form.errors.outlet_id}
+                        >
+                            {outlets.map((outlet) => (
+                                <option key={outlet.id} value={outlet.id}>
+                                    {outlet.name}
+                                    {outlet.is_active ? '' : ' (inactive)'}
+                                </option>
+                            ))}
+                        </Select>
+                    )}
                 </div>
                 <Input
                     label={form.data.role === 'customer' ? (user ? 'New PIN' : 'PIN') : user ? 'New password' : 'Password'}

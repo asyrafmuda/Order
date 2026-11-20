@@ -11,11 +11,14 @@ use App\Models\Category;
 use App\Models\DeliveryZone;
 use App\Models\KitchenStation;
 use App\Models\Order;
+use App\Models\Outlet;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Cart\CartPricer;
+use App\Support\OutletContext;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 pest()->extend(TestCase::class)
@@ -55,6 +58,30 @@ function userWithRole(UserRole $role): User
 }
 
 /**
+ * Switch multi-outlet on and add a second branch next to the main one.
+ */
+function secondOutlet(string $name = 'Shah Alam'): Outlet
+{
+    app(Settings::class)->put(['outlets.multi_enabled' => true]);
+
+    $outlet = Outlet::factory()->create(['name' => $name, 'slug' => Str::slug($name)]);
+    app(OutletContext::class)->flush();
+
+    return $outlet;
+}
+
+/**
+ * A member of staff who works at the given outlet.
+ */
+function staffAt(Outlet $outlet, UserRole $role): User
+{
+    $user = userWithRole($role);
+    $user->update(['outlet_id' => $outlet->id]);
+
+    return $user;
+}
+
+/**
  * A sellable product with its category and kitchen station.
  *
  * @param  array<string, mixed>  $attributes
@@ -71,7 +98,8 @@ function menuItem(array $attributes = []): Product
  * Place an order through the real PlaceOrder action.
  *
  * Options: type (OrderType), method (PaymentMethod), paid (bool, pays online
- * orders through the fake gateway), user (User), quantity (int), products (Product[]).
+ * orders through the fake gateway), user (User), quantity (int), products (Product[]),
+ * outlet (Outlet).
  *
  * @param  array<string, mixed>  $options
  */
@@ -80,7 +108,7 @@ function placeOrder(array $options = []): Order
     $type = $options['type'] ?? OrderType::Pickup;
     $method = $options['method'] ?? ($type === OrderType::Delivery ? PaymentMethod::Fpx : PaymentMethod::Cash);
     $products = $options['products'] ?? [menuItem()];
-    $zone = $type === OrderType::Delivery ? DeliveryZone::factory()->create(['min_order' => 0]) : null;
+    $zone = $type === OrderType::Delivery ? DeliveryZone::factory()->create(['min_order' => 0, 'outlet_id' => ($options['outlet'] ?? Outlet::default())->id]) : null;
 
     $lines = array_map(fn (Product $product, int $index) => [
         'id' => 'line-'.$index,
@@ -93,7 +121,7 @@ function placeOrder(array $options = []): Order
         'notes' => null,
     ], $products, array_keys($products));
 
-    $order = app(PlaceOrder::class)->handle(
+    $place = fn () => app(PlaceOrder::class)->handle(
         app(CartPricer::class)->price($lines, $type, $zone),
         new CheckoutData(
             customerName: 'Ahmad Faiz',
@@ -106,6 +134,9 @@ function placeOrder(array $options = []): Order
         ),
         $options['user'] ?? null,
     );
+
+    // 'outlet' => $outlet places the order at that branch.
+    $order = isset($options['outlet']) ? app(OutletContext::class)->runAs($options['outlet'], $place) : $place();
 
     if ($method->isOnline() && ($options['paid'] ?? true)) {
         app(StartPayment::class)->handle($order);

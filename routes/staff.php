@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 | is limited to the roles that work that station.
 */
 
-Route::middleware('role:admin,kitchen,cashier,waiter')->prefix('kitchen')->name('kitchen.')->group(function () {
+Route::middleware('role:admin,manager,kitchen,cashier,waiter')->prefix('kitchen')->name('kitchen.')->group(function () {
     Route::get('/', KitchenController::class)->name('index');
     Route::patch('/items/{item}', [KitchenItemController::class, 'update'])->name('items.update');
     Route::post('/orders/{order}/start', [KitchenOrderController::class, 'start'])->name('orders.start');
@@ -24,12 +24,12 @@ Route::middleware('role:admin,kitchen,cashier,waiter')->prefix('kitchen')->name(
     Route::patch('/products/{product}/status', [KitchenStockController::class, 'update'])->name('products.status');
 });
 
-Route::middleware('role:admin,cashier,waiter')->prefix('pos')->name('pos.')->group(function () {
+Route::middleware('role:admin,manager,cashier,waiter')->prefix('pos')->name('pos.')->group(function () {
     Route::get('/', [PosController::class, 'index'])->name('index');
     Route::post('/orders', [PosController::class, 'store'])->name('orders.store');
 });
 
-Route::middleware('role:admin,cashier,waiter')->prefix('counter')->name('counter.')->group(function () {
+Route::middleware('role:admin,manager,cashier,waiter')->prefix('counter')->name('counter.')->group(function () {
     Route::get('/', CounterController::class)->name('index');
     Route::post('/verify', [CounterOrderController::class, 'verify'])->name('verify');
     Route::post('/orders/{order}/pay', [CounterOrderController::class, 'pay'])->name('orders.pay');

@@ -37,7 +37,7 @@
     --color-go-500: #10b981;
     --color-go-900: #06281f;
 
-    --shadow-glow: 0 0 0 1px rgb(238 43 50 / 0.35), 0 8px 30px -8px rgb(238 43 50 / 0.45);
+    --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--color-brand-500) 35%, transparent), 0 8px 30px -8px color-mix(in srgb, var(--color-brand-500) 45%, transparent);
 
     --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
     --animate-slide-up: slide-up 0.2s ease-out;

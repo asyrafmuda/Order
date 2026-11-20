@@ -29,7 +29,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
     const { kitchen, pos } = usePage().props;
     const now = useNow(15000);
 
-    useLiveReload([{ name: 'shop' }], { only: ['board', 'stations', 'sync', 'kitchen'] });
+    useLiveReload([{ name: 'shop', perOutlet: true }], { only: ['board', 'stations', 'sync', 'kitchen'] });
 
     const preparing = board.filter((order) => order.status !== 'ready');
     const ready = board.filter((order) => order.status === 'ready');
@@ -48,7 +48,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
             <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Stat icon={<ChefHat className="size-5" />} label="Kitchen load" value={kitchen.label} valueClassName={loadTone[kitchen.level]} hint={`${kitchen.active_orders} order${kitchen.active_orders === 1 ? '' : 's'} in the queue`} />
                 <Stat icon={<Timer className="size-5" />} label="Current wait" value={`${kitchen.eta_min}–${kitchen.eta_max} min`} hint="For a new pickup order" />
-                <Stat icon={<Flame className="size-5" />} label="On the grill" value={String(kitchen.cooking_items)} hint="Items cooking right now" />
+                <Stat icon={<Flame className="size-5" />} label="Cooking now" value={String(kitchen.cooking_items)} hint="Items cooking right now" />
                 <Stat icon={<Plug className="size-5" />} label={`POS (${pos.label})`} value={pos.simulated ? 'Demo mode' : pos.connected ? 'Connected' : 'Offline'} valueClassName={pos.connected ? 'text-go-400' : 'text-brand-400'} hint={sync.last_synced_at ? `Last ticket synced ${time(sync.last_synced_at)}` : 'No tickets synced yet'} />
             </div>
 
@@ -56,7 +56,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
                 <Card>
                     <CardHeader icon={<Flame className="size-4" />} title="Now preparing" action={<Badge tone="red">{preparing.length}</Badge>} />
                     {preparing.length === 0 ? (
-                        <EmptyState title="The grill is clear">New orders appear here the moment they are confirmed.</EmptyState>
+                        <EmptyState title="The kitchen is clear">New orders appear here the moment they are confirmed.</EmptyState>
                     ) : (
                         <ul className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
                             {preparing.map((order) => {

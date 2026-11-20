@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\OrderException;
+use App\Http\Middleware\EnsureOutletAccess;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -19,8 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function () {
             Route::middleware('web')->group(base_path('routes/auth.php'));
-            Route::middleware(['web', 'auth'])->group(base_path('routes/staff.php'));
-            Route::middleware(['web', 'auth', 'role:admin'])
+            Route::middleware(['web', 'auth', 'outlet'])->group(base_path('routes/staff.php'));
+            Route::middleware(['web', 'auth', 'role:admin,manager', 'outlet'])
                 ->prefix('admin')
                 ->name('admin.')
                 ->group(base_path('routes/admin.php'));
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
+            'outlet' => EnsureOutletAccess::class,
         ]);
 
         // Payment gateways and the POS post to these without a session.

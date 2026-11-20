@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
+use App\Models\Outlet;
 use App\Models\User;
+use App\Support\OutletContext;
 use App\Support\Phone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +25,10 @@ class UserController extends Controller
             'role' => ['nullable', Rule::enum(UserRole::class)],
         ]);
 
+        $main = Outlet::default();
+
         $users = User::query()
+            ->with('outlet')
             ->withCount('orders')
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $term = '%'.trim($search).'%';
@@ -45,6 +50,9 @@ class UserController extends Controller
                 'role' => $user->role->value,
                 'role_label' => $user->role->label(),
                 'is_active' => $user->is_active,
+                // Staff who were never assigned work at the main outlet.
+                'outlet_id' => $user->isOutletStaff() ? ($user->outlet_id ?? $main->id) : null,
+                'outlet_name' => $user->isOutletStaff() ? ($user->outlet?->name ?? $main->name) : null,
                 'orders_count' => $user->orders_count,
                 'created_at' => $user->created_at?->toIso8601String(),
             ]);
@@ -56,6 +64,8 @@ class UserController extends Controller
                 'role' => $filters['role'] ?? '',
             ],
             'roles' => UserRole::options(),
+            'outlets' => Outlet::query()->ordered()->get(['id', 'name', 'is_active', 'is_default']),
+            'multi' => app(OutletContext::class)->multi(),
         ]);
     }
 
@@ -111,6 +121,10 @@ class UserController extends Controller
     {
         return [
             ...$request->safe()->only('name', 'email', 'role', 'is_active'),
+            // Only outlet staff are tied to an outlet; super admins and customers are not.
+            'outlet_id' => in_array($request->validated('role'), [UserRole::Admin->value, UserRole::Customer->value], true)
+                ? null
+                : $request->validated('outlet_id'),
             'phone' => $request->filled('phone') ? Phone::normalize($request->validated('phone')) : null,
             ...($request->filled('password') ? ['password' => $request->validated('password')] : []),
         ];

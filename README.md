@@ -1,6 +1,6 @@
 # Boss Burger — Sistem Order Online
 
-Sistem order online untuk kedai burger: menu & cart, checkout, tiket digital dengan tracking live, Kitchen Display (KDS), kaunter pickup, delivery dengan rider, dan admin panel. Order yang disahkan dihantar ke Loyverse POS sebagai resit.
+Sistem order online untuk kedai makan (burger, restoran, kafe — nama, logo dan warna diubah di Admin → Settings), satu outlet atau banyak cawangan: menu & cart, checkout, tiket digital dengan tracking live, Kitchen Display (KDS), kaunter pickup, delivery dengan rider, dan admin panel. Order yang disahkan dihantar ke Loyverse POS sebagai resit.
 
 - **Backend:** Laravel 13, PHP 8.3+, MySQL 8
 - **Frontend:** Inertia 3 + React 19 + TypeScript + Tailwind 4
@@ -24,13 +24,24 @@ Buka http://localhost:8000.
 
 `composer setup` seed menu Boss Burger, zon delivery dan satu akaun untuk setiap role. Untuk data jualan contoh (dashboard & laporan): `php artisan db:seed --class=DemoOrderSeeder`.
 
+### Kemas kini selepas `git pull`
+
+```bash
+composer install
+php artisan migrate      # tambah jadual/lajur baru; data sedia ada kekal
+npm install && npm run build
+```
+
+Migration outlet memindahkan order, meja, zon delivery dan tetapan sedia ada ke *Main Outlet* secara automatik. Akaun demo baru (`manager@…`): `php artisan db:seed --class=UserSeeder`.
+
 ### Akaun demo
 
 Staf login dengan email dan password `password`. Pelanggan login dengan nombor telefon dan PIN. **Tukar semuanya sebelum go live.**
 
 | Role | Login | Skrin |
 |---|---|---|
-| Admin | admin@bossburger.test | `/admin` |
+| Super Admin | admin@bossburger.test | `/admin` (semua, termasuk Outlets dan Settings) |
+| Outlet Manager | manager@bossburger.test | `/admin` (outlet sendiri sahaja) |
 | Cashier | cashier@bossburger.test | `/pos` (ambil order), `/counter` (serah order) |
 | Kitchen | kitchen@bossburger.test | `/kitchen` |
 | Rider | rider@bossburger.test | `/rider` |
@@ -61,6 +72,41 @@ Kod QR mengandungi alamat laman semasa admin membukanya. **Buka admin melalui al
 Akaun adalah pilihan — untuk sejarah order, alamat tersimpan dan bayar di kaunter bagi pickup. Pendaftaran hanya nama, nombor telefon dan PIN 6 digit; email pilihan (untuk reset PIN sendiri). Pelanggan tanpa email yang lupa PIN boleh minta staf set PIN baru di Admin → Users. Login dihadkan: 5 cubaan setiap peranti dan 10 setiap akaun dalam 15 minit. Staf kekal guna email + password penuh.
 
 OTP melalui SMS/WhatsApp belum ada; ia boleh ditambah di atas `App\Contracts\MessageChannel` bila penyedia mesej disambung.
+
+## Jenama kedai
+
+Admin → Settings → **Branding**: nama, tagline, logo (atau emoji), warna utama dan warna aksen, teks footer. Semua skrin, invois PDF dan favicon ikut tetapan ini — tiada kod yang perlu diubah untuk kedai lain. Warna yang terlalu pudar untuk dibaca atas latar gelap ditolak semasa simpan.
+
+## Banyak outlet (cawangan)
+
+Satu bisnes, banyak outlet. Dimatikan secara default — kedai satu cawangan tak nampak apa-apa perbezaan.
+
+**Hidupkan:** Admin → Settings → **Outlets** → *This business has more than one outlet* → Save. Butiran kedai sedia ada jadi outlet utama (*Main Outlet*); kemudian tambah cawangan di Admin → **Outlets**.
+
+| Dikongsi semua outlet | Berasingan setiap outlet |
+|---|---|
+| Menu, harga, kategori, add-on, combo | Order dan nombor giliran (setiap outlet ada A001 sendiri; prefix boleh berbeza) |
+| Akaun pelanggan dan sejarah order | Meja & kod QR, zon delivery, rider |
+| Jenama, cukai, kaedah bayaran, integrasi | Alamat, telefon, WhatsApp, waktu operasi, kaunter |
+| Stesen dapur | Suis pickup / delivery / dine-in, anggaran masa siap |
+| | Senarai *sold out* (habis di Shah Alam tak sorok item di outlet lain) |
+| | Staf, dashboard, laporan, KDS, kaunter, POS |
+
+**Siapa nampak apa**
+
+| Role | Outlet | Boleh buat |
+|---|---|---|
+| **Super Admin** | Semua — tukar melalui pemilih outlet di header | Semua: menu, pengguna, outlets, settings, integrasi |
+| **Outlet Manager** | Outlet sendiri | Dashboard, order, meja, zon delivery, rider, laporan dan butiran outlet sendiri (alamat, waktu, cara order). Tak boleh ubah menu, pengguna, settings atau outlet lain |
+| Cashier, Waiter, Kitchen, Rider | Outlet sendiri | Skrin kerja masing-masing, hanya order outlet itu |
+
+Staf ditugaskan ke outlet di Admin → Users → *Works at*. Staf yang belum ditugaskan dikira bekerja di outlet utama. Rekod outlet lain yang dibuka terus melalui URL dijawab 404.
+
+**Pelanggan** pilih outlet di bahagian atas menu. Scan QR meja terus masuk ke outlet meja itu. Tiket, invois dan mesej WhatsApp sentiasa guna alamat outlet tempat order dibuat.
+
+**Mematikan semula** hanya dibenarkan bila outlet lain tiada order yang belum selesai. Data cawangan disimpan (tak dipadam) dan muncul semula bila dihidupkan balik. Outlet yang pernah terima order tak boleh dipadam — nyahaktifkan sahaja; outlet utama tak boleh dipadam atau dinyahaktifkan.
+
+Dalam kod: `App\Support\OutletContext` tentukan outlet untuk setiap request; model `Order`, `DiningTable`, `DeliveryZone` guna trait `BelongsToOutlet` dan ditapis dengan `->forOutlet()`; middleware `outlet` (`EnsureOutletAccess`) jaga rekod yang dialamatkan terus; tetapan per-outlet disenaraikan dalam `Settings::OUTLET_KEYS`.
 
 ## Telefon dan tablet
 
@@ -115,7 +161,7 @@ Semua pertukaran status melalui `App\Actions\Orders\TransitionOrder`, yang kuatk
 | `app/Contracts` + `app/Services/{Payments,Pos,Messaging}` | Interface dan driver integrasi |
 | `app/Http/Controllers` | Controller nipis; validation dalam `app/Http/Requests` |
 | `app/Http/Resources` | Bentuk data yang dihantar ke React |
-| `app/Support` | `Settings`, `Money`, `ShopHours`, `KitchenLoad`, `OrderTimeline` |
+| `app/Support` | `Settings`, `OutletContext`, `OutletStock`, `BrandPalette`, `Money`, `ShopHours`, `KitchenLoad`, `OrderTimeline` |
 | `routes/web.php`, `auth.php`, `staff.php`, `admin.php` | Route ikut kawasan |
 | `resources/js/pages` | Halaman Inertia (React) |
 | `resources/js/components`, `layouts` | UI kit, layout storefront / back office |
@@ -124,8 +170,8 @@ Nota penting:
 
 - **Duit disimpan sebagai integer sen.** Guna `App\Support\Money` (PHP) dan `money()` (TS) untuk paparan.
 - **Harga disalin ke order** (`order_items`), jadi perubahan menu tak ubah order lama.
-- **Timezone aplikasi** ialah `Asia/Kuala_Lumpur` (`APP_TIMEZONE`). Nombor giliran (A001…) reset setiap hari.
-- **Tetapan kedai** (waktu operasi, SST, ETA, prefix giliran) diubah di Admin → Settings; default dalam `config/shop.php`.
+- **Timezone aplikasi** ialah `Asia/Kuala_Lumpur` (`APP_TIMEZONE`). Nombor giliran (A001…) reset setiap hari, bagi setiap outlet.
+- **Tetapan kedai** (waktu operasi, SST, ETA, prefix giliran) diubah di Admin → Settings; default dalam `config/shop.php`. Dalam mod banyak outlet, tetapan per-outlet diubah di Admin → Outlets (atau *Outlet Details* untuk manager).
 
 ## Integrasi
 
@@ -166,7 +212,7 @@ Default `log` (mesej ditulis ke `storage/logs` dan `notification_logs`). `whatsa
 
 ## Real-time
 
-Event `OrderUpdated` di-broadcast ke channel `orders.{uuid}` (tiket pelanggan), `shop` (papan status awam) dan private `staff` (KDS, kaunter, rider). Skrin memuat semula data bila event sampai.
+Event `OrderUpdated` di-broadcast ke channel `orders.{uuid}` (tiket pelanggan), `shop.{outlet}` (papan status awam) dan private `staff.{outlet}` (KDS, kaunter, rider) — setiap outlet hanya dengar order sendiri. Skrin memuat semula data bila event sampai.
 
 `composer setup` hidupkan Reverb melalui `php artisan shop:enable-realtime` (jana kunci dalam `.env` dan set `BROADCAST_CONNECTION=reverb`). Kalau `BROADCAST_CONNECTION=log`, frontend guna polling setiap 8 saat — sistem tetap berfungsi tanpa websocket.
 

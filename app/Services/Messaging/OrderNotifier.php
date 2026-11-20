@@ -6,6 +6,7 @@ use App\Contracts\MessageChannel;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Support\Money;
+use App\Support\OutletContext;
 use App\Support\Settings;
 use Throwable;
 
@@ -26,9 +27,11 @@ class OrderNotifier
             return;
         }
 
-        $order->loadMissing('delivery.rider.user');
+        $order->loadMissing(['delivery.rider.user', 'outlet']);
 
-        $message = $this->compose($order, $status);
+        // Runs on the queue, where there is no "current" outlet: read the
+        // settings of the outlet the order belongs to.
+        $message = app(OutletContext::class)->runAs($order->outlet, fn () => $this->compose($order, $status));
 
         if ($message === null) {
             return;

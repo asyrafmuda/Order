@@ -24,7 +24,7 @@ class CounterController extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $active = Order::query()
+        $active = Order::query()->forOutlet($this->outlet())
             ->active()
             ->with(OrderResource::relations())
             ->orderBy('confirmed_at')
@@ -69,7 +69,7 @@ class CounterController extends Controller
             return null;
         }
 
-        $order = Order::query()
+        $order = Order::query()->forOutlet($this->outlet())
             ->with([...OrderResource::relations(), 'histories.user'])
             ->when($uuid !== '', fn ($query) => $query->where('uuid', $uuid), fn ($query) => $query->where('pickup_code', $code))
             ->first();
@@ -84,7 +84,7 @@ class CounterController extends Controller
      */
     private function riders(): array
     {
-        return Rider::query()
+        return Rider::query()->forOutlet($this->outlet())
             ->with('user')
             ->whereHas('user', fn ($query) => $query->where('is_active', true))
             ->withCount(['deliveries as open_deliveries_count' => fn ($query) => $query->whereIn('status', [
@@ -115,7 +115,7 @@ class CounterController extends Controller
         $unpaidCash = $active->filter(fn (Order $order) => $order->payment_method === PaymentMethod::Cash
             && $order->payment_status !== PaymentStatus::Paid);
 
-        $today = Order::query()->where('business_date', now()->toDateString());
+        $today = Order::query()->forOutlet($this->outlet())->where('business_date', now()->toDateString());
 
         return [
             'active' => $active->count(),

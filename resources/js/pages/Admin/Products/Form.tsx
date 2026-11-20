@@ -223,7 +223,7 @@ export default function ProductForm({ product, categories, stations, modifierGro
                                             </label>
                                             <Input
                                                 aria-label={`Size ${index + 1} name`}
-                                                placeholder="e.g. Patty 150g"
+                                                placeholder="e.g. Regular, Large"
                                                 required
                                                 value={variant.name}
                                                 onChange={(event) => setVariant(index, { name: event.target.value })}

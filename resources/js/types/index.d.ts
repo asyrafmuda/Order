@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'cashier' | 'waiter' | 'kitchen' | 'rider' | 'customer';
+export type Role = 'admin' | 'manager' | 'cashier' | 'waiter' | 'kitchen' | 'rider' | 'customer';
 export type OrderType = 'pickup' | 'delivery' | 'dine_in';
 export type OrderSource = 'online' | 'pos';
 export type OrderStatus =
@@ -30,11 +30,18 @@ export interface AuthUser {
     role: Role;
     role_label: string;
     is_staff: boolean;
+    /** Super admin: manages every outlet and the shared menu, staff and settings. */
+    is_admin: boolean;
     home_url: string;
 }
 
 export interface Shop {
     name: string;
+    /** Emoji used as the logo and as the placeholder for items without a photo. */
+    icon: string;
+    logo_url: string | null;
+    footer_text: string;
+    badge_text: string;
     tagline: string;
     address: string;
     phone: string;
@@ -98,6 +105,23 @@ export interface Cart {
     upsells: { id: number; name: string; price: number }[];
 }
 
+/** One branch of the business, as offered in an outlet picker. */
+export interface OutletOption {
+    id: number;
+    name: string;
+    address: string;
+    is_active: boolean;
+}
+
+export interface OutletState {
+    /** Multi-outlet is switched on in Admin → Settings. */
+    multi: boolean;
+    current: { id: number; name: string };
+    /** The viewer may pick another outlet (customers and super admins). */
+    can_switch: boolean;
+    options: OutletOption[];
+}
+
 /** Result of the last order rung up on the counter POS. */
 export interface PosReceipt {
     uuid: string;
@@ -115,6 +139,7 @@ export interface SharedProps {
     kitchen: KitchenLoad;
     pos: { provider: string; label: string; connected: boolean; simulated: boolean };
     cart: Cart | null;
+    outlet: OutletState;
     realtime: boolean;
     [key: string]: unknown;
 }
@@ -156,7 +181,9 @@ export interface Product {
     from_price: number;
     status: ProductStatus;
     status_label: string;
+    /** Can be ordered at the outlet being viewed (available, and not sold out there). */
     is_orderable: boolean;
+    sold_out_here: boolean;
     badge: string | null;
     tags: string[];
     is_combo_eligible: boolean;
@@ -250,6 +277,8 @@ export interface Order {
     source_label: string;
     /** Dine-in orders: where the food goes. */
     table_label: string | null;
+    /** The outlet the order was placed at: where to collect it and who to call. */
+    outlet?: { id: number; name: string; address: string; phone: string; whatsapp: string; maps_url: string; counter: string };
     status: OrderStatus;
     status_label: string;
     is_final: boolean;

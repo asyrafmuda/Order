@@ -18,7 +18,7 @@ class RiderController extends Controller
 {
     public function index(): Response
     {
-        $riders = Rider::query()
+        $riders = Rider::query()->forOutlet($this->outlet())
             ->with('user')
             ->withCount([
                 'deliveries',
@@ -52,6 +52,7 @@ class RiderController extends Controller
                 ...$request->safe()->only('name', 'email', 'password', 'is_active'),
                 'phone' => Phone::normalize($request->validated('phone')),
                 'role' => UserRole::Rider,
+                'outlet_id' => $this->outlet()->id,
             ]);
 
             $user->rider()->create($request->safe()->only('vehicle_type', 'plate_number', 'is_available'));

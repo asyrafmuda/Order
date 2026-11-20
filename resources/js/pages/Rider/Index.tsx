@@ -19,7 +19,7 @@ interface RiderProps {
 }
 
 export default function RiderIndex({ rider, deliveries, completed }: RiderProps) {
-    useLiveReload([{ name: 'staff', private: true }], { only: ['rider', 'deliveries', 'completed'] });
+    useLiveReload([{ name: 'staff', private: true, perOutlet: true }], { only: ['rider', 'deliveries', 'completed'] });
 
     const setAvailability = (available: boolean) =>
         router.put(route('rider.availability'), { is_available: available }, { preserveScroll: true, preserveState: true });

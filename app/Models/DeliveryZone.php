@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToOutlet;
 use Database\Factories\DeliveryZoneFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'areas', 'fee', 'min_order', 'eta_minutes', 'is_active', 'sort_order'])]
+#[Fillable(['outlet_id', 'name', 'areas', 'fee', 'min_order', 'eta_minutes', 'is_active', 'sort_order'])]
 class DeliveryZone extends Model
 {
     /** @use HasFactory<DeliveryZoneFactory> */
-    use HasFactory;
+    use BelongsToOutlet, HasFactory;
 
     /**
      * @return array<string, string>

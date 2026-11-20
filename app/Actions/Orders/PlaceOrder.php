@@ -17,6 +17,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\Cart\PricedCart;
 use App\Services\Cart\PricedLine;
+use App\Support\OutletContext;
 use App\Support\PaymentOptions;
 use App\Support\Phone;
 use App\Support\Settings;
@@ -36,6 +37,7 @@ class PlaceOrder
         private readonly PaymentOptions $paymentOptions,
         private readonly TransitionOrder $transition,
         private readonly CollectCashPayment $collectPayment,
+        private readonly OutletContext $outlets,
     ) {}
 
     /**
@@ -116,14 +118,19 @@ class PlaceOrder
 
     private function create(PricedCart $cart, CheckoutData $data, ?User $user): Order
     {
+        // The order belongs to the outlet the request is working in: the one
+        // the customer picked (or whose table they scanned), or the staff member's own.
+        $outlet = $this->outlets->current();
         $businessDate = now()->toDateString();
 
         $queueNumber = (int) Order::query()
+            ->forOutlet($outlet)
             ->where('business_date', $businessDate)
             ->lockForUpdate()
             ->max('queue_number') + 1;
 
         $order = Order::query()->create([
+            'outlet_id' => $outlet->id,
             'uuid' => (string) Str::uuid(),
             'business_date' => $businessDate,
             'queue_number' => $queueNumber,

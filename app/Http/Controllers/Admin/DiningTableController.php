@@ -75,6 +75,7 @@ class DiningTableController extends Controller
     private function tables(): array
     {
         return DiningTable::query()
+            ->forOutlet($this->outlet())
             ->ordered()
             ->withCount(['orders as open_orders_count' => fn ($query) => $query->whereNotIn('status', [OrderStatus::Completed, OrderStatus::Cancelled])])
             ->get()

@@ -37,7 +37,7 @@ class PosController extends Controller
             ->with(['products' => fn ($query) => $query->visible()->ordered()->with(['variants', 'modifierGroups.modifiers'])])
             ->get();
 
-        $recent = Order::query()
+        $recent = Order::query()->forOutlet($this->outlet())
             ->where('source', OrderSource::Pos)
             ->where('business_date', now()->toDateString())
             ->latest('id')
@@ -48,7 +48,7 @@ class PosController extends Controller
             'categories' => CategoryResource::collection($categories)->resolve($request),
             'combo' => ComboOffer::current()?->only(['id', 'name', 'description', 'price', 'choices']),
             'quickNotes' => array_values(array_filter((array) $settings->get('pos.quick_notes', []))),
-            'tables' => DiningTable::query()->active()->ordered()->get(['id', 'name', 'seats']),
+            'tables' => DiningTable::query()->forOutlet($this->outlet())->active()->ordered()->get(['id', 'name', 'seats']),
             'tax' => [
                 'rate' => (float) $settings->get('tax.rate', 0),
                 'inclusive' => $settings->bool('tax.inclusive'),
@@ -91,7 +91,7 @@ class PosController extends Controller
 
         $type = OrderType::from($request->validated('type'));
         $table = $type === OrderType::DineIn && $request->validated('dining_table_id')
-            ? DiningTable::query()->find($request->validated('dining_table_id'))
+            ? DiningTable::query()->forOutlet($this->outlet())->find($request->validated('dining_table_id'))
             : null;
 
         $order = $placeOrder->handle($cart, new CheckoutData(

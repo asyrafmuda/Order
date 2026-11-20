@@ -30,7 +30,7 @@ class CounterOrderController extends Controller
     {
         $code = $request->code();
 
-        $order = Order::query()
+        $order = Order::query()->forOutlet($this->outlet())
             ->whereNotIn('status', [OrderStatus::Completed, OrderStatus::Cancelled])
             ->where(fn ($query) => $query
                 ->where('pickup_code', $code)

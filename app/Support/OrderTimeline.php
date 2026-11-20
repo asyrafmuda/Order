@@ -42,7 +42,7 @@ final class OrderTimeline
                 },
                 $order->pos_synced_at,
             ),
-            self::step('kitchen', 'Grill & Station', 'Cooking your order', $order->preparing_at, done: $order->ready_at !== null),
+            self::step('kitchen', 'In the Kitchen', 'Cooking your order', $order->preparing_at, done: $order->ready_at !== null),
             // "Ready" stays the current step until the order is handed over.
             self::step(
                 'ready',

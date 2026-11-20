@@ -15,7 +15,9 @@ import { minutesUntil, money, time } from '@/lib/format';
 import type { KitchenItemStatus, Order, OrderItem } from '@/types';
 
 export default function OrderShow({ order }: { order: Order }) {
-    const { shop, pos } = usePage().props;
+    const { shop: business, pos, outlet: outlets } = usePage().props;
+    // Address, counter and contact come from the outlet the order was placed at.
+    const shop = { ...business, ...(order.outlet ?? {}), name: business.name };
     const now = useNow(15000);
 
     useLiveReload([{ name: `orders.${order.uuid}` }], { only: ['order', 'kitchen', 'flash'], enabled: !order.is_final });
@@ -67,7 +69,7 @@ export default function OrderShow({ order }: { order: Order }) {
 
             <div className="space-y-5">
                 {/* Ticket hero */}
-                <Card className="overflow-hidden bg-[radial-gradient(circle_at_0%_0%,rgb(238_43_50/0.22),transparent_45%)]">
+                <Card className="overflow-hidden bg-[radial-gradient(circle_at_0%_0%,color-mix(in_srgb,var(--color-brand-500)_22%,transparent),transparent_45%)]">
                     <div className="grid gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
                         <div>
                             <div className="flex flex-wrap items-center gap-2">
@@ -118,7 +120,8 @@ export default function OrderShow({ order }: { order: Order }) {
                                     </>
                                 )}
                                 <span className="flex items-center gap-1.5 text-ink-300">
-                                    <Store className="size-4 text-flame-400" aria-hidden /> {shop.name} · {shop.address}
+                                    <Store className="size-4 text-flame-400" aria-hidden /> {shop.name}
+                                    {outlets.multi && order.outlet ? ` ${order.outlet.name}` : ''} · {shop.address}
                                 </span>
                             </div>
 

@@ -7,6 +7,8 @@ use App\Actions\Payments\StartPayment;
 use App\Enums\OrderStatus;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Support\BrandPalette;
+use App\Support\OutletContext;
 use App\Support\Settings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -32,16 +34,19 @@ class OrderController extends Controller
 
     public function invoice(Request $request, Order $order, Settings $settings): SymfonyResponse
     {
-        $order->load(['items.modifiers', 'delivery', 'latestPayment']);
+        $order->load(['items.modifiers', 'delivery', 'latestPayment', 'outlet']);
+        $outlet = $settings->forOutlet($order->outlet);
 
         return Pdf::loadView('pdf.invoice', [
             'order' => $order,
             'showContact' => OrderResource::showsContactDetails($request, $order),
+            'brandColor' => BrandPalette::mix(app(BrandPalette::class)->primary(), '#000000', 0.10),
             'shop' => [
                 'name' => $settings->string('shop.name'),
                 'tagline' => $settings->string('shop.tagline'),
-                'address' => $settings->string('shop.address'),
-                'phone' => $settings->string('shop.phone'),
+                'outlet' => app(OutletContext::class)->multi() ? $order->outlet->name : null,
+                'address' => $outlet['shop.address'],
+                'phone' => $outlet['shop.phone'],
             ],
         ])->download("invoice-{$order->business_date->format('Ymd')}-{$order->order_number}.pdf");
     }

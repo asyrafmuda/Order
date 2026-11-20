@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\KitchenItemStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Outlet;
 
 /**
  * A snapshot of how busy the kitchen is, used for the storefront status badge
@@ -12,24 +13,30 @@ use App\Models\OrderItem;
  */
 class KitchenLoad
 {
-    /** @var array{level: string, label: string, active_orders: int, cooking_items: int, eta_min: int, eta_max: int}|null */
-    private ?array $snapshot = null;
+    /** @var array<int, array{level: string, label: string, active_orders: int, cooking_items: int, eta_min: int, eta_max: int}> */
+    private array $snapshots = [];
 
-    public function __construct(private readonly Settings $settings) {}
+    public function __construct(
+        private readonly Settings $settings,
+        private readonly OutletContext $outlets,
+    ) {}
 
     /**
      * @return array{level: string, label: string, active_orders: int, cooking_items: int, eta_min: int, eta_max: int}
      */
-    public function snapshot(): array
+    public function snapshot(?Outlet $outlet = null): array
     {
-        if ($this->snapshot !== null) {
-            return $this->snapshot;
+        // Each outlet has its own kitchen and its own queue.
+        $outlet ??= $this->outlets->current();
+
+        if (isset($this->snapshots[$outlet->id])) {
+            return $this->snapshots[$outlet->id];
         }
 
-        $activeOrders = Order::query()->inKitchen()->count();
+        $activeOrders = Order::query()->forOutlet($outlet)->inKitchen()->count();
         $cookingItems = OrderItem::query()
             ->where('kitchen_status', KitchenItemStatus::Cooking)
-            ->whereHas('order', fn ($query) => $query->inKitchen())
+            ->whereHas('order', fn ($query) => $query->forOutlet($outlet)->inKitchen())
             ->count();
 
         [$level, $label, $delay] = match (true) {
@@ -39,21 +46,29 @@ class KitchenLoad
             default => ['quiet', 'Quiet', 0],
         };
 
-        return $this->snapshot = [
+        return $this->snapshots[$outlet->id] = [
             'level' => $level,
             'label' => $label,
             'active_orders' => $activeOrders,
             'cooking_items' => $cookingItems,
-            'eta_min' => $this->settings->int('ordering.pickup_eta_min') + $delay,
-            'eta_max' => $this->settings->int('ordering.pickup_eta_max') + $delay,
+            'eta_min' => (int) $this->settings->forOutlet($outlet)['ordering.pickup_eta_min'] + $delay,
+            'eta_max' => (int) $this->settings->forOutlet($outlet)['ordering.pickup_eta_max'] + $delay,
         ];
     }
 
     /**
      * Minutes from now a freshly confirmed order is expected to be ready.
      */
-    public function estimatedPrepMinutes(): int
+    public function estimatedPrepMinutes(?Outlet $outlet = null): int
     {
-        return $this->snapshot()['eta_max'];
+        return $this->snapshot($outlet)['eta_max'];
+    }
+
+    /**
+     * Drop the remembered snapshots after the queue changed.
+     */
+    public function forget(): void
+    {
+        $this->snapshots = [];
     }
 }

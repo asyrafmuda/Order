@@ -30,7 +30,7 @@ class IntegrationController extends Controller
                 'configured' => $pos->isConfigured(),
                 'products_linked' => $linked,
                 'products_unlinked' => $products - $linked,
-                'orders_failed' => Order::query()->where('pos_sync_status', SyncStatus::Failed)->count(),
+                'orders_failed' => Order::query()->forOutlet($this->outlet())->where('pos_sync_status', SyncStatus::Failed)->count(),
                 'webhook_url' => route('webhooks.loyverse'),
             ],
             'payment' => ['gateway' => $gateway->name(), 'callback_url' => route('payments.callback')],

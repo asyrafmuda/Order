@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DiningTable;
 use App\Services\Cart\Cart;
+use App\Support\OutletContext;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 
@@ -13,11 +14,17 @@ use Illuminate\Http\RedirectResponse;
  */
 class TableController extends Controller
 {
-    public function show(string $token, Cart $cart, Settings $settings): RedirectResponse
+    public function show(string $token, Cart $cart, Settings $settings, OutletContext $outlets): RedirectResponse
     {
-        $table = DiningTable::query()->active()->where('token', $token)->first();
+        $table = DiningTable::query()->active()->with('outlet')->where('token', $token)->first();
 
-        if (! $table || ! $settings->bool('ordering.dine_in_enabled')) {
+        // The code decides the outlet: a customer sitting in one branch is
+        // ordering from that branch, whatever they browsed before.
+        if ($table?->outlet->is_active) {
+            $outlets->switchTo($table->outlet);
+        }
+
+        if (! $table || ! $table->outlet->is_active || ! $settings->bool('ordering.dine_in_enabled')) {
             return redirect()->route('menu.index')->with('error', 'That table code is not active. Please ask our crew, or order for pickup instead.');
         }
 

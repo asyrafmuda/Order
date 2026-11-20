@@ -2,6 +2,12 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\OrderStatus;
+use App\Models\Order;
+use App\Models\Outlet;
+use App\Support\BrandPalette;
+use App\Support\OutletContext;
+use App\Support\Settings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
@@ -22,7 +28,9 @@ class SettingRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
+            'outlets.multi_enabled' => ['required', 'boolean'],
+
             'shop.name' => ['required', 'string', 'max:80'],
             'shop.tagline' => ['nullable', 'string', 'max:80'],
             'shop.address' => ['required', 'string', 'max:255'],
@@ -30,6 +38,12 @@ class SettingRequest extends FormRequest
             'shop.whatsapp' => ['required', 'string', 'regex:/^[0-9]{9,15}$/'],
             'shop.maps_url' => ['nullable', 'url', 'max:255'],
             'shop.counter' => ['required', 'string', 'max:40'],
+
+            'brand.icon' => ['required', 'string', 'max:8'],
+            'brand.primary_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'brand.accent_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'brand.footer_text' => ['nullable', 'string', 'max:255'],
+            'brand.badge_text' => ['nullable', 'string', 'max:60'],
 
             'hours.open' => ['required', 'date_format:H:i'],
             'hours.close' => ['required', 'date_format:H:i'],
@@ -60,6 +74,16 @@ class SettingRequest extends FormRequest
 
             'notifications.enabled' => ['required', 'boolean'],
         ];
+
+        // With several outlets, each outlet's address, hours and ways of
+        // ordering are edited under Outlets, so this form does not send them.
+        if (app(OutletContext::class)->multi()) {
+            foreach (Settings::OUTLET_KEYS as $key) {
+                $rules[$key] = ['exclude'];
+            }
+        }
+
+        return $rules;
     }
 
     /**
@@ -69,12 +93,38 @@ class SettingRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                $anyChannel = $this->boolean('ordering.pickup_enabled')
+                $multi = app(OutletContext::class)->multi();
+
+                $anyChannel = $multi
+                    || $this->boolean('ordering.pickup_enabled')
                     || $this->boolean('ordering.delivery_enabled')
                     || $this->boolean('ordering.dine_in_enabled');
 
+                // Switching multi-outlet off folds everything back into the main
+                // outlet, which would hide other outlets' unfinished orders.
+                if ($multi && ! $this->boolean('outlets.multi_enabled')) {
+                    $open = Order::query()
+                        ->whereIn('status', [OrderStatus::PendingPayment, ...OrderStatus::active()])
+                        ->where('outlet_id', '!=', Outlet::default()->id)
+                        ->count();
+
+                    if ($open > 0) {
+                        $validator->errors()->add('outlets.multi_enabled', "Other outlets still have {$open} open order(s). Finish or cancel them before switching multi-outlet off.");
+                    }
+                }
+
                 if (! $anyChannel) {
                     $validator->errors()->add('ordering.delivery_enabled', 'Keep at least one of pickup, delivery or dine-in switched on.');
+                }
+
+                // Buttons put white text on the main colour, and the accent is
+                // used for prices on the dark background: both must stay readable.
+                if ($validator->errors()->missing('brand.primary_color') && BrandPalette::contrast((string) $this->input('brand.primary_color'), '#ffffff') < 3) {
+                    $validator->errors()->add('brand.primary_color', 'This colour is too light for white button text. Pick a darker or stronger one.');
+                }
+
+                if ($validator->errors()->missing('brand.accent_color') && BrandPalette::contrast((string) $this->input('brand.accent_color'), '#0f0f12') < 4.5) {
+                    $validator->errors()->add('brand.accent_color', 'This colour is too dark to read on the dark background. Pick a lighter one.');
                 }
 
                 $anyPayment = collect(['fpx', 'card', 'ewallet', 'cash'])
@@ -100,6 +150,11 @@ class SettingRequest extends FormRequest
             'shop.whatsapp' => 'WhatsApp number',
             'shop.maps_url' => 'map link',
             'shop.counter' => 'pickup counter',
+            'brand.icon' => 'icon',
+            'brand.primary_color' => 'main colour',
+            'brand.accent_color' => 'accent colour',
+            'brand.footer_text' => 'footer text',
+            'brand.badge_text' => 'badge',
             'hours.open' => 'opening time',
             'hours.close' => 'closing time',
             'hours.last_order' => 'last order time',
@@ -141,22 +196,30 @@ class SettingRequest extends FormRequest
         $settings['pos.quick_notes'] = $quickNotes;
 
         $booleans = [
-            'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'ordering.dine_in_enabled', 'tax.inclusive',
-            'notifications.enabled', 'payments.dine_in_pay_at_counter',
+            'outlets.multi_enabled', 'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'ordering.dine_in_enabled',
+            'tax.inclusive', 'notifications.enabled', 'payments.dine_in_pay_at_counter',
             'payments.fpx_enabled', 'payments.card_enabled', 'payments.ewallet_enabled', 'payments.cash_enabled',
             'payments.cash_requires_account',
         ];
 
         foreach ($booleans as $key) {
-            $settings[$key] = filter_var($settings[$key], FILTER_VALIDATE_BOOLEAN);
+            if (array_key_exists($key, $settings)) {
+                $settings[$key] = filter_var($settings[$key], FILTER_VALIDATE_BOOLEAN);
+            }
         }
 
+        $settings['brand.primary_color'] = strtolower($settings['brand.primary_color']);
+        $settings['brand.accent_color'] = strtolower($settings['brand.accent_color']);
+        $settings['brand.footer_text'] ??= '';
+        $settings['brand.badge_text'] ??= '';
         $settings['ordering.auto_close_hours'] = (int) $settings['ordering.auto_close_hours'];
         $settings['payments.cash_max_amount'] = (int) $settings['payments.cash_max_amount'];
 
-        $settings['ordering.pickup_eta_min'] = (int) $settings['ordering.pickup_eta_min'];
-        $settings['ordering.pickup_eta_max'] = (int) $settings['ordering.pickup_eta_max'];
-        $settings['ordering.queue_prefix'] = strtoupper($settings['ordering.queue_prefix']);
+        if (array_key_exists('ordering.queue_prefix', $settings)) {
+            $settings['ordering.pickup_eta_min'] = (int) $settings['ordering.pickup_eta_min'];
+            $settings['ordering.pickup_eta_max'] = (int) $settings['ordering.pickup_eta_max'];
+            $settings['ordering.queue_prefix'] = strtoupper($settings['ordering.queue_prefix']);
+        }
         $settings['tax.rate'] = (float) $settings['tax.rate'];
 
         return $settings;

@@ -9,8 +9,8 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1a1a1f; margin: 0; }
-        .header { border-bottom: 3px solid #d91f27; padding-bottom: 12px; margin-bottom: 18px; }
-        .brand { font-size: 22px; font-weight: bold; color: #d91f27; text-transform: uppercase; letter-spacing: 1px; }
+        .header { border-bottom: 3px solid {{ $brandColor }}; padding-bottom: 12px; margin-bottom: 18px; }
+        .brand { font-size: 22px; font-weight: bold; color: {{ $brandColor }}; text-transform: uppercase; letter-spacing: 1px; }
         .muted { color: #6b6b76; }
         table { width: 100%; border-collapse: collapse; }
         .meta td { vertical-align: top; padding: 0; }
@@ -33,7 +33,7 @@
                 <td>
                     <div class="brand">{{ $shop['name'] }}</div>
                     <div class="muted">{{ $shop['tagline'] }}</div>
-                    <div class="muted" style="margin-top: 6px;">{{ $shop['address'] }}<br>{{ $shop['phone'] }}</div>
+                    <div class="muted" style="margin-top: 6px;">@if ($shop['outlet']){{ $shop['outlet'] }}<br>@endif{{ $shop['address'] }}<br>{{ $shop['phone'] }}</div>
                 </td>
                 <td class="right">
                     <div style="font-size: 18px; font-weight: bold;">INVOICE</div>

@@ -38,7 +38,7 @@ export default function KitchenStationsIndex({ stations }: { stations: Station[]
             <Card>
                 {stations.length === 0 ? (
                     <EmptyState icon={<Layers className="size-8" />} title="No stations yet">
-                        Add a station such as “Hot Iron Grill” and assign categories to it.
+                        Add a station such as “Grill” or “Drinks” and assign categories to it.
                     </EmptyState>
                 ) : (
                     <Table>
@@ -103,7 +103,7 @@ function StationForm({ station, nextSort, onClose }: { station: Station | null; 
     return (
         <Modal open onClose={onClose} title={station ? `Edit ${station.name}` : 'New station'} size="sm">
             <form onSubmit={submit} className="space-y-4">
-                <Input label="Name" required autoFocus placeholder="Hot Iron Grill" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} error={form.errors.name} />
+                <Input label="Name" required autoFocus placeholder="e.g. Grill, Fryer, Drinks" value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} error={form.errors.name} />
                 <Input label="Sort order" type="number" min={0} required value={form.data.sort_order} onChange={(event) => form.setData('sort_order', event.target.value)} error={form.errors.sort_order} />
                 <Toggle checked={form.data.is_active} onChange={(checked) => form.setData('is_active', checked)} label="Active" description="Inactive stations are hidden from the kitchen display filters." />
                 <div className="flex justify-end gap-2 pt-2">

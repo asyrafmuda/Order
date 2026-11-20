@@ -2,6 +2,7 @@
 
 use App\Enums\ProductStatus;
 use App\Enums\UserRole;
+use App\Support\OutletStock;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('lets the kitchen mark an item sold out and bring it back', function () {
@@ -9,10 +10,12 @@ it('lets the kitchen mark an item sold out and bring it back', function () {
     $this->actingAs(userWithRole(UserRole::Kitchen));
 
     $this->patch(route('kitchen.products.status', $product), ['status' => 'sold_out'])->assertSessionHas('success');
-    expect($product->refresh()->status)->toBe(ProductStatus::SoldOut);
+    expect(app(OutletStock::class)->isSoldOut($product))->toBeTrue()
+        // The business-wide switch is the admin's; the kitchen never touches it.
+        ->and($product->refresh()->status)->toBe(ProductStatus::Available);
 
     $this->patch(route('kitchen.products.status', $product), ['status' => 'available'])->assertSessionHas('success');
-    expect($product->refresh()->status)->toBe(ProductStatus::Available);
+    expect(app(OutletStock::class)->isSoldOut($product))->toBeFalse();
 });
 
 it('takes a sold out item off the customer\'s ticket straight away', function () {
@@ -20,8 +23,14 @@ it('takes a sold out item off the customer\'s ticket straight away', function ()
     $this->post(route('cart.store'), ['product_id' => $product->id]);
 
     $this->actingAs(userWithRole(UserRole::Kitchen))->patch(route('kitchen.products.status', $product), ['status' => 'sold_out']);
+    auth()->logout();
 
-    $this->get(route('menu.index'))->assertInertia(fn (Assert $page) => $page->where('cart.count', 0));
+    $this->get(route('menu.index'))->assertInertia(fn (Assert $page) => $page
+        ->where('cart.count', 0)
+        ->where('categories.0.products.0.is_orderable', false)
+        ->where('categories.0.products.0.status_label', 'Sold Out'));
+
+    $this->post(route('cart.store'), ['product_id' => $product->id])->assertSessionHas('error');
 });
 
 it('does not let the kitchen hide items or revive admin-managed ones', function () {
@@ -29,10 +38,12 @@ it('does not let the kitchen hide items or revive admin-managed ones', function 
 
     $this->patch(route('kitchen.products.status', menuItem()), ['status' => 'hidden'])->assertSessionHasErrors('status');
 
-    $comingSoon = menuItem(['status' => ProductStatus::ComingSoon]);
-    $this->patch(route('kitchen.products.status', $comingSoon), ['status' => 'available'])->assertStatus(422);
+    foreach ([ProductStatus::ComingSoon, ProductStatus::SoldOut] as $status) {
+        $managed = menuItem(['status' => $status]);
+        $this->patch(route('kitchen.products.status', $managed), ['status' => 'available'])->assertStatus(422);
 
-    expect($comingSoon->refresh()->status)->toBe(ProductStatus::ComingSoon);
+        expect($managed->refresh()->status)->toBe($status);
+    }
 });
 
 it('is not open to customers or riders', function (UserRole $role) {
@@ -42,8 +53,18 @@ it('is not open to customers or riders', function (UserRole $role) {
 })->with([UserRole::Customer, UserRole::Rider]);
 
 it('lists the menu on the kitchen display for the stock panel', function () {
-    menuItem(['name' => 'Smash Burger']);
+    $product = menuItem(['name' => 'Smash Burger']);
+    menuItem(['name' => 'Coming Soon Burger', 'status' => ProductStatus::ComingSoon]);
+    app(OutletStock::class)->mark($product, true);
 
     $this->actingAs(userWithRole(UserRole::Kitchen))->get(route('kitchen.index'))
-        ->assertInertia(fn (Assert $page) => $page->has('menu', 1)->where('menu.0.products.0.name', 'Smash Burger'));
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('menu', 2)
+            ->where('menu', fn ($menu) => collect($menu)->flatMap(fn ($category) => $category['products'])->pluck('status', 'name')->all() === [
+                'Smash Burger' => 'sold_out',
+                'Coming Soon Burger' => 'locked',
+            ] || collect($menu)->flatMap(fn ($category) => $category['products'])->pluck('status', 'name')->sortKeys()->all() === [
+                'Coming Soon Burger' => 'locked',
+                'Smash Burger' => 'sold_out',
+            ]));
 });

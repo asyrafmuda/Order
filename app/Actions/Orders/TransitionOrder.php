@@ -48,6 +48,7 @@ class TransitionOrder
             ]);
 
             $this->cascade($order, $to);
+            $this->kitchenLoad->forget();
 
             OrderStatusChanged::dispatch($order, $from, $to);
             OrderUpdated::dispatch($order);
@@ -64,7 +65,9 @@ class TransitionOrder
         return match ($to) {
             OrderStatus::Confirmed => [
                 'confirmed_at' => now(),
-                'estimated_ready_at' => now()->addMinutes($this->kitchenLoad->estimatedPrepMinutes()),
+                // The order's own kitchen, whichever outlet the request happens to be in
+                // (a payment callback or a queue job has no outlet of its own).
+                'estimated_ready_at' => now()->addMinutes($this->kitchenLoad->estimatedPrepMinutes($order->loadMissing('outlet')->outlet)),
             ],
             OrderStatus::Preparing => ['preparing_at' => now()],
             OrderStatus::Ready => ['ready_at' => now(), 'preparing_at' => $order->preparing_at ?? now()],

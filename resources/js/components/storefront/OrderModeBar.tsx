@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { Bike, ChefHat, MapPin, ShoppingBag, UtensilsCrossed } from 'lucide-react';
+import { Bike, ChefHat, MapPin, ShoppingBag, Store, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { cartActions } from '@/lib/cart';
 import { money } from '@/lib/format';
@@ -11,7 +11,8 @@ interface OrderModeBarProps {
 
 /** Pickup / delivery switch with the shop, POS and kitchen status chips. */
 export function OrderModeBar({ zones }: OrderModeBarProps) {
-    const { shop, cart, kitchen, pos } = usePage().props;
+    const { shop, cart, kitchen, pos, outlet } = usePage().props;
+    const pickOutlet = outlet.can_switch && outlet.options.length > 1;
     const type = cart?.type ?? 'pickup';
     const zone = cart?.zone;
     const table = cart?.table ?? null;
@@ -25,6 +26,29 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
     return (
         <div className="no-print border-b border-ink-700 bg-ink-900">
             <div className="scrollbar-none mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5">
+                {/* Which branch: decided by the table QR when seated, otherwise the customer's choice. */}
+                {pickOutlet && !table && (
+                    <label className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-flame-500/40 bg-flame-900 pr-1 pl-2.5 text-xs font-bold text-flame-300">
+                        <Store className="size-3.5" aria-hidden />
+                        <span className="sr-only">Outlet</span>
+                        <select
+                            value={outlet.current.id}
+                            onChange={(event) => router.put(route('outlets.choose'), { outlet_id: Number(event.target.value) }, { preserveScroll: true })}
+                            className="h-full max-w-40 bg-transparent font-bold text-flame-300 focus:outline-none sm:max-w-none"
+                        >
+                            {outlet.options.map((option) => (
+                                <option key={option.id} value={option.id} className="bg-ink-850 text-ink-100">
+                                    {option.name}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                )}
+                {outlet.multi && (!pickOutlet || table) && (
+                    <span className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 text-xs font-bold text-ink-100">
+                        <Store className="size-3.5 text-flame-400" aria-hidden /> {outlet.current.name}
+                    </span>
+                )}
                 {table && (
                     <>
                         <span className={mode(true)}>

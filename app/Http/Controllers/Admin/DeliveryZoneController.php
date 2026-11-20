@@ -14,7 +14,7 @@ class DeliveryZoneController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/DeliveryZones/Index', [
-            'zones' => DeliveryZone::query()->orderBy('sort_order')->orderBy('name')
+            'zones' => DeliveryZone::query()->forOutlet($this->outlet())->orderBy('sort_order')->orderBy('name')
                 ->get(['id', 'name', 'areas', 'fee', 'min_order', 'eta_minutes', 'is_active', 'sort_order']),
         ]);
     }
