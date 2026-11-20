@@ -85,11 +85,12 @@ Satu bisnes, banyak outlet. Dimatikan secara default — kedai satu cawangan tak
 
 | Dikongsi semua outlet | Berasingan setiap outlet |
 |---|---|
-| Menu, harga, kategori, add-on, combo | Order dan nombor giliran (setiap outlet ada A001 sendiri; prefix boleh berbeza) |
+| Menu, kategori, add-on, combo dan harga standard | Order dan nombor giliran (setiap outlet ada A001 sendiri; prefix boleh berbeza) |
 | Akaun pelanggan dan sejarah order | Meja & kod QR, zon delivery, rider |
 | Jenama, cukai, kaedah bayaran, integrasi | Alamat, telefon, WhatsApp, waktu operasi, kaunter |
 | Stesen dapur | Suis pickup / delivery / dine-in, anggaran masa siap |
 | | Senarai *sold out* (habis di Shah Alam tak sorok item di outlet lain) |
+| | Harga sendiri, kalau outlet itu caj lain daripada harga standard |
 | | Staf, dashboard, laporan, KDS, kaunter, POS |
 
 **Siapa nampak apa**
@@ -103,6 +104,10 @@ Satu bisnes, banyak outlet. Dimatikan secara default — kedai satu cawangan tak
 Staf ditugaskan ke outlet di Admin → Users → *Works at*. Staf yang belum ditugaskan dikira bekerja di outlet utama. Rekod outlet lain yang dibuka terus melalui URL dijawab 404.
 
 **Pelanggan** pilih outlet di bahagian atas menu. Scan QR meja terus masuk ke outlet meja itu. Tiket, invois dan mesej WhatsApp sentiasa guna alamat outlet tempat order dibuat.
+
+**Harga ikut outlet.** Admin → **Outlet Prices** (atau butang *Prices* pada kad outlet) — untuk outlet yang sedang dilihat, taip harga hanya pada item yang berbeza: produk, saiz, add-on atau naik taraf combo. Yang dibiarkan kosong ikut harga standard di Products, termasuk bila harga standard berubah kemudian. Menu pelanggan, cart, checkout dan POS semua guna harga outlet tempat order dibuat; order lama tak berubah. Hanya Super Admin boleh tetapkan harga.
+
+**Laporan gabungan.** Admin → Reports → *All outlets* (Super Admin sahaja) menjumlahkan semua outlet, dengan jadual *Sales by outlet* untuk banding cawangan. Export CSV dalam mod ini ada lajur *Outlet*. Manager kekal nampak outlet sendiri sahaja.
 
 **Mematikan semula** hanya dibenarkan bila outlet lain tiada order yang belum selesai. Data cawangan disimpan (tak dipadam) dan muncul semula bila dihidupkan balik. Outlet yang pernah terima order tak boleh dipadam — nyahaktifkan sahaja; outlet utama tak boleh dipadam atau dinyahaktifkan.
 
@@ -161,7 +166,7 @@ Semua pertukaran status melalui `App\Actions\Orders\TransitionOrder`, yang kuatk
 | `app/Contracts` + `app/Services/{Payments,Pos,Messaging}` | Interface dan driver integrasi |
 | `app/Http/Controllers` | Controller nipis; validation dalam `app/Http/Requests` |
 | `app/Http/Resources` | Bentuk data yang dihantar ke React |
-| `app/Support` | `Settings`, `OutletContext`, `OutletStock`, `BrandPalette`, `Money`, `ShopHours`, `KitchenLoad`, `OrderTimeline` |
+| `app/Support` | `Settings`, `OutletContext`, `OutletStock`, `OutletPrices`, `BrandPalette`, `Money`, `ShopHours`, `KitchenLoad`, `OrderTimeline` |
 | `routes/web.php`, `auth.php`, `staff.php`, `admin.php` | Route ikut kawasan |
 | `resources/js/pages` | Halaman Inertia (React) |
 | `resources/js/components`, `layouts` | UI kit, layout storefront / back office |

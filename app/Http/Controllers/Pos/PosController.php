@@ -11,10 +11,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Staff\PosOrderRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
-use App\Models\ComboOffer;
 use App\Models\DiningTable;
 use App\Models\Order;
 use App\Services\Cart\CartPricer;
+use App\Support\OutletPrices;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +28,7 @@ use Inertia\Response;
  */
 class PosController extends Controller
 {
-    public function index(Request $request, Settings $settings): Response
+    public function index(Request $request, Settings $settings, OutletPrices $prices): Response
     {
         $categories = Category::query()
             ->active()
@@ -36,6 +36,8 @@ class PosController extends Controller
             ->whereHas('products', fn ($query) => $query->visible())
             ->with(['products' => fn ($query) => $query->visible()->ordered()->with(['variants', 'modifierGroups.modifiers'])])
             ->get();
+
+        $prices->apply($categories->flatMap->products);
 
         $recent = Order::query()->forOutlet($this->outlet())
             ->where('source', OrderSource::Pos)
@@ -46,7 +48,7 @@ class PosController extends Controller
 
         return Inertia::render('Pos/Index', [
             'categories' => CategoryResource::collection($categories)->resolve($request),
-            'combo' => ComboOffer::current()?->only(['id', 'name', 'description', 'price', 'choices']),
+            'combo' => $prices->currentCombo()?->only(['id', 'name', 'description', 'price', 'choices']),
             'quickNotes' => array_values(array_filter((array) $settings->get('pos.quick_notes', []))),
             'tables' => DiningTable::query()->forOutlet($this->outlet())->active()->ordered()->get(['id', 'name', 'seats']),
             'tax' => [

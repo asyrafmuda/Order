@@ -8,6 +8,7 @@ use App\Models\DeliveryZone;
 use App\Models\DiningTable;
 use App\Models\Product;
 use App\Support\OutletContext;
+use App\Support\OutletPrices;
 use App\Support\OutletStock;
 use App\Support\Settings;
 use Illuminate\Contracts\Session\Session;
@@ -37,6 +38,7 @@ class Cart
         private readonly Settings $settings,
         private readonly OutletContext $outlets,
         private readonly OutletStock $stock,
+        private readonly OutletPrices $prices,
     ) {}
 
     /**
@@ -249,6 +251,7 @@ class Cart
             ->ordered()
             ->limit(2)
             ->get()
+            ->tap(fn ($products) => $this->prices->apply($products))
             ->map(fn (Product $product) => [
                 'id' => $product->id,
                 'name' => $product->name,

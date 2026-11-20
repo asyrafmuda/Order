@@ -1,5 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
+    BadgeDollarSign,
     BarChart3,
     Building2,
     Bike,
@@ -36,6 +37,8 @@ interface NavItem {
     match?: string;
     icon: LucideIcon;
     roles: Role[];
+    /** Only shown while the business has more than one outlet. */
+    multiOutlet?: boolean;
 }
 
 interface NavSection {
@@ -62,6 +65,7 @@ const sections: NavSection[] = [
             { label: 'Categories', route: 'admin.categories.index', match: 'admin.categories.*', icon: Tags, roles: ['admin'] },
             { label: 'Options & Add-ons', route: 'admin.modifier-groups.index', match: 'admin.modifier-groups.*', icon: SlidersHorizontal, roles: ['admin'] },
             { label: 'Combo Offer', route: 'admin.combo-offers.index', match: 'admin.combo-offers.*', icon: Flame, roles: ['admin'] },
+            { label: 'Outlet Prices', route: 'admin.outlet-prices.edit', match: 'admin.outlet-prices.*', icon: BadgeDollarSign, roles: ['admin'], multiOutlet: true },
         ],
     },
     {
@@ -102,7 +106,7 @@ export default function BackOfficeLayout({ title, description, actions, children
     const role = auth.user?.role ?? 'customer';
 
     const visible = sections
-        .map((section) => ({ ...section, items: section.items.filter((item) => item.roles.includes(role)) }))
+        .map((section) => ({ ...section, items: section.items.filter((item) => item.roles.includes(role) && (!item.multiOutlet || outlet.multi)) }))
         .filter((section) => section.items.length > 0);
 
     const sidebar = (

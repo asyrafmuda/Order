@@ -25,7 +25,8 @@ class IntegrationController extends Controller
         $linked = Product::query()->whereNotNull('pos_item_id')->count();
 
         return Inertia::render('Admin/Integrations/Index', [
-            'pos' => [
+            // Not "pos": that name is the shared prop the page header reads.
+            'posStatus' => [
                 'provider' => $pos->name(),
                 'configured' => $pos->isConfigured(),
                 'products_linked' => $linked,

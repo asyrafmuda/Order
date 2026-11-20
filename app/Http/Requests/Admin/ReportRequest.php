@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Support\OutletContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,20 @@ class ReportRequest extends FormRequest
         return [
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d', Rule::when($this->filled('from'), ['after_or_equal:from'])],
+            'outlet' => ['nullable', 'in:all'],
         ];
+    }
+
+    /**
+     * Whether the report covers every outlet at once. Only a super admin of
+     * a multi-outlet business can ask for that; everyone else gets the
+     * outlet they are working in.
+     */
+    public function allOutlets(): bool
+    {
+        return $this->validated('outlet') === 'all'
+            && app(OutletContext::class)->multi()
+            && (bool) $this->user()?->isAdmin();
     }
 
     /**

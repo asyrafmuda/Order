@@ -59,8 +59,8 @@ export default function StorefrontLayout({ children, search, subheader, bottomBa
     return (
         <div className="flex min-h-dvh flex-col">
             <header ref={header} className="no-print sticky top-0 z-40 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
-                <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 lg:py-3">
-                    <Link href={route('menu.index')} aria-label={`${shop.name} home`}>
+                <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2.5 sm:gap-3 lg:py-3">
+                    <Link href={route('menu.index')} aria-label={`${shop.name} home`} className="min-w-0">
                         <Logo />
                     </Link>
 
@@ -80,7 +80,7 @@ export default function StorefrontLayout({ children, search, subheader, bottomBa
                         ))}
                     </nav>
 
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ml-auto flex shrink-0 items-center gap-2">
                         {search && <div className="hidden w-56 md:block">{search}</div>}
 
                         <Link
@@ -258,14 +258,15 @@ function UserMenu() {
             <button
                 type="button"
                 onClick={() => setOpen((value) => !value)}
-                className="flex h-10 items-center gap-1 rounded-full bg-brand-900 pr-2 pl-1 ring-1 ring-brand-600/50"
+                className="flex h-10 items-center gap-1 rounded-full bg-brand-900 px-1 ring-1 ring-brand-600/50 sm:pr-2"
                 aria-haspopup="menu"
                 aria-expanded={open}
             >
                 <span className="flex size-8 items-center justify-center rounded-full bg-brand-600 text-sm font-extrabold text-white">
                     {auth.user.name.charAt(0).toUpperCase()}
                 </span>
-                <ChevronDown className="size-4 text-ink-300" aria-hidden />
+                {/* The arrow is dropped on phones so the shop name has room. */}
+                <ChevronDown className="hidden size-4 text-ink-300 sm:block" aria-hidden />
             </button>
             {open && (
                 <div role="menu" className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-ink-700 bg-ink-800 py-1 shadow-2xl">

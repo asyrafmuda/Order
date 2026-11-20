@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\KitchenStationController;
 use App\Http\Controllers\Admin\ModifierGroupController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OutletController;
+use App\Http\Controllers\Admin\OutletPriceController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RiderController;
@@ -61,6 +62,10 @@ Route::middleware('role:admin')->group(function () use ($crud) {
 
     Route::post('/outlets/switch', [OutletController::class, 'switch'])->name('outlets.switch');
     Route::resource('outlets', OutletController::class)->only($crud);
+
+    // What the outlet being viewed charges, where it differs from the standard price.
+    Route::get('/outlet-prices', [OutletPriceController::class, 'edit'])->name('outlet-prices.edit');
+    Route::put('/outlet-prices', [OutletPriceController::class, 'update'])->name('outlet-prices.update');
 
     Route::get('/integrations', [IntegrationController::class, 'index'])->name('integrations.index');
     Route::post('/integrations/pos/test', [IntegrationController::class, 'testPos'])->name('integrations.pos.test');

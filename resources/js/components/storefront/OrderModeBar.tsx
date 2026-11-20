@@ -25,7 +25,9 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
 
     return (
         <div className="no-print border-b border-ink-700 bg-ink-900">
-            <div className="scrollbar-none mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5">
+            {/* "relative" keeps the visually hidden labels inside the scroller; without it they sit
+                outside its clipping and stretch the whole page sideways on a phone. */}
+            <div className="scrollbar-none relative mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5">
                 {/* Which branch: decided by the table QR when seated, otherwise the customer's choice. */}
                 {pickOutlet && !table && (
                     <label className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-flame-500/40 bg-flame-900 pr-1 pl-2.5 text-xs font-bold text-flame-300">

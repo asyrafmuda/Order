@@ -367,7 +367,10 @@ describe('outlet manager', function () {
     it('edits the details of their own outlet only', function () {
         $this->get(route('admin.outlet.edit'))->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Outlets/Edit')
-            ->where('outlet.id', $this->branch->id));
+            ->where('details.id', $this->branch->id)
+            // The page's own data must not hide the shared outlet prop the header reads.
+            ->where('outlet.multi', true)
+            ->where('outlet.current.id', $this->branch->id));
 
         $this->put(route('admin.outlet.update'), outletPayload([
             'name' => 'Renamed By Manager', 'is_active' => false,
@@ -432,6 +435,6 @@ it('lets a manager run the single outlet when multi-outlet is off', function () 
     $this->actingAs(userWithRole(UserRole::Manager));
 
     $this->get(route('admin.dashboard'))->assertOk();
-    $this->get(route('admin.outlet.edit'))->assertInertia(fn (Assert $page) => $page->where('outlet.is_default', true));
+    $this->get(route('admin.outlet.edit'))->assertInertia(fn (Assert $page) => $page->where('details.is_default', true)->where('outlet.multi', false));
     $this->get(route('admin.settings.edit'))->assertForbidden();
 });

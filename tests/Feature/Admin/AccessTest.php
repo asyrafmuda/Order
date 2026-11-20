@@ -34,7 +34,15 @@ it('renders every admin page', function (string $route, string $component) {
     $this->actingAs(userWithRole(UserRole::Admin))
         ->get(route($route))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component($component));
+        ->assertInertia(fn (Assert $page) => $page
+            ->component($component)
+            // A page's own data must never hide the shared props the layout reads.
+            ->has('outlet.current.id')
+            ->has('outlet.multi')
+            ->has('pos.label')
+            ->has('kitchen.label')
+            ->has('auth.user.role')
+            ->has('shop.name'));
 })->with([
     ['admin.dashboard', 'Admin/Dashboard'],
     ['admin.orders.index', 'Admin/Orders/Index'],
@@ -50,6 +58,9 @@ it('renders every admin page', function (string $route, string $component) {
     ['admin.reports.index', 'Admin/Reports/Index'],
     ['admin.integrations.index', 'Admin/Integrations/Index'],
     ['admin.settings.edit', 'Admin/Settings/Edit'],
+    ['admin.tables.index', 'Admin/Tables/Index'],
+    ['admin.outlets.index', 'Admin/Outlets/Index'],
+    ['admin.outlet.edit', 'Admin/Outlets/Edit'],
 ]);
 
 it('shows today\'s numbers on the dashboard', function () {

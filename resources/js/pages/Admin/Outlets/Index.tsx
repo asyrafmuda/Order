@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Building2, Eye, Plus } from 'lucide-react';
+import { BadgeDollarSign, Building2, Eye, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { ActiveBadge } from '@/components/admin/ActiveBadge';
 import { OutletForm, type Outlet } from '@/components/admin/OutletForm';
@@ -81,6 +81,17 @@ export default function OutletsIndex({ outlets, multi }: { outlets: OutletRow[];
                             {multi && (
                                 <Button variant="ghost" size="xs" onClick={() => router.post(route('admin.outlets.switch'), { outlet_id: outlet.id }, { preserveScroll: true })} icon={<Eye className="size-3.5" aria-hidden />}>
                                     View this outlet
+                                </Button>
+                            )}
+                            {multi && (
+                                <Button
+                                    variant="ghost"
+                                    size="xs"
+                                    // Prices are edited for the outlet being viewed, so look at this one first.
+                                    onClick={() => router.post(route('admin.outlets.switch'), { outlet_id: outlet.id }, { onSuccess: () => router.visit(route('admin.outlet-prices.edit')) })}
+                                    icon={<BadgeDollarSign className="size-3.5" aria-hidden />}
+                                >
+                                    Prices
                                 </Button>
                             )}
                             <span className="ml-auto">

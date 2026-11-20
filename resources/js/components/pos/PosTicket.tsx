@@ -70,7 +70,7 @@ export function PosTicket(props: PosTicketProps) {
                     ))}
                 </div>
                 {type === 'dine_in' && tables.length > 0 && (
-                    <div className="scrollbar-none -mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5" role="radiogroup" aria-label="Table">
+                    <div className="scrollbar-none relative -mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5" role="radiogroup" aria-label="Table">
                         {tables.map((table) => (
                             <button
                                 key={table.id}
