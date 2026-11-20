@@ -5,6 +5,7 @@ namespace App\Services\Cart;
 use App\Enums\OrderType;
 use App\Exceptions\InvalidCartLine;
 use App\Models\DeliveryZone;
+use App\Models\DiningTable;
 use App\Models\Product;
 use App\Support\Settings;
 use Illuminate\Contracts\Session\Session;
@@ -22,7 +23,11 @@ class Cart
 
     private const ZONE = 'cart.zone_id';
 
+    private const TABLE = 'cart.table_id';
+
     private ?PricedCart $priced = null;
+
+    private ?DiningTable $table = null;
 
     public function __construct(
         private readonly Session $session,
@@ -123,9 +128,46 @@ class Cart
         return $this->lines() === [];
     }
 
+    /**
+     * The table the customer is sitting at, set by scanning its QR code.
+     */
+    public function table(): ?DiningTable
+    {
+        $tableId = $this->session->get(self::TABLE);
+
+        if (! $tableId || ! $this->settings->bool('ordering.dine_in_enabled')) {
+            return null;
+        }
+
+        return $this->table ??= DiningTable::query()->active()->find($tableId);
+    }
+
+    public function sitAt(DiningTable $table): void
+    {
+        $this->session->put(self::TABLE, $table->id);
+        $this->table = $table;
+        $this->priced = null;
+    }
+
+    public function leaveTable(): void
+    {
+        $this->session->forget(self::TABLE);
+        $this->table = null;
+        $this->priced = null;
+    }
+
     public function type(): OrderType
     {
+        // Sitting at a table always means dine-in; leave the table to change it.
+        if ($this->table()) {
+            return OrderType::DineIn;
+        }
+
         $type = OrderType::tryFrom((string) $this->session->get(self::TYPE)) ?? OrderType::Pickup;
+
+        if ($type === OrderType::DineIn) {
+            $type = OrderType::Pickup;
+        }
 
         if ($type === OrderType::Delivery && ! $this->settings->bool('ordering.delivery_enabled')) {
             return OrderType::Pickup;
@@ -140,6 +182,8 @@ class Cart
 
     public function setType(OrderType $type): void
     {
+        // Choosing pickup or delivery means the customer is not ordering for the table.
+        $this->leaveTable();
         $this->session->put(self::TYPE, $type->value);
         $this->priced = null;
     }
@@ -205,7 +249,13 @@ class Cart
                 'price' => $product->price,
             ]);
 
-        return [...$priced->toArray(), 'upsells' => $upsells->values()->all()];
+        $table = $this->table();
+
+        return [
+            ...$priced->toArray(),
+            'table' => $table ? ['id' => $table->id, 'name' => $table->name] : null,
+            'upsells' => $upsells->values()->all(),
+        ];
     }
 
     /**

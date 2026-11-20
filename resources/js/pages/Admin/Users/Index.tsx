@@ -18,7 +18,7 @@ import type { Option, Paginated, Role } from '@/types';
 interface UserRow {
     id: number;
     name: string;
-    email: string;
+    email: string | null;
     phone: string | null;
     role: Role;
     role_label: string;
@@ -36,6 +36,7 @@ interface UsersProps {
 const roleTones: Record<Role, Tone> = {
     admin: 'solid-red',
     cashier: 'flame',
+    waiter: 'flame',
     kitchen: 'blue',
     rider: 'green',
     customer: 'neutral',
@@ -109,7 +110,7 @@ export default function UsersIndex({ users, filters, roles }: UsersProps) {
                                                 {user.name}
                                                 {self && <span className="ml-2 text-xs font-semibold text-flame-400">You</span>}
                                             </span>
-                                            <span className="block text-xs text-ink-400">{user.email}</span>
+                                            <span className="block text-xs text-ink-400">{user.email ?? 'Signs in with mobile number'}</span>
                                         </Td>
                                         <Td>{user.phone ? `+${user.phone}` : '—'}</Td>
                                         <Td>
@@ -178,7 +179,7 @@ function UserForm({ user, roles, self, onClose }: { user: UserRow | null; roles:
                 <div className="grid gap-3 sm:grid-cols-2">
                     <Input label="Full name" required autoFocus value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} error={form.errors.name} />
                     <Input label="Mobile number" type="tel" placeholder="012-345 6789" value={form.data.phone} onChange={(event) => form.setData('phone', event.target.value)} error={form.errors.phone} />
-                    <Input label="Email (login)" type="email" required value={form.data.email} onChange={(event) => form.setData('email', event.target.value)} error={form.errors.email} />
+                    <Input label={form.data.role === 'customer' ? 'Email (optional)' : 'Email (login)'} type="email" required={form.data.role !== 'customer'} value={form.data.email} onChange={(event) => form.setData('email', event.target.value)} error={form.errors.email} />
                     <Select
                         label="Role"
                         required
@@ -196,11 +197,11 @@ function UserForm({ user, roles, self, onClose }: { user: UserRow | null; roles:
                     </Select>
                 </div>
                 <Input
-                    label={user ? 'New password' : 'Password'}
+                    label={form.data.role === 'customer' ? (user ? 'New PIN' : 'PIN') : user ? 'New password' : 'Password'}
                     type="password"
                     autoComplete="new-password"
                     required={!user}
-                    hint={user ? 'Leave empty to keep the current password.' : 'At least 8 characters.'}
+                    hint={`${user ? 'Leave empty to keep the current one. ' : ''}${form.data.role === 'customer' ? 'Customers: a 6-digit PIN (they sign in with their mobile number).' : 'At least 8 characters.'}`}
                     value={form.data.password}
                     onChange={(event) => form.setData('password', event.target.value)}
                     error={form.errors.password}

@@ -29,6 +29,8 @@ return [
         'ordering.enabled' => true,
         'ordering.pickup_enabled' => true,
         'ordering.delivery_enabled' => true,
+        // Customers scan the QR code on their table and order from their seat.
+        'ordering.dine_in_enabled' => true,
         'ordering.pickup_eta_min' => 15,
         'ordering.pickup_eta_max' => 20,
         'ordering.queue_prefix' => 'A',
@@ -44,6 +46,9 @@ return [
         // easiest to abuse. These two limits keep prank orders small.
         'payments.cash_requires_account' => true,
         'payments.cash_max_amount' => 15000,
+        // Table orders may be paid at the counter without an account: the
+        // customer is sitting in the shop.
+        'payments.dine_in_pay_at_counter' => true,
 
         // One-tap kitchen instructions on the counter POS.
         'pos.quick_notes' => ['Pedas', 'Kurang pedas', 'Potong dua', 'Sos asing', 'Bungkus asing', 'Tak nak ais'],

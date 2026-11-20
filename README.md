@@ -26,15 +26,41 @@ Buka http://localhost:8000.
 
 ### Akaun demo
 
-Semua password ialah `password`. **Tukar sebelum go live.**
+Staf login dengan email dan password `password`. Pelanggan login dengan nombor telefon dan PIN. **Tukar semuanya sebelum go live.**
 
-| Role | Email | Skrin |
+| Role | Login | Skrin |
 |---|---|---|
 | Admin | admin@bossburger.test | `/admin` |
 | Cashier | cashier@bossburger.test | `/pos` (ambil order), `/counter` (serah order) |
 | Kitchen | kitchen@bossburger.test | `/kitchen` |
 | Rider | rider@bossburger.test | `/rider` |
-| Customer | customer@bossburger.test | storefront |
+| Waiter | waiter@bossburger.test | `/pos` (ambil order di meja), `/counter` |
+| Customer | `012-345 6789`, PIN `135790` | storefront |
+
+## Tiga cara order
+
+Setiap satu boleh dihidup/matikan di Admin → Settings → Ordering. Kedai tanpa delivery hanya perlu matikan suis Delivery.
+
+| Cara | Siapa | Perlu login? |
+|---|---|---|
+| **Dine-in (QR meja)** | Pelanggan scan kod di meja, atau waiter ambil order di `/pos` dan pilih meja | Tidak. Nama dan telefon pun pilihan |
+| **Self pickup** | Pelanggan order dari rumah, datang ambil | Tidak (guest: nama + telefon) |
+| **Delivery** | Pelanggan order dari rumah, rider hantar | Tidak (guest: nama + telefon + alamat) |
+
+### Dine-in dengan QR meja
+
+1. Admin → **Tables & QR**: tambah meja, tekan **Print QR codes**, potong dan letak satu di setiap meja.
+2. Pelanggan scan → menu terbuka dalam mod "Dine-in · Table 5" → pilih → hantar. Tiada app, tiada pendaftaran.
+3. Dapur nampak nombor meja pada tiket; makanan dihantar ke meja.
+4. Bayaran: di kaunter sebelum balik (default), atau online. Tetapan *Table orders can pay at the counter* mengawalnya.
+
+Kod QR mengandungi alamat laman semasa admin membukanya. **Buka admin melalui alamat yang boleh dicapai telefon pelanggan** (domain sebenar, atau IP LAN semasa ujian — bukan `localhost`) sebelum mencetak. Kalau satu kod disalah guna, tekan *New code* pada meja itu dan cetak semula; kod lama terus tak berfungsi.
+
+### Akaun pelanggan: telefon + PIN
+
+Akaun adalah pilihan — untuk sejarah order, alamat tersimpan dan bayar di kaunter bagi pickup. Pendaftaran hanya nama, nombor telefon dan PIN 6 digit; email pilihan (untuk reset PIN sendiri). Pelanggan tanpa email yang lupa PIN boleh minta staf set PIN baru di Admin → Users. Login dihadkan: 5 cubaan setiap peranti dan 10 setiap akaun dalam 15 minit. Staf kekal guna email + password penuh.
+
+OTP melalui SMS/WhatsApp belum ada; ia boleh ditambah di atas `App\Contracts\MessageChannel` bila penyedia mesej disambung.
 
 ## Telefon dan tablet
 

@@ -16,6 +16,8 @@ export interface PaymentResult {
 
 interface PaymentDialogProps {
     total: number;
+    /** Method selected when the dialog opens. */
+    initial?: PosPayment;
     processing: boolean;
     errors: Record<string, string | undefined>;
     onConfirm: (result: PaymentResult) => void;
@@ -30,8 +32,8 @@ const methods: { value: PosPayment; label: string; hint: string; icon: LucideIco
 ];
 
 /** Take payment for the ticket. Cash shows the change before the order is sent. */
-export function PaymentDialog({ total, processing, errors, onConfirm, onClose }: PaymentDialogProps) {
-    const [payment, setPayment] = useState<PosPayment>('cash');
+export function PaymentDialog({ total, initial = 'cash', processing, errors, onConfirm, onClose }: PaymentDialogProps) {
+    const [payment, setPayment] = useState<PosPayment>(initial);
     const [tendered, setTendered] = useState<number | null>(null);
     const [typed, setTyped] = useState('');
     const [phone, setPhone] = useState('');

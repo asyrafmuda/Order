@@ -34,8 +34,8 @@ export function CounterOrderCard({ order, selected, onSelect }: CounterOrderCard
                     <p className="font-display text-3xl leading-none text-white">{order.order_number}</p>
                     <p className="mt-1 truncate text-xs font-semibold text-ink-200">{order.customer_name}</p>
                     <p className="text-[11px] text-ink-400">
-                        {order.type === 'dine_in' ? 'Dine-in' : order.source === 'pos' ? 'Counter order' : null}
-                        {order.customer_phone && `${order.source === 'pos' ? ' · ' : ''}+${order.customer_phone}`}
+                        {order.type === 'dine_in' ? `Dine-in${order.table_label ? ` · ${order.table_label}` : ''}` : order.source === 'pos' ? 'Counter order' : null}
+                        {order.customer_phone && `${order.source === 'pos' || order.type === 'dine_in' ? ' · ' : ''}+${order.customer_phone}`}
                     </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">

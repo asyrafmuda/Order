@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
-    'uuid', 'business_date', 'queue_number', 'order_number', 'pickup_code', 'user_id', 'placed_by_id', 'customer_name',
+    'uuid', 'business_date', 'queue_number', 'order_number', 'pickup_code', 'user_id', 'placed_by_id', 'dining_table_id', 'table_label', 'customer_name',
     'customer_phone', 'customer_email', 'type', 'source', 'status', 'payment_status', 'payment_method', 'notes',
     'subtotal', 'delivery_fee', 'discount', 'tax_amount', 'tax_rate', 'tax_inclusive', 'total',
     'estimated_ready_at', 'confirmed_at', 'preparing_at', 'ready_at', 'dispatched_at', 'completed_at',
@@ -102,6 +102,12 @@ class Order extends Model
         return $this->belongsTo(User::class, 'placed_by_id');
     }
 
+    /** @return BelongsTo<DiningTable, $this> */
+    public function diningTable(): BelongsTo
+    {
+        return $this->belongsTo(DiningTable::class);
+    }
+
     /** @return HasMany<OrderItem, $this> */
     public function items(): HasMany
     {
@@ -147,6 +153,11 @@ class Order extends Model
     public function isDelivery(): bool
     {
         return $this->type === OrderType::Delivery;
+    }
+
+    public function isDineIn(): bool
+    {
+        return $this->type === OrderType::DineIn;
     }
 
     public function isCounterSale(): bool

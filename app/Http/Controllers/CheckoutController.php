@@ -44,7 +44,7 @@ class CheckoutController extends Controller
 
     public function store(CheckoutRequest $request, Cart $cart, PlaceOrder $placeOrder, StartPayment $startPayment): SymfonyResponse
     {
-        $data = CheckoutData::fromArray($request->validated());
+        $data = CheckoutData::fromArray([...$request->validated(), 'table' => $cart->table()]);
         $order = $placeOrder->handle($cart->priced(), $data, $request->user());
 
         $cart->clear();
@@ -70,6 +70,8 @@ class CheckoutController extends Controller
             return Inertia::location($startPayment->handle($order));
         }
 
-        return redirect()->route('orders.show', $order)->with('success', "Order {$order->order_number} is in! Pay at the counter when you collect.");
+        return redirect()->route('orders.show', $order)->with('success', $order->isDineIn()
+            ? "Order {$order->order_number} is in! We will bring it to {$order->table_label}."
+            : "Order {$order->order_number} is in! Pay at the counter when you collect.");
     }
 }

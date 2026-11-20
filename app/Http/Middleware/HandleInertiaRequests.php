@@ -100,6 +100,7 @@ class HandleInertiaRequests extends Middleware
             'closed_message' => $open ? null : $hours->closedMessage(),
             'pickup_enabled' => $settings->bool('ordering.pickup_enabled'),
             'delivery_enabled' => $settings->bool('ordering.delivery_enabled'),
+            'dine_in_enabled' => $settings->bool('ordering.dine_in_enabled'),
         ];
     }
 }

@@ -38,6 +38,7 @@ class SettingRequest extends FormRequest
             'ordering.enabled' => ['required', 'boolean'],
             'ordering.pickup_enabled' => ['required', 'boolean'],
             'ordering.delivery_enabled' => ['required', 'boolean'],
+            'ordering.dine_in_enabled' => ['required', 'boolean'],
             'ordering.pickup_eta_min' => ['required', 'integer', 'min:1', 'max:180'],
             'ordering.pickup_eta_max' => ['required', 'integer', 'max:240', 'gte:ordering.pickup_eta_min'],
             'ordering.queue_prefix' => ['required', 'string', 'alpha', 'max:3'],
@@ -49,6 +50,7 @@ class SettingRequest extends FormRequest
             'payments.cash_enabled' => ['required', 'boolean'],
             'payments.cash_requires_account' => ['required', 'boolean'],
             'payments.cash_max_amount' => ['required', 'integer', 'min:0', 'max:10000000'],
+            'payments.dine_in_pay_at_counter' => ['required', 'boolean'],
 
             'pos.quick_notes' => ['present', 'array', 'max:12'],
             'pos.quick_notes.*' => ['nullable', 'string', 'max:30'],
@@ -67,8 +69,12 @@ class SettingRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                if (! $this->boolean('ordering.pickup_enabled') && ! $this->boolean('ordering.delivery_enabled')) {
-                    $validator->errors()->add('ordering.delivery_enabled', 'Keep at least one of pickup or delivery switched on.');
+                $anyChannel = $this->boolean('ordering.pickup_enabled')
+                    || $this->boolean('ordering.delivery_enabled')
+                    || $this->boolean('ordering.dine_in_enabled');
+
+                if (! $anyChannel) {
+                    $validator->errors()->add('ordering.delivery_enabled', 'Keep at least one of pickup, delivery or dine-in switched on.');
                 }
 
                 $anyPayment = collect(['fpx', 'card', 'ewallet', 'cash'])
@@ -135,7 +141,8 @@ class SettingRequest extends FormRequest
         $settings['pos.quick_notes'] = $quickNotes;
 
         $booleans = [
-            'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'tax.inclusive', 'notifications.enabled',
+            'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'ordering.dine_in_enabled', 'tax.inclusive',
+            'notifications.enabled', 'payments.dine_in_pay_at_counter',
             'payments.fpx_enabled', 'payments.card_enabled', 'payments.ewallet_enabled', 'payments.cash_enabled',
             'payments.cash_requires_account',
         ];

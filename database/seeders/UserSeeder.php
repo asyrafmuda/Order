@@ -9,14 +9,16 @@ use Illuminate\Database\Seeder;
 class UserSeeder extends Seeder
 {
     /**
-     * One account per role. Every password is "password" — change them
-     * before going live.
+     * One account per role. Staff passwords are "password"; the customer
+     * signs in with the mobile number and PIN 135790. Change them all before
+     * going live.
      */
     public function run(): void
     {
         $accounts = [
             ['Boss Admin', 'admin@bossburger.test', '60120000001', UserRole::Admin],
             ['Counter Crew', 'cashier@bossburger.test', '60120000002', UserRole::Cashier],
+            ['Floor Crew', 'waiter@bossburger.test', '60120000006', UserRole::Waiter],
             ['Grill Master', 'kitchen@bossburger.test', '60120000003', UserRole::Kitchen],
             ['Rider Amir', 'rider@bossburger.test', '60120000004', UserRole::Rider],
             ['Rider Faiz', 'rider2@bossburger.test', '60120000005', UserRole::Rider],
@@ -28,7 +30,7 @@ class UserSeeder extends Seeder
                 'name' => $name,
                 'phone' => $phone,
                 'role' => $role,
-                'password' => 'password',
+                'password' => $role === UserRole::Customer ? '135790' : 'password',
                 'is_active' => true,
                 'email_verified_at' => now(),
             ]);

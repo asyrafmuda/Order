@@ -32,7 +32,7 @@ export function TicketPanel({ action, className }: TicketPanelProps) {
                         </p>
                     </div>
                 </div>
-                <Badge tone="solid-red">{cart.type === 'delivery' ? 'Delivery' : 'Pickup'}</Badge>
+                <Badge tone="solid-red">{cart.table ? cart.table.name : cart.type === 'delivery' ? 'Delivery' : 'Pickup'}</Badge>
             </header>
 
             {cart.lines.length === 0 ? (
@@ -145,7 +145,7 @@ export function Totals({ cart }: { cart: Pick<Cart, 'subtotal' | 'delivery_fee' 
                 <dd className="font-semibold text-ink-100">{money(cart.subtotal)}</dd>
             </div>
             <div className="flex justify-between text-ink-300">
-                <dt>{cart.type === 'delivery' ? 'Delivery fee' : 'Order handling (Self Pickup)'}</dt>
+                <dt>{cart.type === 'delivery' ? 'Delivery fee' : cart.type === 'dine_in' ? 'Table service' : 'Order handling (Self Pickup)'}</dt>
                 <dd className={cn('font-semibold', cart.delivery_fee > 0 ? 'text-ink-100' : 'text-go-400')}>{money(cart.delivery_fee)}</dd>
             </div>
             {cart.tax_rate > 0 && (

@@ -17,6 +17,7 @@ interface PosProps {
     categories: Category[];
     combo: ComboOffer | null;
     quickNotes: string[];
+    tables: { id: number; name: string; seats: number | null }[];
     tax: { rate: number; inclusive: boolean };
     recent: { uuid: string; order_number: string; customer_name: string; total: number; status_label: string; is_paid: boolean }[];
 }
@@ -28,7 +29,7 @@ const STORAGE_KEY = 'pos.ticket';
 let nextKey = 0;
 const newKey = () => `line-${Date.now()}-${nextKey++}`;
 
-export default function PosIndex({ categories, combo, quickNotes, tax, recent }: PosProps) {
+export default function PosIndex({ categories, combo, quickNotes, tables, tax, recent }: PosProps) {
     const { auth, flash } = usePage().props;
     const now = useNow(30000);
     const searchRef = useRef<HTMLInputElement>(null);
@@ -38,6 +39,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
     const [lines, setLines] = useState<PosLine[]>(() => restore(products.map((entry) => entry.product)).lines);
     const [type, setType] = useState<OrderType>(() => restore([]).type);
     const [customerName, setCustomerName] = useState(() => restore([]).customerName);
+    const [tableId, setTableId] = useState<number | null>(null);
     const [categoryId, setCategoryId] = useState<number | null>(null);
     const [query, setQuery] = useState('');
     const [options, setOptions] = useState<{ product: Product; line: PosLine | null } | null>(null);
@@ -66,6 +68,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
             setReceipt(flash.receipt);
             setLines([]);
             setCustomerName('');
+            setTableId(null);
             setType('pickup');
             setPaying(false);
             setErrors({});
@@ -131,6 +134,7 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
             route('pos.orders.store'),
             {
                 type,
+                dining_table_id: type === 'dine_in' ? tableId : null,
                 customer_name: customerName.trim() || null,
                 customer_phone: result.phone || null,
                 notes: result.notes || null,
@@ -313,6 +317,9 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                         tax={tax}
                         type={type}
                         customerName={customerName}
+                        tables={tables}
+                        tableId={tableId}
+                        onTable={setTableId}
                         receipt={receipt}
                         recent={recent}
                         onType={setType}
@@ -343,7 +350,17 @@ export default function PosIndex({ categories, combo, quickNotes, tax, recent }:
                 <span className="font-display text-3xl leading-none">{money(totals.total)}</span>
             </button>
 
-            {paying && <PaymentDialog total={totals.total} processing={processing} errors={errors} onConfirm={charge} onClose={() => setPaying(false)} />}
+            {paying && (
+                <PaymentDialog
+                    total={totals.total}
+                    // Seated customers usually pay after eating; walk-ins pay now.
+                    initial={type === 'dine_in' ? 'later' : 'cash'}
+                    processing={processing}
+                    errors={errors}
+                    onConfirm={charge}
+                    onClose={() => setPaying(false)}
+                />
+            )}
 
             <Flash />
         </div>

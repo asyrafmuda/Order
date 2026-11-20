@@ -11,8 +11,8 @@ import { inputToSen, senToInput } from '@/lib/format';
 interface Settings {
     shop: { name: string; tagline: string | null; address: string; phone: string; whatsapp: string; maps_url: string | null; counter: string };
     hours: { open: string; close: string; last_order: string };
-    ordering: { enabled: boolean; pickup_enabled: boolean; delivery_enabled: boolean; pickup_eta_min: number; pickup_eta_max: number; queue_prefix: string; auto_close_hours: number };
-    payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number };
+    ordering: { enabled: boolean; pickup_enabled: boolean; delivery_enabled: boolean; dine_in_enabled: boolean; pickup_eta_min: number; pickup_eta_max: number; queue_prefix: string; auto_close_hours: number };
+    payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number; dine_in_pay_at_counter: boolean };
     pos: { quick_notes: string[] };
     tax: { rate: number; inclusive: boolean };
     notifications: { enabled: boolean };
@@ -121,9 +121,10 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
                             label="Accept online orders"
                             description="Switch off to pause ordering immediately, e.g. when the kitchen is overwhelmed."
                         />
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <Toggle checked={data.ordering.pickup_enabled} onChange={(checked) => set('ordering', 'pickup_enabled', checked)} label="Self pickup" />
-                            <Toggle checked={data.ordering.delivery_enabled} onChange={(checked) => set('ordering', 'delivery_enabled', checked)} label="Delivery" description="Also needs at least one active delivery zone." />
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <Toggle checked={data.ordering.pickup_enabled} onChange={(checked) => set('ordering', 'pickup_enabled', checked)} label="Self pickup" description="Order from home, collect at the shop." />
+                            <Toggle checked={data.ordering.delivery_enabled} onChange={(checked) => set('ordering', 'delivery_enabled', checked)} label="Delivery" description="Switch off if you do not deliver. Needs an active delivery zone." />
+                            <Toggle checked={data.ordering.dine_in_enabled} onChange={(checked) => set('ordering', 'dine_in_enabled', checked)} label="Dine-in by table QR" description="Customers scan the code on their table. Set up under Tables & QR." />
                         </div>
                         {(errors['ordering.delivery_enabled'] || errors['ordering.pickup_enabled']) && (
                             <p className="text-xs font-medium text-brand-400">{errors['ordering.delivery_enabled'] ?? errors['ordering.pickup_enabled']}</p>
@@ -208,6 +209,12 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
                                 </div>
                             )}
                         </div>
+                        <Toggle
+                            checked={data.payments.dine_in_pay_at_counter}
+                            onChange={(checked) => set('payments', 'dine_in_pay_at_counter', checked)}
+                            label="Table orders can pay at the counter"
+                            description="Seated customers order first and pay before they leave, without an account. Off: table orders must be paid online."
+                        />
                     </div>
                 </Section>
 

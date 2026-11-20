@@ -18,6 +18,7 @@ final class OrderTimeline
     public static function for(Order $order): array
     {
         $delivery = $order->isDelivery();
+        $dineIn = $order->isDineIn();
 
         // Online gateways confirm the order when they are paid; anything
         // settled at the till is done once the cashier has the money.
@@ -45,8 +46,16 @@ final class OrderTimeline
             // "Ready" stays the current step until the order is handed over.
             self::step(
                 'ready',
-                $delivery ? 'Packed for Rider' : 'Ready for Pickup',
-                $delivery ? 'Waiting for rider' : 'Collect at counter',
+                match (true) {
+                    $delivery => 'Packed for Rider',
+                    $dineIn => 'Ready to Serve',
+                    default => 'Ready for Pickup',
+                },
+                match (true) {
+                    $delivery => 'Waiting for rider',
+                    $dineIn => 'Coming to '.($order->table_label ?? 'your table'),
+                    default => 'Collect at counter',
+                },
                 $order->ready_at,
                 done: $order->dispatched_at !== null || $order->completed_at !== null,
             ),
@@ -56,7 +65,7 @@ final class OrderTimeline
             $steps[] = self::step('dispatched', 'Out for Delivery', 'Rider on the way', $order->dispatched_at, done: $order->completed_at !== null);
         }
 
-        $steps[] = self::step('completed', 'Order Fulfilled', $delivery ? 'Delivered' : 'Collected', $order->completed_at);
+        $steps[] = self::step('completed', 'Order Fulfilled', $delivery ? 'Delivered' : ($dineIn ? 'Served' : 'Collected'), $order->completed_at);
 
         if ($order->status === OrderStatus::Cancelled) {
             return $steps;

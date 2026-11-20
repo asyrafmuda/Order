@@ -18,7 +18,7 @@ class CartPreferenceController extends Controller
     public function __invoke(Request $request, Cart $cart): RedirectResponse
     {
         $validated = $request->validate([
-            'type' => ['sometimes', Rule::enum(OrderType::class)],
+            'type' => ['sometimes', Rule::enum(OrderType::class)->only(OrderType::online())],
             'zone_id' => ['sometimes', 'nullable', Rule::exists(DeliveryZone::class, 'id')->where('is_active', true)],
         ]);
 

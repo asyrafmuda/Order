@@ -12,6 +12,7 @@ use App\Http\Requests\Staff\PosOrderRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Models\ComboOffer;
+use App\Models\DiningTable;
 use App\Models\Order;
 use App\Services\Cart\CartPricer;
 use App\Support\Settings;
@@ -47,6 +48,7 @@ class PosController extends Controller
             'categories' => CategoryResource::collection($categories)->resolve($request),
             'combo' => ComboOffer::current()?->only(['id', 'name', 'description', 'price', 'choices']),
             'quickNotes' => array_values(array_filter((array) $settings->get('pos.quick_notes', []))),
+            'tables' => DiningTable::query()->active()->ordered()->get(['id', 'name', 'seats']),
             'tax' => [
                 'rate' => (float) $settings->get('tax.rate', 0),
                 'inclusive' => $settings->bool('tax.inclusive'),
@@ -54,7 +56,7 @@ class PosController extends Controller
             'recent' => $recent->map(fn (Order $order) => [
                 'uuid' => $order->uuid,
                 'order_number' => $order->order_number,
-                'customer_name' => $order->customer_name,
+                'customer_name' => $order->table_label ?? $order->customer_name,
                 'total' => $order->total,
                 'status_label' => $order->status->label(),
                 'is_paid' => $order->isPaid(),
@@ -87,8 +89,13 @@ class PosController extends Controller
             throw ValidationException::withMessages(['tendered' => 'The cash received is less than the total.']);
         }
 
+        $type = OrderType::from($request->validated('type'));
+        $table = $type === OrderType::DineIn && $request->validated('dining_table_id')
+            ? DiningTable::query()->find($request->validated('dining_table_id'))
+            : null;
+
         $order = $placeOrder->handle($cart, new CheckoutData(
-            customerName: $request->validated('customer_name') ?: 'Walk-in',
+            customerName: $request->validated('customer_name') ?: ($table?->name ?? 'Walk-in'),
             customerPhone: $request->validated('customer_phone'),
             customerEmail: null,
             paymentMethod: $method,
@@ -96,6 +103,7 @@ class PosController extends Controller
             source: OrderSource::Pos,
             placedBy: $request->user(),
             paidAtCounter: $paid,
+            table: $table,
         ));
 
         return redirect()->route('pos.index')->with('receipt', [

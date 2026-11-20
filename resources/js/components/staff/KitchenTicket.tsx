@@ -65,11 +65,11 @@ export function KitchenTicket({ order, now, stationId }: KitchenTicketProps) {
                     {/* Plating differs: dine-in goes on a tray, the rest is packed. */}
                     <Badge tone={order.type === 'delivery' ? 'blue' : order.type === 'dine_in' ? 'solid-flame' : 'neutral'}>
                         {order.type === 'delivery' ? <Bike className="size-3" aria-hidden /> : order.type === 'dine_in' ? <UtensilsCrossed className="size-3" aria-hidden /> : <ShoppingBag className="size-3" aria-hidden />}
-                        {order.type === 'delivery' ? 'Delivery' : order.type === 'dine_in' ? 'Dine-in' : order.source === 'pos' ? 'Takeaway' : 'Pickup'}
+                        {order.type === 'delivery' ? 'Delivery' : order.type === 'dine_in' ? (order.table_label ?? 'Dine-in') : order.source === 'pos' ? 'Takeaway' : 'Pickup'}
                     </Badge>
                     <OrderStatusBadge status={order.status} label={order.status_label} />
                     <span className="min-w-0 truncate text-xs font-semibold text-ink-300">
-                        {order.source === 'pos' ? order.customer_name : order.customer_name.split(' ')[0]} · in at {time(order.confirmed_at ?? order.created_at)}
+                        {order.source === 'pos' || order.type === 'dine_in' ? order.customer_name : order.customer_name.split(' ')[0]} · in at {time(order.confirmed_at ?? order.created_at)}
                     </span>
                 </div>
             </header>

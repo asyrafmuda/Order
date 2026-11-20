@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Bike, ChefHat, Clock, Download, FileText, MapPin, MessageCircle, Navigation, RefreshCw, ScanLine, ShoppingBag, Store, TrendingUp, User } from 'lucide-react';
+import { Bike, ChefHat, Clock, Download, FileText, MapPin, MessageCircle, Navigation, RefreshCw, ScanLine, ShoppingBag, Store, TrendingUp, User, UtensilsCrossed } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { OrderTimeline } from '@/components/storefront/OrderTimeline';
 import { ProductImage } from '@/components/ProductImage';
@@ -21,6 +21,7 @@ export default function OrderShow({ order }: { order: Order }) {
     useLiveReload([{ name: `orders.${order.uuid}` }], { only: ['order', 'kitchen', 'flash'], enabled: !order.is_final });
 
     const delivery = order.type === 'delivery';
+    const dineIn = order.type === 'dine_in';
     const cancelled = order.status === 'cancelled';
     const items = order.items ?? [];
 
@@ -36,7 +37,9 @@ export default function OrderShow({ order }: { order: Order }) {
           ? 'Waiting for payment'
           : order.is_paid
             ? `Order confirmed & paid via ${order.payment_method_label}`
-            : 'Order confirmed · pay at the counter';
+            : dineIn
+              ? 'Order confirmed · pay at the counter before you leave'
+              : 'Order confirmed · pay at the counter';
 
     return (
         <StorefrontLayout
@@ -87,7 +90,7 @@ export default function OrderShow({ order }: { order: Order }) {
                                 {!cancelled && (
                                     <div>
                                         <p className="text-[11px] font-extrabold tracking-[0.15em] text-ink-400 uppercase">
-                                            {order.status === 'completed' ? 'Completed at' : order.status === 'ready' && !delivery ? 'Ready since' : delivery ? 'Target arrival' : 'Target ready time'}
+                                            {order.status === 'completed' ? 'Completed at' : order.status === 'ready' && !delivery ? 'Ready since' : delivery ? 'Target arrival' : dineIn ? 'At your table by' : 'Target ready time'}
                                         </p>
                                         <p className="font-display text-5xl leading-none text-flame-400">
                                             {order.status === 'completed' ? time(order.completed_at) : order.status === 'ready' && !delivery ? time(order.ready_at) : target ? time(target) : '—'}
@@ -100,12 +103,20 @@ export default function OrderShow({ order }: { order: Order }) {
                             </div>
 
                             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
-                                <span className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 font-bold', delivery ? 'bg-ink-800 text-ink-300' : 'bg-brand-600 text-white')}>
-                                    <ShoppingBag className="size-4" aria-hidden /> Self-Pickup ({shop.counter})
-                                </span>
-                                <span className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 font-bold', delivery ? 'bg-brand-600 text-white' : 'bg-ink-800 text-ink-300')}>
-                                    <Bike className="size-4" aria-hidden /> Delivery dispatch
-                                </span>
+                                {dineIn ? (
+                                    <span className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-2 font-bold text-white">
+                                        <UtensilsCrossed className="size-4" aria-hidden /> Dine-in · {order.table_label ?? 'Table service'}
+                                    </span>
+                                ) : (
+                                    <>
+                                        <span className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 font-bold', delivery ? 'bg-ink-800 text-ink-300' : 'bg-brand-600 text-white')}>
+                                            <ShoppingBag className="size-4" aria-hidden /> Self-Pickup ({shop.counter})
+                                        </span>
+                                        <span className={cn('flex items-center gap-1.5 rounded-lg px-3 py-2 font-bold', delivery ? 'bg-brand-600 text-white' : 'bg-ink-800 text-ink-300')}>
+                                            <Bike className="size-4" aria-hidden /> Delivery dispatch
+                                        </span>
+                                    </>
+                                )}
                                 <span className="flex items-center gap-1.5 text-ink-300">
                                     <Store className="size-4 text-flame-400" aria-hidden /> {shop.name} · {shop.address}
                                 </span>
@@ -142,7 +153,16 @@ export default function OrderShow({ order }: { order: Order }) {
                         </div>
 
                         {/* The pass is only useful until the order has been handed over. */}
-                        {!order.is_final && order.status !== 'pending_payment' && (
+                        {!order.is_final && order.status !== 'pending_payment' && dineIn && (
+                            <div className="flex items-center gap-4 rounded-xl border border-ink-700 bg-ink-900 p-4 md:flex-col md:justify-center md:text-center">
+                                <UtensilsCrossed className="size-10 shrink-0 text-flame-400" aria-hidden />
+                                <div>
+                                    <p className="font-display text-4xl leading-none text-white uppercase">{order.table_label ?? 'Your table'}</p>
+                                    <p className="mt-1 text-[11px] text-ink-400">Stay seated, we will bring it over.</p>
+                                </div>
+                            </div>
+                        )}
+                        {!order.is_final && order.status !== 'pending_payment' && !dineIn && (
                             <div className="flex items-center gap-4 rounded-xl border border-ink-700 bg-ink-900 p-4 md:flex-col md:justify-center md:text-center">
                                 <div>
                                     <Badge tone="flame" className="mb-2">
@@ -183,7 +203,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             <p className="flex items-center gap-1.5 font-semibold text-ink-100">
                                 <User className="size-3.5 text-flame-400" aria-hidden /> {order.customer_name} {order.customer_phone && <span className="font-normal text-ink-400">(+{order.customer_phone})</span>}
                             </p>
-                            <p className="font-bold tracking-wider text-flame-400 uppercase">{delivery ? 'Delivery' : `Station: ${shop.counter}`}</p>
+                            <p className="font-bold tracking-wider text-flame-400 uppercase">{delivery ? 'Delivery' : dineIn ? (order.table_label ?? 'Dine-in') : `Station: ${shop.counter}`}</p>
                         </div>
 
                         <ul className="divide-y divide-ink-800">
@@ -264,6 +284,18 @@ export default function OrderShow({ order }: { order: Order }) {
                                     ) : (
                                         !order.is_final && <p className="text-xs text-ink-400">A rider is assigned once your order is nearly ready.</p>
                                     )}
+                                </div>
+                            </Card>
+                        ) : dineIn ? (
+                            <Card>
+                                <CardHeader icon={<UtensilsCrossed className="size-4" />} title={order.table_label ?? 'Table service'} />
+                                <div className="space-y-2 p-4 text-sm text-ink-300">
+                                    <p className="font-semibold text-white">We will bring your order to the table.</p>
+                                    <p className="text-xs">
+                                        {order.is_paid || order.is_final
+                                            ? 'Nothing else to do — enjoy your meal.'
+                                            : `When you are done, pay ${money(order.total)} at ${shop.counter} and mention queue token ${order.order_number}.`}
+                                    </p>
                                 </div>
                             </Card>
                         ) : (

@@ -1,5 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, Banknote, Bike, Building2, CreditCard, ShoppingBag, Wallet, Zap, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Banknote, Bike, Building2, CreditCard, ShoppingBag, UtensilsCrossed, Wallet, Zap, type LucideIcon } from 'lucide-react';
 import type { FormEvent, ReactNode } from 'react';
 import { TicketPanel } from '@/components/storefront/TicketPanel';
 import { Button } from '@/components/ui/Button';
@@ -45,16 +45,23 @@ const paymentHints: Record<PaymentMethod, string> = {
     cash: 'Pay when you collect',
 };
 
+const tableHint = 'Pay at the counter before you leave';
+
 export default function CheckoutCreate({ zones, paymentMethods, customer, addresses }: CheckoutProps) {
     const { cart, shop, auth, kitchen } = usePage().props;
     const delivery = cart?.type === 'delivery';
+    // Sitting at a table: the QR code already says where the food goes.
+    const table = cart?.table ?? null;
 
     const form = useForm({
         customer_name: customer.name,
         customer_phone: customer.phone,
         customer_email: customer.email,
         notes: '',
-        payment_method: (paymentMethods.find((option) => option.available)?.value ?? 'fpx') as PaymentMethod,
+        // Seated customers usually pay at the counter after eating, so that is preselected for them.
+        payment_method: ((cart?.table && paymentMethods.find((option) => option.value === 'cash' && option.available)?.value) ||
+            paymentMethods.find((option) => option.available)?.value ||
+            'fpx') as PaymentMethod,
         recipient_name: '',
         recipient_phone: '',
         line1: '',
@@ -124,16 +131,16 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
 
             <form id="checkout-form" onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-6">
                 <div className="space-y-5">
-                    <Section step={1} title="Your details" aside={!auth.user && <Link href={route('login')} className="text-xs font-semibold text-flame-400 hover:underline">Have an account? Sign in</Link>}>
+                    <Section step={1} title={table ? 'Your details (optional)' : 'Your details'} aside={!auth.user && <Link href={route('login')} className="text-xs font-semibold text-flame-400 hover:underline">Have an account? Sign in</Link>}>
                         <div className="grid gap-4 sm:grid-cols-2">
-                            <Input label="Name" autoComplete="name" required value={form.data.customer_name} onChange={(event) => form.setData('customer_name', event.target.value)} error={form.errors.customer_name} />
+                            <Input label="Name" autoComplete="name" required={!table} value={form.data.customer_name} onChange={(event) => form.setData('customer_name', event.target.value)} error={form.errors.customer_name} />
                             <Input
                                 label="Mobile number"
                                 type="tel"
                                 autoComplete="tel"
                                 placeholder="012-345 6789"
-                                hint="Order updates are sent here."
-                                required
+                                hint={table ? 'Add it if you want order updates on your phone.' : 'Order updates are sent here.'}
+                                required={!table}
                                 value={form.data.customer_phone}
                                 onChange={(event) => form.setData('customer_phone', event.target.value)}
                                 error={form.errors.customer_phone}
@@ -150,8 +157,20 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                         </div>
                     </Section>
 
-                    <Section step={2} title="How do you want it?">
-                        <div className="grid gap-3 sm:grid-cols-2">
+                    <Section step={2} title={table ? 'Where you are sitting' : 'How do you want it?'}>
+                        {table && (
+                            <div className="flex items-start gap-3 rounded-xl border border-brand-500 bg-brand-900 p-3.5">
+                                <UtensilsCrossed className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-bold text-white">Dine-in · {table.name}</p>
+                                    <p className="text-xs text-ink-300">Stay seated — we will bring your order to the table.</p>
+                                </div>
+                                <button type="button" onClick={() => cartActions.setType('pickup')} className="shrink-0 text-xs font-semibold text-ink-300 underline hover:text-white">
+                                    Take away instead
+                                </button>
+                            </div>
+                        )}
+                        <div className={cn('grid gap-3 sm:grid-cols-2', table && 'hidden')}>
                             {shop.pickup_enabled && (
                                 <button type="button" className={choice(!delivery)} onClick={() => cartActions.setType('pickup')} aria-pressed={!delivery}>
                                     <ShoppingBag className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
@@ -174,7 +193,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                             )}
                         </div>
 
-                        {delivery ? (
+                        {table ? null : delivery ? (
                             <div className="mt-5 space-y-4">
                                 <fieldset>
                                     <legend className="mb-2 text-xs font-semibold text-ink-300">Delivery area</legend>
@@ -250,7 +269,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                         <Icon className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                         <span>
                                             <span className="block text-sm font-bold text-white">{option.label}</span>
-                                            <span className="block text-xs text-ink-400">{option.reason ?? paymentHints[option.value]}</span>
+                                            <span className="block text-xs text-ink-400">{option.reason ?? (table && option.value === 'cash' ? tableHint : paymentHints[option.value])}</span>
                                         </span>
                                     </button>
                                 );

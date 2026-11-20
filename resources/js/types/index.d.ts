@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'cashier' | 'kitchen' | 'rider' | 'customer';
+export type Role = 'admin' | 'cashier' | 'waiter' | 'kitchen' | 'rider' | 'customer';
 export type OrderType = 'pickup' | 'delivery' | 'dine_in';
 export type OrderSource = 'online' | 'pos';
 export type OrderStatus =
@@ -24,7 +24,8 @@ export interface Option<T extends string | number = string> {
 export interface AuthUser {
     id: number;
     name: string;
-    email: string;
+    /** Customers sign in with their mobile number, so an email is optional. */
+    email: string | null;
     phone: string | null;
     role: Role;
     role_label: string;
@@ -45,6 +46,7 @@ export interface Shop {
     closed_message: string | null;
     pickup_enabled: boolean;
     delivery_enabled: boolean;
+    dine_in_enabled: boolean;
 }
 
 export interface KitchenLoad {
@@ -84,6 +86,8 @@ export interface Cart {
     count: number;
     type: OrderType;
     zone: CartZone | null;
+    /** Set when the customer scanned a table QR code: the order is dine-in for this table. */
+    table: { id: number; name: string } | null;
     subtotal: number;
     delivery_fee: number;
     tax_rate: number;
@@ -244,6 +248,8 @@ export interface Order {
     type_label: string;
     source: OrderSource;
     source_label: string;
+    /** Dine-in orders: where the food goes. */
+    table_label: string | null;
     status: OrderStatus;
     status_label: string;
     is_final: boolean;

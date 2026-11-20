@@ -1,5 +1,5 @@
-import { usePage } from '@inertiajs/react';
-import { Bike, ChefHat, MapPin, ShoppingBag } from 'lucide-react';
+import { router, usePage } from '@inertiajs/react';
+import { Bike, ChefHat, MapPin, ShoppingBag, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { cartActions } from '@/lib/cart';
 import { money } from '@/lib/format';
@@ -14,6 +14,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
     const { shop, cart, kitchen, pos } = usePage().props;
     const type = cart?.type ?? 'pickup';
     const zone = cart?.zone;
+    const table = cart?.table ?? null;
 
     const mode = (active: boolean) =>
         cn(
@@ -24,20 +25,36 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
     return (
         <div className="no-print border-b border-ink-700 bg-ink-900">
             <div className="scrollbar-none mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5">
-                {shop.pickup_enabled && (
+                {table && (
+                    <>
+                        <span className={mode(true)}>
+                            <UtensilsCrossed className="size-4" aria-hidden />
+                            Dine-in · {table.name}
+                        </span>
+                        <span className="shrink-0 text-xs text-ink-300">We bring it to your table.</span>
+                        <button
+                            type="button"
+                            onClick={() => router.delete(route('tables.leave'), { preserveScroll: true })}
+                            className="h-9 shrink-0 rounded-lg px-2 text-xs font-semibold text-ink-400 underline hover:text-white"
+                        >
+                            Not at this table?
+                        </button>
+                    </>
+                )}
+                {!table && shop.pickup_enabled && (
                     <button type="button" className={mode(type === 'pickup')} onClick={() => cartActions.setType('pickup')} aria-pressed={type === 'pickup'}>
                         <ShoppingBag className="size-4" aria-hidden />
                         Self Pickup ({kitchen.eta_min}–{kitchen.eta_max} min)
                     </button>
                 )}
-                {shop.delivery_enabled && zones.length > 0 && (
+                {!table && shop.delivery_enabled && zones.length > 0 && (
                     <button type="button" className={mode(type === 'delivery')} onClick={() => cartActions.setType('delivery')} aria-pressed={type === 'delivery'}>
                         <Bike className="size-4" aria-hidden />
                         Delivery ({(zone?.eta_minutes ?? zones[0].eta_minutes) - 10}–{zone?.eta_minutes ?? zones[0].eta_minutes} min)
                     </button>
                 )}
 
-                {type === 'delivery' && zone ? (
+                {table ? null : type === 'delivery' && zone ? (
                     <>
                         <label className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 pr-1 pl-2.5 text-xs text-ink-300">
                             <MapPin className="size-3.5 text-brand-400" aria-hidden />

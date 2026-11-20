@@ -29,12 +29,12 @@ function settingsPayload(array $overrides = []): array
         ],
         'hours' => ['open' => '10:00', 'close' => '22:00', 'last_order' => '21:30'],
         'ordering' => [
-            'enabled' => true, 'pickup_enabled' => true, 'delivery_enabled' => false,
+            'enabled' => true, 'pickup_enabled' => true, 'delivery_enabled' => false, 'dine_in_enabled' => true,
             'pickup_eta_min' => 10, 'pickup_eta_max' => 25, 'queue_prefix' => 'b', 'auto_close_hours' => 4,
         ],
         'payments' => [
             'fpx_enabled' => true, 'card_enabled' => true, 'ewallet_enabled' => false, 'cash_enabled' => true,
-            'cash_requires_account' => false, 'cash_max_amount' => 8000,
+            'cash_requires_account' => false, 'cash_max_amount' => 8000, 'dine_in_pay_at_counter' => true,
         ],
         'pos' => ['quick_notes' => ['Pedas', ' Potong dua ', '']],
         'tax' => ['rate' => 8, 'inclusive' => false],
@@ -85,10 +85,15 @@ describe('settings', function () {
         expect(app(Settings::class)->string('shop.name'))->toBe('Boss Burger');
     });
 
-    it('needs pickup or delivery to stay on', function () {
+    it('needs at least one way of ordering to stay on', function () {
         $this->put(route('admin.settings.update'), settingsPayload([
-            'ordering' => ['pickup_enabled' => false, 'delivery_enabled' => false],
+            'ordering' => ['pickup_enabled' => false, 'delivery_enabled' => false, 'dine_in_enabled' => false],
         ]))->assertSessionHasErrors('ordering.delivery_enabled');
+
+        // A dine-in only shop is fine.
+        $this->put(route('admin.settings.update'), settingsPayload([
+            'ordering' => ['pickup_enabled' => false, 'delivery_enabled' => false, 'dine_in_enabled' => true],
+        ]))->assertSessionHas('success');
     });
 
     it('shows the current settings grouped', function () {

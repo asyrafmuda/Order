@@ -11,6 +11,7 @@ import {
     MapPinned,
     Menu as MenuIcon,
     Plug,
+    QrCode,
     Settings,
     SlidersHorizontal,
     Store,
@@ -46,9 +47,9 @@ const sections: NavSection[] = [
         title: 'Service',
         items: [
             { label: 'Dashboard', route: 'admin.dashboard', icon: LayoutDashboard, roles: ['admin'] },
-            { label: 'Take Order (POS)', route: 'pos.index', match: 'pos.*', icon: Zap, roles: ['admin', 'cashier'] },
-            { label: 'Kitchen Display', route: 'kitchen.index', match: 'kitchen.*', icon: ChefHat, roles: ['admin', 'kitchen', 'cashier'] },
-            { label: 'Counter', route: 'counter.index', match: 'counter.*', icon: Ticket, roles: ['admin', 'cashier'] },
+            { label: 'Take Order (POS)', route: 'pos.index', match: 'pos.*', icon: Zap, roles: ['admin', 'cashier', 'waiter'] },
+            { label: 'Kitchen Display', route: 'kitchen.index', match: 'kitchen.*', icon: ChefHat, roles: ['admin', 'kitchen', 'cashier', 'waiter'] },
+            { label: 'Counter', route: 'counter.index', match: 'counter.*', icon: Ticket, roles: ['admin', 'cashier', 'waiter'] },
             { label: 'My Deliveries', route: 'rider.index', match: 'rider.*', icon: Bike, roles: ['rider'] },
             { label: 'Orders', route: 'admin.orders.index', match: 'admin.orders.*', icon: ClipboardList, roles: ['admin'] },
         ],
@@ -66,6 +67,7 @@ const sections: NavSection[] = [
         title: 'Operations',
         items: [
             { label: 'Kitchen Stations', route: 'admin.kitchen-stations.index', match: 'admin.kitchen-stations.*', icon: Layers, roles: ['admin'] },
+            { label: 'Tables & QR', route: 'admin.tables.index', match: 'admin.tables.*', icon: QrCode, roles: ['admin'] },
             { label: 'Delivery Zones', route: 'admin.delivery-zones.index', match: 'admin.delivery-zones.*', icon: MapPinned, roles: ['admin'] },
             { label: 'Riders', route: 'admin.riders.index', match: 'admin.riders.*', icon: Bike, roles: ['admin'] },
         ],

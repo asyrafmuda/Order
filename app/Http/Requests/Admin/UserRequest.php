@@ -4,6 +4,8 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Rules\PinOrPassword;
+use App\Rules\UniquePhone;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -23,14 +25,16 @@ class UserRequest extends FormRequest
     {
         /** @var User|null $user */
         $user = $this->route('user');
+        $customer = $this->input('role') === UserRole::Customer->value;
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user?->id)],
-            'phone' => ['nullable', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/'],
+            // Customers sign in with their mobile number; everyone else with an email.
+            'email' => [$customer ? 'nullable' : 'required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user?->id)],
+            'phone' => [$customer ? 'required' : 'nullable', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/', new UniquePhone($user?->id)],
             'role' => ['required', Rule::enum(UserRole::class)],
             'is_active' => ['required', 'boolean'],
-            'password' => [$user ? 'nullable' : 'required', Password::defaults()],
+            'password' => [$user ? 'nullable' : 'required', $customer ? new PinOrPassword : Password::defaults()],
         ];
     }
 
