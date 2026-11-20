@@ -7,10 +7,12 @@ import { Card, CardHeader, EmptyState } from '@/components/ui/Card';
 import { Table, Td, Th } from '@/components/ui/Table';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
 import { cn } from '@/lib/cn';
-import { money, plural, time } from '@/lib/format';
+import { dateTime, money, plural, time } from '@/lib/format';
 import type { Order, OrderStatus } from '@/types';
 
 interface DashboardProps {
+    /** Set when the cron job that drives scheduled work has not run recently. */
+    cronMissing: { last_run: string | null; command: string } | null;
     stats: { sales: number; orders: number; average: number; active: number; awaiting_payment: number; pos_failures: number };
     chart: { date: string; sales: number; orders: number }[];
     topProducts: { name: string; quantity: number; revenue: number }[];
@@ -18,7 +20,7 @@ interface DashboardProps {
     recent: Order[];
 }
 
-export default function Dashboard({ stats, chart, topProducts, statuses, recent }: DashboardProps) {
+export default function Dashboard({ cronMissing, stats, chart, topProducts, statuses, recent }: DashboardProps) {
     const totalToday = statuses.reduce((sum, status) => sum + status.count, 0);
 
     return (
@@ -32,6 +34,17 @@ export default function Dashboard({ stats, chart, topProducts, statuses, recent 
             }
         >
             <Head title="Dashboard" />
+
+            {cronMissing && (
+                <div className="mb-6 rounded-xl border border-danger-600/50 bg-danger-900 p-4" role="alert">
+                    <p className="text-sm font-bold text-danger-400">The cron job is not running</p>
+                    <p className="mt-1 text-sm text-ink-200">
+                        {cronMissing.last_run ? `Scheduled work last ran ${dateTime(cronMissing.last_run)}.` : 'Scheduled work has never run.'} Until it does, customers get no WhatsApp updates, the POS gets no
+                        receipts and unpaid orders are not cancelled. In cPanel → Cron Jobs, add this command with “Once Per Minute” (use your PHP 8.3 path if plain “php” is older):
+                    </p>
+                    <code className="mt-2 block overflow-x-auto rounded-lg bg-ink-950 px-3 py-2 font-mono text-xs whitespace-nowrap text-flame-300">{cronMissing.command}</code>
+                </div>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
                 <StatCard label="Sales today" value={money(stats.sales)} tone="flame" icon={<Banknote className="size-4" />} hint="Paid orders, excluding cancelled" />

@@ -195,7 +195,7 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
                         maxLength={200}
                         value={notes}
                         onChange={(event) => setNotes(event.target.value)}
-                        placeholder="e.g. Extra Boss Sauce, cut in half"
+                        placeholder="e.g. Less spicy, cut in half"
                         className="h-10 w-full rounded-lg border border-ink-600 bg-ink-900 px-3 text-sm text-ink-100 placeholder:text-ink-500 focus:border-flame-400 focus:outline-none"
                     />
                 </label>

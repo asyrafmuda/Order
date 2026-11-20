@@ -9,13 +9,18 @@ use App\Services\Cart\Cart;
 use App\Services\Cart\CartPricer;
 use App\Services\Messaging\WhatsAppChannel;
 use App\Services\Pos\LoyversePosProvider;
+use App\Support\Installer\EnvironmentFile;
+use App\Support\Installer\Installation;
 use App\Support\KitchenLoad;
 use App\Support\OutletContext;
 use App\Support\OutletPrices;
 use App\Support\OutletStock;
 use App\Support\Settings;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Events\MigrationsEnded;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
@@ -23,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(Installation::class);
+        $this->app->singleton(EnvironmentFile::class, fn ($app) => new EnvironmentFile($app->basePath('.env')));
         $this->app->scoped(Settings::class);
         $this->app->scoped(OutletContext::class);
         $this->app->scoped(OutletStock::class);
@@ -55,6 +62,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         JsonResource::withoutWrapping();
+
+        // `php artisan migrate` brings the database up to the code on disk.
+        Event::listen(MigrationsEnded::class, fn () => $this->app->make(Installation::class)->syncAfterMigrations());
+
+        // Behind Cloudflare or a host's proxy the request may look like plain
+        // http; a site whose address is https must still link to https.
+        if (str_starts_with((string) config('app.url'), 'https://') && ! $this->app->runningUnitTests()) {
+            URL::forceScheme('https');
+        }
 
         Model::shouldBeStrict(! $this->app->isProduction());
     }

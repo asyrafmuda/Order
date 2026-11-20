@@ -4,7 +4,8 @@ import { createInertiaApp, router } from '@inertiajs/react';
 import type { ComponentType } from 'react';
 import { createRoot } from 'react-dom/client';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Order';
+// The shop's own name (Admin → Settings), not the name the files were built with.
+let shopName = document.querySelector<HTMLMetaElement>('meta[name="shop-name"]')?.content || 'Order';
 const pages = import.meta.glob<{ default: ComponentType }>('./pages/**/*.tsx');
 
 /**
@@ -22,11 +23,14 @@ function applyTheme(theme: { css: string; page_color: string } | undefined): voi
 
 // "success" covers every visit, including a form that redirects back to the same page;
 // "navigate" covers the first load and the browser's back and forward buttons.
-router.on('success', (event) => applyTheme(event.detail.page.props.theme));
+router.on('success', (event) => {
+    applyTheme(event.detail.page.props.theme);
+    shopName = event.detail.page.props.shop?.name || shopName;
+});
 router.on('navigate', (event) => applyTheme(event.detail.page.props.theme));
 
 createInertiaApp({
-    title: (title) => (title ? `${title} · ${appName}` : appName),
+    title: (title) => (title ? `${title} · ${shopName}` : shopName),
     resolve: async (name) => {
         const page = pages[`./pages/${name}.tsx`];
 

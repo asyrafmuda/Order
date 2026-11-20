@@ -41,7 +41,7 @@ interface Settings extends OutletSettings {
     notifications: { enabled: boolean };
 }
 
-export default function SettingsEdit({ settings, multi }: { settings: Settings; multi: boolean }) {
+export default function SettingsEdit({ settings, multi, onlinePaymentReady }: { settings: Settings; multi: boolean; onlinePaymentReady: boolean }) {
     const outlet = toOutletForm(settings);
 
     const form = useForm({
@@ -283,6 +283,11 @@ export default function SettingsEdit({ settings, multi }: { settings: Settings; 
 
                 <Section title="Payment methods (online checkout)" icon={<Wallet className="size-4" />}>
                     <div className="space-y-4">
+                        {!onlinePaymentReady && (
+                            <p className="rounded-lg border border-flame-500/40 bg-flame-900 px-3 py-2 text-sm text-flame-300">
+                                No payment gateway is connected yet, so customers cannot pay online — FPX, card and e-wallet stay hidden at checkout even if switched on. Cash at the counter works.
+                            </p>
+                        )}
                         <div className="grid gap-4 sm:grid-cols-3">
                             <Toggle checked={data.payments.fpx_enabled} onChange={(checked) => set('payments', 'fpx_enabled', checked)} label="FPX online banking" />
                             <Toggle checked={data.payments.card_enabled} onChange={(checked) => set('payments', 'card_enabled', checked)} label="Credit / debit card" />

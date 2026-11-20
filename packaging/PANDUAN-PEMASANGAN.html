@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panduan Pemasangan · Sistem Order Online</title>
+<style>
+    :root { --ink: #1d1d22; --muted: #5b5b66; --line: #e3e3e8; --soft: #f5f5f7; --brand: #d91f27; --ok: #047857; --warn: #9a6700; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #fff; }
+    main { max-width: 52rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .25rem; }
+    h2 { font-size: 1.35rem; margin: 2.5rem 0 .75rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+    h3 { font-size: 1.05rem; margin: 1.5rem 0 .5rem; }
+    p, li { color: var(--ink); }
+    .lead { color: var(--muted); margin: 0 0 1.5rem; }
+    code { background: var(--soft); border: 1px solid var(--line); border-radius: 4px; padding: .05rem .35rem; font-size: .9em; word-break: break-all; }
+    pre { background: #0f0f12; color: #ffd27a; padding: .9rem 1rem; border-radius: 8px; overflow-x: auto; font-size: .85rem; }
+    .box { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; margin: 1rem 0; background: var(--soft); }
+    .ok { border-color: #a7e3cc; background: #ecfbf4; }
+    .warn { border-color: #f1d48a; background: #fff8e6; }
+    .danger { border-color: #f3b4b6; background: #fdeeee; }
+    .box > :first-child { margin-top: 0; } .box > :last-child { margin-bottom: 0; }
+    ol.steps { padding-left: 1.3rem; } ol.steps > li { margin: .5rem 0; }
+    table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: .5rem .6rem; border-bottom: 1px solid var(--line); }
+    th { background: var(--soft); }
+    nav { columns: 2; column-gap: 2rem; font-size: .95rem; }
+    nav a { display: block; color: var(--brand); text-decoration: none; padding: .1rem 0; }
+    kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 .3rem; font-size: .85em; background: #fff; }
+    @media (max-width: 600px) { nav { columns: 1; } h1 { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<main>
+    <h1>Panduan Pemasangan</h1>
+    <p class="lead">Sistem Order Online — untuk shared hosting dengan cPanel. Masa yang diperlukan: lebih kurang 15 minit.</p>
+
+    <nav>
+        <a href="#perlu">1. Apa yang diperlukan</a>
+        <a href="#php">2. Tetapkan versi PHP</a>
+        <a href="#database">3. Cipta database</a>
+        <a href="#upload">4. Upload fail</a>
+        <a href="#installer">5. Jalankan installer</a>
+        <a href="#cron">6. Cron job (wajib)</a>
+        <a href="#selepas">7. Selepas pasang</a>
+        <a href="#update">8. Kemas kini versi baru</a>
+        <a href="#emel">9. Emel (pilihan)</a>
+        <a href="#masalah">10. Masalah biasa</a>
+    </nav>
+
+    <h2 id="perlu">1. Apa yang diperlukan</h2>
+    <table>
+        <tr><th>Perkara</th><th>Keperluan</th></tr>
+        <tr><td>Hosting</td><td>Shared hosting dengan cPanel (atau DirectAdmin / Plesk — langkahnya serupa)</td></tr>
+        <tr><td>PHP</td><td><strong>8.3 atau lebih baru</strong></td></tr>
+        <tr><td>Database</td><td>MySQL 5.7.8+ atau MariaDB 10.3+</td></tr>
+        <tr><td>Domain</td><td>Domain atau subdomain sendiri, contoh <code>order.kedaianda.com</code>. Pemasangan dalam sub-folder (<code>kedaianda.com/order</code>) <strong>tidak</strong> disokong.</td></tr>
+        <tr><td>SSL</td><td>Sangat disyorkan (percuma dalam cPanel → <em>SSL/TLS Status</em> → AutoSSL)</td></tr>
+        <tr><td>Fail</td><td><code>order-system-x.y.z.zip</code> (versi ikut nombor)</td></tr>
+    </table>
+    <div class="box warn"><p><strong>Tiada SSH, Composer atau Node.js diperlukan.</strong> Semua sudah ada dalam ZIP. Jangan jalankan <code>composer install</code> atau <code>npm</code> di server.</p></div>
+
+    <h2 id="php">2. Tetapkan versi PHP</h2>
+    <ol class="steps">
+        <li>cPanel → <strong>MultiPHP Manager</strong> (atau <strong>Select PHP Version</strong>).</li>
+        <li>Pilih domain anda → tetapkan <strong>PHP 8.3</strong> (atau 8.4) → <em>Apply</em>.</li>
+        <li>Jika ada <em>Select PHP Version → Extensions</em>, pastikan ditanda: <code>pdo_mysql</code>, <code>mbstring</code>, <code>openssl</code>, <code>curl</code>, <code>fileinfo</code>, <code>dom</code>, <code>xml</code>, <code>tokenizer</code>, <code>ctype</code>. Yang disyorkan: <code>gd</code>, <code>intl</code>, <code>zip</code>.</li>
+    </ol>
+    <p>Installer akan menyemak semua ini dan memberitahu apa yang kurang.</p>
+
+    <h2 id="database">3. Cipta database</h2>
+    <ol class="steps">
+        <li>cPanel → <strong>MySQL® Databases</strong>.</li>
+        <li><em>Create New Database</em>: contoh <code>order</code>. Nama penuh biasanya jadi <code>namacpanel_order</code> — <strong>salin nama penuh ini</strong>.</li>
+        <li><em>Add New User</em>: contoh <code>order</code>, dengan kata laluan yang kuat (guna <em>Password Generator</em>). Salin nama penuh user dan kata laluan.</li>
+        <li><em>Add User To Database</em>: pilih user dan database tadi → tanda <strong>ALL PRIVILEGES</strong> → <em>Make Changes</em>.</li>
+    </ol>
+    <div class="box"><p>Gunakan database <strong>kosong</strong> khas untuk sistem ini. Jangan kongsi dengan WordPress atau aplikasi lain.</p></div>
+
+    <h2 id="upload">4. Upload fail</h2>
+    <p>Pilih <strong>satu</strong> cara:</p>
+
+    <h3>Cara A — Disyorkan: subdomain atau domain sendiri</h3>
+    <ol class="steps">
+        <li>cPanel → <strong>Domains</strong> → <em>Create A New Domain</em> (contoh <code>order.kedaianda.com</code>).</li>
+        <li>Untuk <em>Document Root</em>, tulis <code>order/public</code> (nyahtanda “Share document root” jika ada).</li>
+        <li>cPanel → <strong>File Manager</strong> → buka folder <code>order</code> (dicipta tadi; jika tiada folder <code>public</code> lagi, tak apa).</li>
+        <li><em>Upload</em> fail ZIP ke folder <code>order</code> → klik kanan → <em>Extract</em>. Pastikan fail seperti <code>artisan</code> dan folder <code>public</code>, <code>app</code>, <code>vendor</code> berada <strong>terus</strong> dalam <code>order</code> (bukan <code>order/order-system-1.0.0/…</code>).</li>
+        <li>Padam fail ZIP selepas extract.</li>
+    </ol>
+
+    <h3>Cara B — Terus dalam public_html (domain utama)</h3>
+    <ol class="steps">
+        <li>File Manager → <code>public_html</code>. Pindahkan atau padam fail lama di situ (contohnya <code>index.html</code> default hosting) — <em>backup dahulu jika ada laman lain</em>.</li>
+        <li>Upload ZIP ke <code>public_html</code> → <em>Extract</em>.</li>
+        <li>Tekan <em>Settings</em> (kanan atas File Manager) → tanda <strong>Show Hidden Files</strong>, dan pastikan fail <code>.htaccess</code> ada dalam <code>public_html</code>. Fail ini menghalakan semua permintaan ke folder <code>public</code> dan menyekat akses kepada fail sulit.</li>
+    </ol>
+    <div class="box warn"><p>Jika selepas upload anda nampak halaman <em>“The site is uploaded, but the web server needs one more setting”</em>, server tidak membaca <code>.htaccess</code>. Guna Cara A, atau minta support hosting <em>“enable mod_rewrite and AllowOverride All”</em>.</p></div>
+
+    <h2 id="installer">5. Jalankan installer</h2>
+    <p>Buka alamat laman anda (contoh <code>https://order.kedaianda.com</code>). Anda akan dibawa terus ke installer, 4 langkah:</p>
+    <ol class="steps">
+        <li><strong>Server</strong> — semakan PHP, extension dan kebenaran folder. Semua mesti ✓ (tanda ! hanya cadangan). Jika ada ✕, ikut arahan di sebelahnya dan tekan <em>Check again</em>.</li>
+        <li><strong>Database</strong> — host: <code>localhost</code>, port: <code>3306</code>, nama database, user dan kata laluan dari Langkah 3.</li>
+        <li><strong>Your shop</strong> — nama kedai, alamat, telefon, WhatsApp, akaun super admin (emel + kata laluan anda), alamat laman dan zon masa. Tanda <em>Add a sample menu</em> jika mahu menu contoh untuk dicuba.</li>
+        <li><strong>Done</strong> — salin arahan cron (Langkah 6) dan semak keputusan <em>Security check</em>. Mesti hijau.</li>
+    </ol>
+    <div class="box ok"><p>Selepas siap, installer <strong>dikunci secara automatik</strong> — tiada fail yang perlu dipadam. Untuk memasang semula, guna database baru.</p></div>
+
+    <h2 id="cron">6. Cron job (wajib)</h2>
+    <p>Satu cron job yang berjalan setiap minit menghantar mesej WhatsApp kepada pelanggan, resit ke POS, membatalkan order yang tak dibayar dan menutup order yang terlupa diambil.</p>
+    <ol class="steps">
+        <li>cPanel → <strong>Cron Jobs</strong>.</li>
+        <li><em>Common Settings</em>: pilih <strong>Once Per Minute (* * * * *)</strong>.</li>
+        <li>Dalam ruangan <em>Command</em>, tampal arahan yang ditunjukkan di skrin <em>Done</em> installer — <strong>tanpa</strong> lima bintang di depan. Contoh:
+            <pre>/opt/cpanel/ea-php83/root/usr/bin/php /home/namacpanel/order/artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1</pre>
+        </li>
+        <li><em>Add New Cron Job</em>.</li>
+    </ol>
+    <div class="box"><p><strong>Penting:</strong> arahan mesti guna PHP 8.3. Perkataan <code>php</code> sahaja kadang-kadang menjalankan versi lama server. Laluan biasa:</p>
+        <ul>
+            <li>cPanel EasyApache: <code>/opt/cpanel/ea-php83/root/usr/bin/php</code></li>
+            <li>CloudLinux: <code>/opt/alt/php83/usr/bin/php</code></li>
+        </ul>
+        <p>Jika cron tidak berjalan, <strong>Dashboard admin</strong> akan menunjukkan amaran merah “The cron job is not running” dalam masa 5 minit.</p>
+    </div>
+
+    <h2 id="selepas">7. Selepas pasang</h2>
+    <ol class="steps">
+        <li>Log masuk di <code>/login</code> dengan emel dan kata laluan super admin.</li>
+        <li><strong>Settings</strong>: waktu operasi, logo, tema &amp; warna, cara order (pickup / delivery / dine-in), SST.</li>
+        <li><strong>Products</strong> dan <strong>Categories</strong>: masukkan menu (atau ubah menu contoh).</li>
+        <li><strong>Users</strong>: akaun untuk cashier, dapur, waiter dan rider. Masing-masing log masuk dengan emel + kata laluan sendiri.</li>
+        <li><strong>Tables &amp; QR</strong>: cetak poster <em>Shop QR code</em> untuk kaunter, dan kod QR meja jika ada meja.</li>
+        <li>Buka <code>/kitchen</code> pada tablet dapur dan <code>/pos</code> pada telefon/tablet kaunter.</li>
+    </ol>
+    <div class="box warn">
+        <p><strong>Bayaran online (FPX, kad, e-wallet) dimatikan</strong> sehingga payment gateway sebenar disambungkan. Pelanggan bayar di kaunter.</p>
+        <p><strong>Tiada websocket di shared hosting</strong>, jadi skrin dapur, kaunter dan tiket pelanggan dikemas kini setiap beberapa saat (bukan serta-merta). Ini normal.</p>
+    </div>
+
+    <h2 id="update">8. Kemas kini ke versi baru</h2>
+    <ol class="steps">
+        <li><strong>Backup dahulu</strong>: cPanel → <em>phpMyAdmin</em> → pilih database → <em>Export</em> → <em>Go</em>. Juga muat turun fail <code>.env</code> dan folder <code>storage/app/public</code> (gambar produk &amp; logo).</li>
+        <li>Upload ZIP versi baru ke folder yang sama → <em>Extract</em> → pilih untuk <strong>overwrite</strong> fail sedia ada.
+            <br><small>ZIP tidak mengandungi <code>.env</code>, jadi tetapan dan database anda kekal.</small></li>
+        <li>Buka laman anda. Jika versi baru membawa perubahan database, skrin <em>“Finish the update”</em> akan muncul — masukkan emel dan kata laluan <strong>super admin</strong> → <em>Update now</em>. Pelanggan melihat mesej “sedang dikemas kini” sehingga langkah ini selesai.</li>
+    </ol>
+
+    <h2 id="emel">9. Emel (pilihan)</h2>
+    <p>Emel hanya digunakan untuk “Forgot password”. Secara default emel tidak dihantar. Untuk menghidupkannya:</p>
+    <ol class="steps">
+        <li>cPanel → <strong>Email Accounts</strong>: cipta contoh <code>noreply@kedaianda.com</code>.</li>
+        <li>File Manager → buka fail <code>.env</code> dalam folder aplikasi (perlu <em>Show Hidden Files</em>) → <em>Edit</em>, dan ubah baris ini:
+<pre>MAIL_MAILER=smtp
+MAIL_HOST=mail.kedaianda.com
+MAIL_PORT=465
+MAIL_SCHEME=smtps
+MAIL_USERNAME=noreply@kedaianda.com
+MAIL_PASSWORD="kata-laluan-emel"
+MAIL_FROM_ADDRESS="noreply@kedaianda.com"</pre>
+        </li>
+        <li>Simpan. Tiada langkah lain.</li>
+    </ol>
+    <div class="box danger"><p>Fail <code>.env</code> mengandungi kata laluan database dan kunci aplikasi. Jangan kongsi, dan jangan ubah <code>APP_KEY</code> — semua sesi log masuk akan terputus.</p></div>
+
+    <h2 id="masalah">10. Masalah biasa</h2>
+    <table>
+        <tr><th>Gejala</th><th>Penyelesaian</th></tr>
+        <tr><td>Skrin putih atau <em>500 Internal Server Error</em> selepas upload</td><td>Versi PHP domain belum 8.3 (Langkah 2). Jika masih, semak <em>cPanel → Errors</em>.</td></tr>
+        <tr><td>Halaman “The site is uploaded, but the web server needs one more setting”</td><td><code>.htaccess</code> tidak dibaca. Guna Cara A (document root ke <code>public</code>) atau minta hosting hidupkan mod_rewrite.</td></tr>
+        <tr><td>“The username or password was not accepted”</td><td>Salah user/kata laluan database, atau user belum ditambah ke database dengan ALL PRIVILEGES (Langkah 3).</td></tr>
+        <tr><td>“That database does not exist”</td><td>Guna nama <strong>penuh</strong>, contoh <code>namacpanel_order</code>.</td></tr>
+        <tr><td>“This database already holds tables from another program”</td><td>Guna database baru yang kosong.</td></tr>
+        <tr><td>“This database already has a shop in it”</td><td>Anda upload semula fail ke atas database lama. Tekan <em>Reconnect and keep my data</em> untuk sambung semula.</td></tr>
+        <tr><td><em>Security check</em> merah di skrin Done</td><td>Fail sulit boleh dimuat turun. Jangan terima order dahulu — guna Cara A atau minta hosting hidupkan .htaccess.</td></tr>
+        <tr><td>Gambar produk / logo tidak keluar</td><td>Pastikan alamat laman (<code>APP_URL</code> dalam <code>.env</code>) betul, termasuk <code>https://</code>.</td></tr>
+        <tr><td>Pelanggan tak terima WhatsApp, status POS “pending”</td><td>Cron job belum berjalan (Langkah 6). Lihat amaran di Dashboard.</td></tr>
+        <tr><td>Laman masih di <code>http://</code> walaupun SSL dipasang</td><td>Ubah <code>APP_URL</code> dalam <code>.env</code> kepada <code>https://…</code>.</td></tr>
+        <tr><td>Lupa kata laluan super admin</td><td>Guna “Forgot password” (perlu emel, Langkah 9), atau minta super admin lain set semula di <em>Users</em>.</td></tr>
+    </table>
+
+    <p style="margin-top:3rem;color:var(--muted);font-size:.85rem">Log ralat: folder <code>storage/logs</code> dalam aplikasi. Sertakan fail log terkini apabila meminta bantuan.</p>
+</main>
+</body>
+</html>
