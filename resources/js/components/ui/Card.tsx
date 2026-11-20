@@ -2,7 +2,9 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-    return <div className={cn('rounded-xl border border-ink-700 bg-ink-850', className)} {...props} />;
+    // min-w-0: as a grid or flex item a card may be narrower than its content (a wide table,
+    // a line that truncates), so it scrolls or truncates inside instead of widening the page.
+    return <div className={cn('min-w-0 rounded-xl border border-ink-700 bg-ink-850', className)} {...props} />;
 }
 
 interface CardHeaderProps {

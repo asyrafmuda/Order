@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ReportRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Outlet;
+use App\Support\OutletContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Inertia\Inertia;
@@ -18,20 +20,29 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Sales reports. Every figure counts paid orders that were not cancelled.
+ *
+ * A report covers the outlet being worked in. A super admin of a business
+ * with several outlets can also ask for all of them together (?outlet=all).
  */
 class ReportController extends Controller
 {
-    public function index(ReportRequest $request): Response
+    public function index(ReportRequest $request, OutletContext $outlets): Response
     {
         [$from, $to] = $request->period();
+        $all = $request->allOutlets();
 
-        $totals = $this->sales($from, $to)
+        $totals = $this->sales($from, $to, $all)
             ->selectRaw('count(*) as orders, coalesce(sum(total), 0) as sales, coalesce(sum(delivery_fee), 0) as delivery_fees, coalesce(sum(tax_amount), 0) as tax')
             ->toBase()
             ->first();
 
         return Inertia::render('Admin/Reports/Index', [
-            'filters' => ['from' => $from->toDateString(), 'to' => $to->toDateString()],
+            'filters' => ['from' => $from->toDateString(), 'to' => $to->toDateString(), 'outlet' => $all ? 'all' : ''],
+            'scope' => [
+                'all' => $all,
+                'can_all' => $outlets->multi() && $request->user()->isAdmin(),
+                'outlet' => $this->outlet()->name,
+            ],
             // The shop's "today", so quick ranges do not depend on the browser's time zone.
             'today' => CarbonImmutable::today()->toDateString(),
             'totals' => [
@@ -41,7 +52,8 @@ class ReportController extends Controller
                 'delivery_fees' => (int) $totals->delivery_fees,
                 'tax' => (int) $totals->tax,
             ],
-            'byDay' => $this->sales($from, $to)
+            'byOutlet' => $all ? $this->byOutlet($from, $to) : [],
+            'byDay' => $this->sales($from, $to, $all)
                 ->selectRaw('business_date, count(*) as orders, sum(total) as sales')
                 ->groupBy('business_date')
                 ->orderBy('business_date')
@@ -54,7 +66,7 @@ class ReportController extends Controller
                 ]),
             'byProduct' => OrderItem::query()
                 ->join('orders', 'orders.id', '=', 'order_items.order_id')
-                ->where('orders.outlet_id', $this->outlet()->id)
+                ->when(! $all, fn ($query) => $query->where('orders.outlet_id', $this->outlet()->id))
                 ->where('orders.payment_status', PaymentStatus::Paid)
                 ->where('orders.status', '!=', OrderStatus::Cancelled)
                 ->whereBetween('orders.business_date', [$from->toDateString(), $to->toDateString()])
@@ -70,30 +82,34 @@ class ReportController extends Controller
                     'quantity' => (int) $row->quantity,
                     'revenue' => (int) $row->revenue,
                 ]),
-            'byPaymentMethod' => $this->breakdown($from, $to, 'payment_method', fn (string $value) => PaymentMethod::from($value)->label()),
-            'byType' => $this->breakdown($from, $to, 'type', fn (string $value) => OrderType::from($value)->label()),
+            'byPaymentMethod' => $this->breakdown($from, $to, $all, 'payment_method', fn (string $value) => PaymentMethod::from($value)->label()),
+            'byType' => $this->breakdown($from, $to, $all, 'type', fn (string $value) => OrderType::from($value)->label()),
         ]);
     }
 
     /**
-     * One CSV row per order in the period. Amounts are in ringgit.
+     * One CSV row per order in the period. Amounts are in ringgit. The
+     * all-outlets export says which outlet each order belongs to.
      */
     public function export(ReportRequest $request): StreamedResponse
     {
         [$from, $to] = $request->period();
-        $filename = "sales-{$from->toDateString()}-to-{$to->toDateString()}.csv";
+        $all = $request->allOutlets();
+        $filename = 'sales-'.($all ? 'all-outlets-' : '')."{$from->toDateString()}-to-{$to->toDateString()}.csv";
 
-        return response()->streamDownload(function () use ($from, $to) {
+        return response()->streamDownload(function () use ($from, $to, $all) {
             $out = fopen('php://output', 'w');
 
             fputcsv($out, [
+                ...($all ? ['Outlet'] : []),
                 'Order', 'Date', 'Time', 'Customer', 'Phone', 'Type', 'Payment method', 'Items', 'Subtotal (RM)',
                 'Delivery fee (RM)', 'SST (RM)', 'Total (RM)', 'Status', 'POS receipt',
             ]);
 
-            $this->sales($from, $to)->withSum('items', 'quantity')->orderBy('id')->chunk(500, function ($orders) use ($out) {
+            $this->sales($from, $to, $all)->with('outlet')->withSum('items', 'quantity')->orderBy('id')->chunk(500, function ($orders) use ($out, $all) {
                 foreach ($orders as $order) {
                     fputcsv($out, [
+                        ...($all ? [$order->outlet->name] : []),
                         $order->order_number,
                         $order->business_date->toDateString(),
                         $order->created_at->format('H:i'),
@@ -119,12 +135,42 @@ class ReportController extends Controller
     /**
      * @return Builder<Order>
      */
-    private function sales(CarbonImmutable $from, CarbonImmutable $to): Builder
+    private function sales(CarbonImmutable $from, CarbonImmutable $to, bool $all): Builder
     {
-        return Order::query()->forOutlet($this->outlet())
+        return Order::query()
+            ->when(! $all, fn (Builder $query) => $query->forOutlet($this->outlet()))
             ->paid()
             ->where('status', '!=', OrderStatus::Cancelled)
             ->whereBetween('business_date', [$from->toDateString(), $to->toDateString()]);
+    }
+
+    /**
+     * Every outlet side by side, best seller first. Outlets that sold nothing
+     * in the period are listed too, so a quiet branch is not simply missing.
+     *
+     * @return array<int, array{id: int, name: string, is_active: bool, orders: int, sales: int, average: int}>
+     */
+    private function byOutlet(CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $sales = $this->sales($from, $to, true)
+            ->selectRaw('outlet_id, count(*) as orders, sum(total) as sales')
+            ->groupBy('outlet_id')
+            ->toBase()
+            ->get()
+            ->keyBy('outlet_id');
+
+        return Outlet::query()->ordered()->get()
+            ->map(fn (Outlet $outlet) => [
+                'id' => $outlet->id,
+                'name' => $outlet->name,
+                'is_active' => $outlet->is_active,
+                'orders' => $orders = (int) ($sales[$outlet->id]->orders ?? 0),
+                'sales' => $total = (int) ($sales[$outlet->id]->sales ?? 0),
+                'average' => $orders > 0 ? (int) round($total / $orders) : 0,
+            ])
+            ->sortByDesc('sales')
+            ->values()
+            ->all();
     }
 
     /**
@@ -133,9 +179,9 @@ class ReportController extends Controller
      * @param  callable(string): string  $label
      * @return array<int, array{value: string, label: string, orders: int, sales: int}>
      */
-    private function breakdown(CarbonImmutable $from, CarbonImmutable $to, string $column, callable $label): array
+    private function breakdown(CarbonImmutable $from, CarbonImmutable $to, bool $all, string $column, callable $label): array
     {
-        return $this->sales($from, $to)
+        return $this->sales($from, $to, $all)
             ->selectRaw("{$column} as value, count(*) as orders, sum(total) as sales")
             ->groupBy($column)
             ->orderByDesc('sales')

@@ -61,7 +61,8 @@ class OutletController extends Controller
     public function edit(): Response
     {
         return Inertia::render('Admin/Outlets/Edit', [
-            'outlet' => $this->present($this->outlet()),
+            // Not "outlet": that name is the shared prop every page gets.
+            'details' => $this->present($this->outlet()),
         ]);
     }
 

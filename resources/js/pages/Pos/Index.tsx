@@ -253,7 +253,7 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
 
             <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_21rem] lg:grid-cols-[9rem_minmax(0,1fr)_24rem] lg:grid-rows-[minmax(0,1fr)]">
                 <nav
-                    className="scrollbar-none flex gap-2 overflow-x-auto border-b border-ink-700 bg-ink-900 p-2 md:col-span-2 lg:col-span-1 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:border-r lg:border-b-0"
+                    className="scrollbar-none relative flex gap-2 overflow-x-auto border-b border-ink-700 bg-ink-900 p-2 md:col-span-2 lg:col-span-1 lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:border-r lg:border-b-0"
                     aria-label="Menu categories"
                 >
                     <button type="button" className={tab(categoryId === null && query === '')} onClick={() => (setCategoryId(null), setQuery(''))} aria-pressed={categoryId === null}>

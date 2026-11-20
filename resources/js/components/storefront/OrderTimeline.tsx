@@ -19,7 +19,7 @@ export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
     }, [activeKey]);
 
     return (
-        <ol ref={list} className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
+        <ol ref={list} className="scrollbar-none relative flex gap-2 overflow-x-auto pb-1">
             {steps.map((step, index) => (
                 <li
                     key={step.key}

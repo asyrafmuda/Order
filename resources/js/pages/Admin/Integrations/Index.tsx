@@ -33,7 +33,7 @@ interface NotificationLog {
 }
 
 interface IntegrationsProps {
-    pos: { provider: string; configured: boolean; products_linked: number; products_unlinked: number; orders_failed: number; webhook_url: string };
+    posStatus: { provider: string; configured: boolean; products_linked: number; products_unlinked: number; orders_failed: number; webhook_url: string };
     payment: { gateway: string; callback_url: string };
     messaging: { channel: string };
     posLogs: PosLog[];
@@ -42,7 +42,7 @@ interface IntegrationsProps {
 
 const statusTone = (status: string) => (status === 'synced' || status === 'sent' ? 'green' : status === 'failed' ? 'red' : 'neutral');
 
-export default function IntegrationsIndex({ pos, payment, messaging, posLogs, notificationLogs }: IntegrationsProps) {
+export default function IntegrationsIndex({ posStatus: pos, payment, messaging, posLogs, notificationLogs }: IntegrationsProps) {
     const [busy, setBusy] = useState<'test' | 'sync' | null>(null);
 
     const run = (action: 'test' | 'sync') =>

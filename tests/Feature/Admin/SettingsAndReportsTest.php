@@ -182,10 +182,10 @@ describe('integrations', function () {
 
         $this->get(route('admin.integrations.index'))
             ->assertInertia(fn (Assert $page) => $page
-                ->where('pos.provider', 'fake')
-                ->where('pos.configured', true)
-                ->where('pos.products_linked', 0)
-                ->where('pos.products_unlinked', 1)
+                ->where('posStatus.provider', 'fake')
+                ->where('posStatus.configured', true)
+                ->where('posStatus.products_linked', 0)
+                ->where('posStatus.products_unlinked', 1)
                 ->where('payment.gateway', 'fake')
                 ->where('messaging.channel', 'log')
                 ->has('posLogs', 1)

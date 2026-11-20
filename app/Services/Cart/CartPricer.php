@@ -9,6 +9,7 @@ use App\Models\DeliveryZone;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use App\Models\Product;
+use App\Support\OutletPrices;
 use App\Support\OutletStock;
 use App\Support\Settings;
 use Illuminate\Support\Collection;
@@ -22,6 +23,7 @@ class CartPricer
     public function __construct(
         private readonly Settings $settings,
         private readonly OutletStock $stock,
+        private readonly OutletPrices $prices,
     ) {}
 
     /**
@@ -34,7 +36,7 @@ class CartPricer
     public function price(array $rawLines, OrderType $type, ?DeliveryZone $zone, array &$invalid = []): PricedCart
     {
         $products = $this->loadProducts($rawLines);
-        $combo = ComboOffer::current();
+        $combo = $this->prices->currentCombo();
         $lines = collect();
 
         foreach ($rawLines as $raw) {
@@ -63,7 +65,7 @@ class CartPricer
      */
     public function resolveLine(array $raw): PricedLine
     {
-        return $this->resolve($raw, $this->loadProducts([$raw])->get($raw['product_id']), ComboOffer::current());
+        return $this->resolve($raw, $this->loadProducts([$raw])->get($raw['product_id']), $this->prices->currentCombo());
     }
 
     /**
@@ -161,10 +163,14 @@ class CartPricer
      */
     private function loadProducts(array $rawLines): Collection
     {
-        return Product::query()
+        $products = Product::query()
             ->with(['category', 'variants', 'modifierGroups.modifiers'])
             ->whereKey(array_unique(array_column($rawLines, 'product_id')))
-            ->get()
-            ->keyBy('id');
+            ->get();
+
+        // Everything is charged at the price of the outlet taking the order.
+        $this->prices->apply($products);
+
+        return $products->keyBy('id');
     }
 }

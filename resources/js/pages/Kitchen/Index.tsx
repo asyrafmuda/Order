@@ -83,7 +83,7 @@ export default function KitchenIndex({ orders, ready, stations, filters, menu }:
         >
             <Head title="Kitchen Display" />
 
-            <nav className="scrollbar-none -mx-4 mb-5 flex gap-2 overflow-x-auto px-4" aria-label="Kitchen stations">
+            <nav className="scrollbar-none relative -mx-4 mb-5 flex gap-2 overflow-x-auto px-4" aria-label="Kitchen stations">
                 <StationTab label="All stations" queued={totals.queued} cooking={totals.cooking} active={filters.station === null} onClick={() => selectStation(null)} />
                 {stations.map((station) => (
                     <StationTab
