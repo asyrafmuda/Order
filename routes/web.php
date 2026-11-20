@@ -13,6 +13,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderLookupController;
 use App\Http\Controllers\OutletChoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ShopCodeController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\Webhooks\LoyverseWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,10 @@ Route::put('/outlet', OutletChoiceController::class)->name('outlets.choose');
 // Dine-in: the QR code on each table.
 Route::get('/t/{token}', [TableController::class, 'show'])->name('tables.show');
 Route::delete('/table', [TableController::class, 'destroy'])->name('tables.leave');
+
+// The outlet's own QR code, scanned at the counter or kiosk.
+Route::get('/s/{token}', [ShopCodeController::class, 'show'])->name('shop.show');
+Route::delete('/counter-order', [ShopCodeController::class, 'destroy'])->name('shop.leave');
 
 Route::inertia('/terms', 'Legal/Terms')->name('legal.terms');
 Route::inertia('/privacy', 'Legal/Privacy')->name('legal.privacy');

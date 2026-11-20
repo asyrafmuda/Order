@@ -98,7 +98,7 @@ class PlaceOrder
             throw new OrderException('Scan the QR code on your table to order for dine-in.');
         }
 
-        $reason = $this->paymentOptions->unavailableReason($data->paymentMethod, $cart->type, $user, $cart->total());
+        $reason = $this->paymentOptions->unavailableReason($data->paymentMethod, $cart->type, $user, $cart->total(), $data->atCounter);
 
         if ($reason !== null) {
             throw new OrderException("{$data->paymentMethod->label()} cannot be used for this order: {$reason}.");
@@ -141,7 +141,7 @@ class PlaceOrder
             'source' => $data->source,
             'dining_table_id' => $cart->type === OrderType::DineIn ? $data->table?->id : null,
             'table_label' => $cart->type === OrderType::DineIn ? $data->table?->name : null,
-            'customer_name' => filled($data->customerName) ? $data->customerName : ($data->table?->name ?? 'Guest'),
+            'customer_name' => filled($data->customerName) ? $data->customerName : ($data->table?->name ?? ($data->atCounter ? 'Walk-in' : 'Guest')),
             'customer_phone' => filled($data->customerPhone) ? Phone::normalize($data->customerPhone) : null,
             'customer_email' => $data->customerEmail,
             'type' => $cart->type,

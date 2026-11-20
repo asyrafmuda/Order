@@ -95,6 +95,8 @@ export interface Cart {
     zone: CartZone | null;
     /** Set when the customer scanned a table QR code: the order is dine-in for this table. */
     table: { id: number; name: string } | null;
+    /** Set when the customer scanned the shop QR code: they are ordering at the counter. */
+    at_counter: boolean;
     subtotal: number;
     delivery_fee: number;
     tax_rate: number;

@@ -31,7 +31,7 @@ class CheckoutController extends Controller
 
         return Inertia::render('Checkout/Create', [
             'zones' => DeliveryZone::query()->active()->forOutlet(app(OutletContext::class)->current())->orderBy('sort_order')->get(['id', 'name', 'areas', 'fee', 'min_order', 'eta_minutes']),
-            'paymentMethods' => $paymentOptions->for($priced->type, $user, $priced->total()),
+            'paymentMethods' => $paymentOptions->for($priced->type, $user, $priced->total(), $cart->atCounter()),
             'customer' => [
                 'name' => $user?->name ?? '',
                 'phone' => $user?->phone ?? '',
@@ -45,7 +45,7 @@ class CheckoutController extends Controller
 
     public function store(CheckoutRequest $request, Cart $cart, PlaceOrder $placeOrder, StartPayment $startPayment): SymfonyResponse
     {
-        $data = CheckoutData::fromArray([...$request->validated(), 'table' => $cart->table()]);
+        $data = CheckoutData::fromArray([...$request->validated(), 'table' => $cart->table(), 'at_counter' => $cart->atCounter()]);
         $order = $placeOrder->handle($cart->priced(), $data, $request->user());
 
         $cart->clear();
@@ -71,8 +71,10 @@ class CheckoutController extends Controller
             return Inertia::location($startPayment->handle($order));
         }
 
-        return redirect()->route('orders.show', $order)->with('success', $order->isDineIn()
-            ? "Order {$order->order_number} is in! We will bring it to {$order->table_label}."
-            : "Order {$order->order_number} is in! Pay at the counter when you collect.");
+        return redirect()->route('orders.show', $order)->with('success', match (true) {
+            $order->isDineIn() => "Order {$order->order_number} is in! We will bring it to {$order->table_label}.",
+            $data->atCounter => "Order {$order->order_number} is in! Pay at the counter, then wait for your number.",
+            default => "Order {$order->order_number} is in! Pay at the counter when you collect.",
+        });
     }
 }

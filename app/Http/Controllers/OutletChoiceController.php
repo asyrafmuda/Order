@@ -25,8 +25,9 @@ class OutletChoiceController extends Controller
 
         $outlet = Outlet::query()->findOrFail($validated['outlet_id']);
 
-        // A table and a delivery area belong to the outlet being left.
+        // A table, a counter and a delivery area belong to the outlet being left.
         $cart->leaveTable();
+        $cart->leaveCounter();
         $cart->setZone(null);
         $outlets->switchTo($outlet);
 

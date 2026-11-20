@@ -26,20 +26,23 @@ class CheckoutRequest extends FormRequest
         $delivery = $cart->type === OrderType::Delivery;
         // At a table the QR code already says where the food goes, so a name and number are optional.
         $dineIn = $cart->type === OrderType::DineIn;
+        // The same goes for someone who scanned the shop QR code and is standing at the counter.
+        $atCounter = app(Cart::class)->atCounter();
+        $optional = $dineIn || $atCounter;
         $phone = 'regex:/^\+?[0-9\s\-]{9,16}$/';
 
         return [
-            'customer_name' => [$dineIn ? 'nullable' : 'required', 'string', 'max:120'],
-            'customer_phone' => [$dineIn ? 'nullable' : 'required', 'string', $phone],
+            'customer_name' => [$optional ? 'nullable' : 'required', 'string', 'max:120'],
+            'customer_phone' => [$optional ? 'nullable' : 'required', 'string', $phone],
             'customer_email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:500'],
             'payment_method' => [
                 'required',
                 Rule::enum(PaymentMethod::class),
-                function (string $attribute, mixed $value, Closure $fail) use ($cart) {
+                function (string $attribute, mixed $value, Closure $fail) use ($cart, $atCounter) {
                     $method = PaymentMethod::tryFrom((string) $value);
                     $reason = $method
-                        ? app(PaymentOptions::class)->unavailableReason($method, $cart->type, $this->user(), $cart->total())
+                        ? app(PaymentOptions::class)->unavailableReason($method, $cart->type, $this->user(), $cart->total(), $atCounter)
                         : null;
 
                     if ($reason !== null) {

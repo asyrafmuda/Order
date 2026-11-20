@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\DiningTableRequest;
 use App\Models\DiningTable;
+use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,10 +14,12 @@ use Inertia\Response;
 
 class DiningTableController extends Controller
 {
-    public function index(): Response
+    public function index(Settings $settings): Response
     {
         return Inertia::render('Admin/Tables/Index', [
             'tables' => $this->tables(),
+            // The one code for the counter; an outlet with no tables uses only this.
+            'shopCode' => ShopQrController::present($this->outlet(), $settings),
         ]);
     }
 

@@ -46,20 +46,25 @@ const paymentHints: Record<PaymentMethod, string> = {
 };
 
 const tableHint = 'Pay at the counter before you leave';
+const counterHint = 'Pay at the counter now';
 
 export default function CheckoutCreate({ zones, paymentMethods, customer, addresses }: CheckoutProps) {
     const { cart, shop, auth, kitchen, outlet } = usePage().props;
     const delivery = cart?.type === 'delivery';
     // Sitting at a table: the QR code already says where the food goes.
     const table = cart?.table ?? null;
+    // Scanned the shop QR code at the counter: a pickup that needs no name and can be paid on the spot.
+    const atCounter = !table && Boolean(cart?.at_counter);
+    // Either way the customer is in the shop, so their details are optional.
+    const inShop = Boolean(table) || atCounter;
 
     const form = useForm({
         customer_name: customer.name,
         customer_phone: customer.phone,
         customer_email: customer.email,
         notes: '',
-        // Seated customers usually pay at the counter after eating, so that is preselected for them.
-        payment_method: ((cart?.table && paymentMethods.find((option) => option.value === 'cash' && option.available)?.value) ||
+        // Customers in the shop usually pay at the counter, so that is preselected for them.
+        payment_method: (((cart?.table || cart?.at_counter) && paymentMethods.find((option) => option.value === 'cash' && option.available)?.value) ||
             paymentMethods.find((option) => option.available)?.value ||
             'fpx') as PaymentMethod,
         recipient_name: '',
@@ -131,16 +136,16 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
 
             <form id="checkout-form" onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-6">
                 <div className="space-y-5">
-                    <Section step={1} title={table ? 'Your details (optional)' : 'Your details'} aside={!auth.user && <Link href={route('login')} className="text-xs font-semibold text-flame-400 hover:underline">Have an account? Sign in</Link>}>
+                    <Section step={1} title={inShop ? 'Your details (optional)' : 'Your details'} aside={!auth.user && <Link href={route('login')} className="text-xs font-semibold text-flame-400 hover:underline">Have an account? Sign in</Link>}>
                         <div className="grid gap-4 sm:grid-cols-2">
-                            <Input label="Name" autoComplete="name" required={!table} value={form.data.customer_name} onChange={(event) => form.setData('customer_name', event.target.value)} error={form.errors.customer_name} />
+                            <Input label="Name" autoComplete="name" required={!inShop} value={form.data.customer_name} onChange={(event) => form.setData('customer_name', event.target.value)} error={form.errors.customer_name} />
                             <Input
                                 label="Mobile number"
                                 type="tel"
                                 autoComplete="tel"
                                 placeholder="012-345 6789"
-                                hint={table ? 'Add it if you want order updates on your phone.' : 'Order updates are sent here.'}
-                                required={!table}
+                                hint={inShop ? 'Add it if you want order updates on your phone.' : 'Order updates are sent here.'}
+                                required={!inShop}
                                 value={form.data.customer_phone}
                                 onChange={(event) => form.setData('customer_phone', event.target.value)}
                                 error={form.errors.customer_phone}
@@ -157,7 +162,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                         </div>
                     </Section>
 
-                    <Section step={2} title={table ? 'Where you are sitting' : 'How do you want it?'}>
+                    <Section step={2} title={table ? 'Where you are sitting' : atCounter ? 'Where to collect' : 'How do you want it?'}>
                         {table && (
                             <div className="flex items-start gap-3 rounded-xl border border-brand-500 bg-brand-900 p-3.5">
                                 <UtensilsCrossed className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
@@ -170,7 +175,18 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                 </button>
                             </div>
                         )}
-                        <div className={cn('grid gap-3 sm:grid-cols-2', table && 'hidden')}>
+                        {atCounter && (
+                            <div className="flex items-start gap-3 rounded-xl border border-brand-500 bg-brand-900 p-3.5">
+                                <ShoppingBag className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-bold text-white">Ordering at the counter{outlet.multi ? ` · ${outlet.current.name}` : ''}</p>
+                                    <p className="text-xs text-ink-300">
+                                        Ready in about {kitchen.eta_min}–{kitchen.eta_max} min. Stay nearby — we call your number at {shop.counter}.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                        <div className={cn('grid gap-3 sm:grid-cols-2', inShop && 'hidden')}>
                             {shop.pickup_enabled && (
                                 <button type="button" className={choice(!delivery)} onClick={() => cartActions.setType('pickup')} aria-pressed={!delivery}>
                                     <ShoppingBag className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
@@ -193,7 +209,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                             )}
                         </div>
 
-                        {table ? null : delivery ? (
+                        {inShop ? null : delivery ? (
                             <div className="mt-5 space-y-4">
                                 <fieldset>
                                     <legend className="mb-2 text-xs font-semibold text-ink-300">Delivery area</legend>
@@ -274,7 +290,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                         <Icon className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                         <span>
                                             <span className="block text-sm font-bold text-white">{option.label}</span>
-                                            <span className="block text-xs text-ink-400">{option.reason ?? (table && option.value === 'cash' ? tableHint : paymentHints[option.value])}</span>
+                                            <span className="block text-xs text-ink-400">{option.reason ?? (option.value === 'cash' && table ? tableHint : option.value === 'cash' && atCounter ? counterHint : paymentHints[option.value])}</span>
                                         </span>
                                     </button>
                                 );

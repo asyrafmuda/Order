@@ -32,6 +32,8 @@ final readonly class CheckoutData
         public bool $paidAtCounter = false,
         /** Dine-in: the table the food goes to. */
         public ?DiningTable $table = null,
+        /** The customer scanned the shop QR code and is ordering at the counter. */
+        public bool $atCounter = false,
     ) {}
 
     /**
@@ -53,6 +55,7 @@ final readonly class CheckoutData
             postcode: $input['postcode'] ?? null,
             deliveryNotes: $input['delivery_notes'] ?? null,
             table: $input['table'] ?? null,
+            atCounter: (bool) ($input['at_counter'] ?? false),
         );
     }
 }

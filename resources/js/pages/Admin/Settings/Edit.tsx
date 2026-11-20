@@ -223,8 +223,8 @@ export default function SettingsEdit({ settings, multi }: { settings: Settings; 
                         <Toggle
                             checked={data.payments.dine_in_pay_at_counter}
                             onChange={(checked) => set('payments', 'dine_in_pay_at_counter', checked)}
-                            label="Table orders can pay at the counter"
-                            description="Seated customers order first and pay before they leave, without an account. Off: table orders must be paid online."
+                            label="Orders placed in the shop can pay at the counter"
+                            description="Customers who scan a table code or the shop code at the counter order first and pay your crew, without an account. Off: those orders must be paid online."
                         />
                     </div>
                 </Section>
