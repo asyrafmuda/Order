@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ComboOfferController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DeliveryZoneController;
+use App\Http\Controllers\Admin\DiningTableController;
 use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\KitchenStationController;
 use App\Http\Controllers\Admin\ModifierGroupController;
@@ -38,6 +39,10 @@ Route::resource('combo-offers', ComboOfferController::class)->only($crud);
 Route::resource('kitchen-stations', KitchenStationController::class)->only($crud);
 Route::resource('delivery-zones', DeliveryZoneController::class)->only($crud);
 Route::resource('riders', RiderController::class)->only($crud);
+
+Route::get('/tables/print', [DiningTableController::class, 'print'])->name('tables.print');
+Route::post('/tables/{table}/regenerate', [DiningTableController::class, 'regenerate'])->name('tables.regenerate');
+Route::resource('tables', DiningTableController::class)->only($crud);
 Route::resource('users', UserController::class)->only($crud);
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

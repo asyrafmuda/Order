@@ -12,6 +12,7 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderLookupController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TableController;
 use App\Http\Controllers\Webhooks\LoyverseWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', MenuController::class)->name('menu.index');
 Route::get('/kitchen-status', KitchenStatusController::class)->name('status.index');
+
+// Dine-in: the QR code on each table.
+Route::get('/t/{token}', [TableController::class, 'show'])->name('tables.show');
+Route::delete('/table', [TableController::class, 'destroy'])->name('tables.leave');
+
 Route::inertia('/terms', 'Legal/Terms')->name('legal.terms');
 Route::inertia('/privacy', 'Legal/Privacy')->name('legal.privacy');
 

@@ -28,6 +28,9 @@ interface PosTicketProps {
     tax: { rate: number; inclusive: boolean };
     type: 'pickup' | 'dine_in';
     customerName: string;
+    tables: { id: number; name: string; seats: number | null }[];
+    tableId: number | null;
+    onTable: (id: number | null) => void;
     receipt: PosReceipt | null;
     recent: RecentOrder[];
     onType: (type: 'pickup' | 'dine_in') => void;
@@ -42,7 +45,7 @@ interface PosTicketProps {
 
 /** The order being built: lines with one-tap quantity changes, totals and the Charge button. */
 export function PosTicket(props: PosTicketProps) {
-    const { lines, combo, totals, tax, type, customerName, receipt, recent } = props;
+    const { lines, combo, totals, tax, type, customerName, tables, tableId, receipt, recent } = props;
 
     return (
         <aside className="flex min-h-0 flex-1 flex-col border-ink-700 bg-ink-900 md:border-l" aria-label="Current order">
@@ -66,12 +69,31 @@ export function PosTicket(props: PosTicketProps) {
                         </button>
                     ))}
                 </div>
+                {type === 'dine_in' && tables.length > 0 && (
+                    <div className="scrollbar-none -mx-1 flex gap-1.5 overflow-x-auto px-1 py-0.5" role="radiogroup" aria-label="Table">
+                        {tables.map((table) => (
+                            <button
+                                key={table.id}
+                                type="button"
+                                role="radio"
+                                aria-checked={tableId === table.id}
+                                onClick={() => props.onTable(tableId === table.id ? null : table.id)}
+                                className={cn(
+                                    'h-11 shrink-0 rounded-lg border px-3 text-sm font-bold whitespace-nowrap transition-colors',
+                                    tableId === table.id ? 'border-flame-400 bg-flame-400 text-ink-950' : 'border-ink-600 bg-ink-850 text-ink-100 hover:border-ink-400',
+                                )}
+                            >
+                                {table.name}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 <input
                     type="text"
                     value={customerName}
                     maxLength={80}
                     onChange={(event) => props.onCustomerName(event.target.value)}
-                    placeholder={type === 'dine_in' ? 'Table or name (optional)' : 'Customer name (optional)'}
+                    placeholder={type === 'dine_in' && tables.length === 0 ? 'Table or name (optional)' : 'Customer name (optional)'}
                     aria-label="Customer name or table"
                     className="h-11 w-full rounded-lg border border-ink-600 bg-ink-850 px-3 text-sm text-ink-100 placeholder:text-ink-500 focus:border-flame-400 focus:outline-none"
                 />

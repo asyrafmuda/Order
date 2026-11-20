@@ -14,15 +14,15 @@ export default function ForgotPassword() {
 
     return (
         <AuthLayout
-            title="Reset password"
-            subtitle="Enter your email and we will send you a link to choose a new password."
+            title="Forgot your PIN?"
+            subtitle="If you added an email to your account, we will send a link to choose a new one. No email on your account? Ask our crew at the counter — they can reset your PIN in a moment."
             footer={
                 <Link href={route('login')} className="font-semibold text-flame-400 hover:underline">
                     Back to sign in
                 </Link>
             }
         >
-            <Head title="Reset password" />
+            <Head title="Forgot PIN" />
             <form onSubmit={submit} className="space-y-4">
                 <Input label="Email" type="email" autoFocus required value={form.data.email} onChange={(event) => form.setData('email', event.target.value)} error={form.errors.email} />
                 <Button type="submit" size="lg" className="w-full" loading={form.processing}>

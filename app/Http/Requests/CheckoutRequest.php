@@ -24,11 +24,13 @@ class CheckoutRequest extends FormRequest
     {
         $cart = app(Cart::class)->priced();
         $delivery = $cart->type === OrderType::Delivery;
+        // At a table the QR code already says where the food goes, so a name and number are optional.
+        $dineIn = $cart->type === OrderType::DineIn;
         $phone = 'regex:/^\+?[0-9\s\-]{9,16}$/';
 
         return [
-            'customer_name' => ['required', 'string', 'max:120'],
-            'customer_phone' => ['required', 'string', $phone],
+            'customer_name' => [$dineIn ? 'nullable' : 'required', 'string', 'max:120'],
+            'customer_phone' => [$dineIn ? 'nullable' : 'required', 'string', $phone],
             'customer_email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:500'],
             'payment_method' => [

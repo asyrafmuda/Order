@@ -4,6 +4,7 @@ namespace App\Data;
 
 use App\Enums\OrderSource;
 use App\Enums\PaymentMethod;
+use App\Models\DiningTable;
 use App\Models\User;
 
 /**
@@ -29,6 +30,8 @@ final readonly class CheckoutData
         public ?User $placedBy = null,
         /** Counter sales only: the customer already paid at the till. */
         public bool $paidAtCounter = false,
+        /** Dine-in: the table the food goes to. */
+        public ?DiningTable $table = null,
     ) {}
 
     /**
@@ -37,8 +40,8 @@ final readonly class CheckoutData
     public static function fromArray(array $input): self
     {
         return new self(
-            customerName: $input['customer_name'],
-            customerPhone: $input['customer_phone'],
+            customerName: $input['customer_name'] ?? '',
+            customerPhone: $input['customer_phone'] ?? null,
             customerEmail: $input['customer_email'] ?? null,
             paymentMethod: PaymentMethod::from($input['payment_method']),
             notes: $input['notes'] ?? null,
@@ -49,6 +52,7 @@ final readonly class CheckoutData
             city: $input['city'] ?? null,
             postcode: $input['postcode'] ?? null,
             deliveryNotes: $input['delivery_notes'] ?? null,
+            table: $input['table'] ?? null,
         );
     }
 }

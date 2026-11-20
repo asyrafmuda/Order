@@ -56,6 +56,11 @@ class PaymentOptions
             return 'Pickup orders only';
         }
 
+        // Seated customers pay at the counter like any walk-in.
+        if ($type === OrderType::DineIn) {
+            return $this->settings->bool('payments.dine_in_pay_at_counter') ? null : 'Please pay online for table orders';
+        }
+
         if ($this->settings->bool('payments.cash_requires_account') && ! $customer) {
             return 'Sign in to pay at the counter';
         }

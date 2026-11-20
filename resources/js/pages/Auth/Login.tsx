@@ -5,15 +5,16 @@ import { Checkbox, Input } from '@/components/ui/Form';
 import AuthLayout from '@/layouts/AuthLayout';
 
 const demoAccounts = [
-    ['Admin', 'admin@bossburger.test'],
-    ['Cashier', 'cashier@bossburger.test'],
-    ['Kitchen', 'kitchen@bossburger.test'],
-    ['Rider', 'rider@bossburger.test'],
-    ['Customer', 'customer@bossburger.test'],
+    ['Customer', '012-345 6789', '135790'],
+    ['Admin', 'admin@bossburger.test', 'password'],
+    ['Cashier', 'cashier@bossburger.test', 'password'],
+    ['Waiter', 'waiter@bossburger.test', 'password'],
+    ['Kitchen', 'kitchen@bossburger.test', 'password'],
+    ['Rider', 'rider@bossburger.test', 'password'],
 ];
 
 export default function Login({ demo }: { demo: boolean }) {
-    const form = useForm({ email: '', password: '', remember: false });
+    const form = useForm({ login: '', password: '', remember: true });
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -23,12 +24,12 @@ export default function Login({ demo }: { demo: boolean }) {
     return (
         <AuthLayout
             title="Sign in"
-            subtitle="Track your orders, reorder favourites, or open your staff workspace."
+            subtitle="Just your mobile number and PIN. No email needed."
             footer={
                 <>
-                    New here?{' '}
+                    First time here?{' '}
                     <Link href={route('register')} className="font-semibold text-flame-400 hover:underline">
-                        Create an account
+                        Create an account in 20 seconds
                     </Link>
                 </>
             }
@@ -36,28 +37,31 @@ export default function Login({ demo }: { demo: boolean }) {
             <Head title="Sign in" />
             <form onSubmit={submit} className="space-y-4">
                 <Input
-                    label="Email"
-                    type="email"
+                    label="Mobile number"
+                    hint="Crew: sign in with your email."
                     autoComplete="username"
+                    inputMode="email"
+                    placeholder="012-345 6789"
                     autoFocus
                     required
-                    value={form.data.email}
-                    onChange={(event) => form.setData('email', event.target.value)}
-                    error={form.errors.email}
+                    value={form.data.login}
+                    onChange={(event) => form.setData('login', event.target.value)}
+                    error={form.errors.login}
                 />
                 <Input
-                    label="Password"
+                    label="PIN"
                     type="password"
                     autoComplete="current-password"
+                    placeholder="6 digits"
                     required
                     value={form.data.password}
                     onChange={(event) => form.setData('password', event.target.value)}
                     error={form.errors.password}
                 />
                 <div className="flex items-center justify-between">
-                    <Checkbox label="Remember me" checked={form.data.remember} onChange={(event) => form.setData('remember', event.target.checked)} />
+                    <Checkbox label="Keep me signed in" checked={form.data.remember} onChange={(event) => form.setData('remember', event.target.checked)} />
                     <Link href={route('password.request')} className="text-sm text-ink-400 hover:text-white">
-                        Forgot password?
+                        Forgot PIN?
                     </Link>
                 </div>
                 <Button type="submit" size="lg" className="w-full" loading={form.processing}>
@@ -67,14 +71,14 @@ export default function Login({ demo }: { demo: boolean }) {
 
             {demo && (
                 <div className="mt-6 rounded-lg border border-dashed border-ink-600 p-3">
-                    <p className="text-xs font-semibold text-ink-400">Demo accounts (password: “password”)</p>
+                    <p className="text-xs font-semibold text-ink-400">Demo accounts (tap to fill)</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                        {demoAccounts.map(([label, email]) => (
+                        {demoAccounts.map(([label, login, password]) => (
                             <button
-                                key={email}
+                                key={label}
                                 type="button"
-                                onClick={() => form.setData({ email, password: 'password', remember: false })}
-                                className="rounded-md bg-ink-700 px-2 py-1 text-xs font-semibold text-ink-200 hover:bg-ink-600"
+                                onClick={() => form.setData({ login, password, remember: false })}
+                                className="rounded-md bg-ink-700 px-2.5 py-1.5 text-xs font-semibold text-ink-200 hover:bg-ink-600"
                             >
                                 {label}
                             </button>

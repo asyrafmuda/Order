@@ -57,7 +57,7 @@ class PlaceOrder
 
         // Online: cash orders go straight to the kitchen; the rest wait for payment.
         if (! $data->paymentMethod->isOnline()) {
-            $order = $this->transition->handle($order, OrderStatus::Confirmed, note: 'Pay at counter');
+            $order = $this->transition->handle($order, OrderStatus::Confirmed, note: $order->isDineIn() ? 'Ordered from the table, pay at counter' : 'Pay at counter');
         }
 
         return $order;
@@ -80,6 +80,20 @@ class PlaceOrder
 
         if (! $this->hours->isAcceptingOrders()) {
             throw OrderException::shopClosed($this->hours->closedMessage());
+        }
+
+        $channelOpen = match ($cart->type) {
+            OrderType::Pickup => $this->settings->bool('ordering.pickup_enabled'),
+            OrderType::Delivery => $this->settings->bool('ordering.delivery_enabled'),
+            OrderType::DineIn => $this->settings->bool('ordering.dine_in_enabled'),
+        };
+
+        if (! $channelOpen) {
+            throw new OrderException("{$cart->type->label()} orders are not available right now.");
+        }
+
+        if ($cart->type === OrderType::DineIn && ! $data->table) {
+            throw new OrderException('Scan the QR code on your table to order for dine-in.');
         }
 
         $reason = $this->paymentOptions->unavailableReason($data->paymentMethod, $cart->type, $user, $cart->total());
@@ -118,7 +132,9 @@ class PlaceOrder
             'user_id' => $user?->id,
             'placed_by_id' => $data->placedBy?->id,
             'source' => $data->source,
-            'customer_name' => $data->customerName,
+            'dining_table_id' => $cart->type === OrderType::DineIn ? $data->table?->id : null,
+            'table_label' => $cart->type === OrderType::DineIn ? $data->table?->name : null,
+            'customer_name' => filled($data->customerName) ? $data->customerName : ($data->table?->name ?? 'Guest'),
             'customer_phone' => filled($data->customerPhone) ? Phone::normalize($data->customerPhone) : null,
             'customer_email' => $data->customerEmail,
             'type' => $cart->type,

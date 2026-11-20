@@ -53,6 +53,7 @@ export default function StorefrontLayout({ children, search, subheader, bottomBa
     }, []);
 
     const delivery = cart?.type === 'delivery';
+    const table = cart?.table ?? null;
     const eta = delivery && cart?.zone ? `${cart.zone.eta_minutes - 10}–${cart.zone.eta_minutes} min` : `${kitchen.eta_min}–${kitchen.eta_max} min`;
 
     return (
@@ -65,11 +66,11 @@ export default function StorefrontLayout({ children, search, subheader, bottomBa
 
                     <div className="hidden items-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 sm:flex">
                         <span className="rounded bg-brand-600 px-1.5 py-0.5 text-[10px] font-extrabold tracking-wide text-white uppercase">
-                            {delivery ? 'Delivery' : 'Pickup'}
+                            {table ? 'Dine-in' : delivery ? 'Delivery' : 'Pickup'}
                         </span>
                         <span className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap text-ink-200">
                             <Clock className="size-3.5 text-flame-400" aria-hidden />
-                            {eta}
+                            {table ? `${table.name} · ${eta}` : eta}
                         </span>
                     </div>
 
@@ -270,7 +271,7 @@ function UserMenu() {
                 <div role="menu" className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-ink-700 bg-ink-800 py-1 shadow-2xl">
                     <div className="border-b border-ink-700 px-3 py-2">
                         <p className="truncate text-sm font-bold text-white">{auth.user.name}</p>
-                        <p className="truncate text-xs text-ink-400">{auth.user.email}</p>
+                        <p className="truncate text-xs text-ink-400">{auth.user.email ?? (auth.user.phone ? `+${auth.user.phone}` : '')}</p>
                     </div>
                     {auth.user.is_staff && (
                         <Link href={auth.user.home_url} className={cn(item, 'font-semibold text-flame-400')} role="menuitem">

@@ -31,6 +31,7 @@ class OrderResource extends JsonResource
             'type_label' => $this->type->label(),
             'source' => $this->source->value,
             'source_label' => $this->source->label(),
+            'table_label' => $this->table_label,
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'is_final' => $this->status->isFinal(),

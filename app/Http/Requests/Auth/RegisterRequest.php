@@ -3,9 +3,10 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use App\Rules\Pin;
+use App\Rules\UniquePhone;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
 {
@@ -21,9 +22,10 @@ class RegisterRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
-            'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/', new UniquePhone],
+            'pin' => ['required', 'string', new Pin],
+            // Optional: lets the customer reset a forgotten PIN by email.
+            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)],
         ];
     }
 

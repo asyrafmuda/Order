@@ -66,15 +66,17 @@ class OrderNotifier
                 $order->estimated_ready_at?->format('g:i A') ?? 'soon',
                 $trackUrl,
             ),
-            OrderStatus::Ready => $order->isDelivery()
-                ? "{$shop}: order {$number} is packed and waiting for the rider 🛵"
-                : sprintf(
+            OrderStatus::Ready => match (true) {
+                $order->isDelivery() => "{$shop}: order {$number} is packed and waiting for the rider 🛵",
+                $order->isDineIn() => "{$shop}: order {$number} is ready and on its way to {$order->table_label} 🍔",
+                default => sprintf(
                     "%s: order %s is READY 🍔\nShow pickup code %s at %s.",
                     $shop,
                     $number,
                     $order->pickup_code,
                     $this->settings->string('shop.counter'),
                 ),
+            },
             OrderStatus::OutForDelivery => sprintf(
                 "%s: order %s is on the way 🛵%s\nTrack it live: %s",
                 $shop,

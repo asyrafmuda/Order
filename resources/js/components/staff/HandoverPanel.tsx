@@ -117,11 +117,13 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                                 <Phone className="size-3" aria-hidden />+{order.customer_phone}
                             </a>
                         ) : (
-                            <span className="block text-xs font-normal text-ink-400">Walk-in, no phone</span>
+                            <span className="block text-xs font-normal text-ink-400">No phone given</span>
                         )}
                     </Fact>
-                    <Fact label="Pickup code">
-                        <span className="font-mono text-lg tracking-[0.2em] text-flame-400">{order.pickup_code}</span>
+                    <Fact label={order.type === 'dine_in' ? 'Serve to' : 'Pickup code'}>
+                        <span className={order.type === 'dine_in' ? 'font-display text-2xl leading-none text-flame-400 uppercase' : 'font-mono text-lg tracking-[0.2em] text-flame-400'}>
+                            {order.type === 'dine_in' ? (order.table_label ?? 'Table') : order.pickup_code}
+                        </span>
                     </Fact>
                     <Fact label={order.type_label}>
                         Placed {time(order.created_at)}

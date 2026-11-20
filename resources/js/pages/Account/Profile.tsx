@@ -34,7 +34,7 @@ export default function AccountProfile({ addresses, zones }: ProfileProps) {
     const user = auth.user!;
     const [editing, setEditing] = useState<Address | 'new' | null>(null);
 
-    const profile = useForm({ name: user.name, email: user.email, phone: user.phone ?? '' });
+    const profile = useForm({ name: user.name, email: user.email ?? '', phone: user.phone ?? '' });
     const password = useForm({ current_password: '', password: '', password_confirmation: '' });
 
     const saveProfile = (event: FormEvent) => {
@@ -57,8 +57,8 @@ export default function AccountProfile({ addresses, zones }: ProfileProps) {
                     <CardHeader icon={<UserRound className="size-4" />} title="Your details" />
                     <form onSubmit={saveProfile} className="space-y-4 p-4">
                         <Input label="Full name" required value={profile.data.name} onChange={(event) => profile.setData('name', event.target.value)} error={profile.errors.name} />
-                        <Input label="Email" type="email" required value={profile.data.email} onChange={(event) => profile.setData('email', event.target.value)} error={profile.errors.email} />
-                        <Input label="Mobile number" type="tel" required value={profile.data.phone} onChange={(event) => profile.setData('phone', event.target.value)} error={profile.errors.phone} />
+                        <Input label={user.is_staff ? 'Email' : 'Email (optional)'} hint={user.is_staff ? undefined : 'Lets you reset a forgotten PIN yourself.'} type="email" required={user.is_staff} value={profile.data.email} onChange={(event) => profile.setData('email', event.target.value)} error={profile.errors.email} />
+                        <Input label="Mobile number" hint={user.is_staff ? undefined : 'You sign in with this number.'} type="tel" required value={profile.data.phone} onChange={(event) => profile.setData('phone', event.target.value)} error={profile.errors.phone} />
                         <Button type="submit" loading={profile.processing}>
                             Save details
                         </Button>
@@ -66,13 +66,13 @@ export default function AccountProfile({ addresses, zones }: ProfileProps) {
                 </Card>
 
                 <Card>
-                    <CardHeader icon={<KeyRound className="size-4" />} title="Change password" />
+                    <CardHeader icon={<KeyRound className="size-4" />} title={user.is_staff ? 'Change password' : 'Change PIN'} />
                     <form onSubmit={savePassword} className="space-y-4 p-4">
-                        <Input label="Current password" type="password" autoComplete="current-password" required value={password.data.current_password} onChange={(event) => password.setData('current_password', event.target.value)} error={password.errors.current_password} />
-                        <Input label="New password" type="password" autoComplete="new-password" required value={password.data.password} onChange={(event) => password.setData('password', event.target.value)} error={password.errors.password} />
-                        <Input label="Confirm new password" type="password" autoComplete="new-password" required value={password.data.password_confirmation} onChange={(event) => password.setData('password_confirmation', event.target.value)} error={password.errors.password_confirmation} />
+                        <Input label={user.is_staff ? 'Current password' : 'Current PIN'} type="password" autoComplete="current-password" required value={password.data.current_password} onChange={(event) => password.setData('current_password', event.target.value)} error={password.errors.current_password} />
+                        <Input label={user.is_staff ? 'New password' : 'New PIN (6 digits)'} type="password" autoComplete="new-password" required value={password.data.password} onChange={(event) => password.setData('password', event.target.value)} error={password.errors.password} />
+                        <Input label={user.is_staff ? 'Confirm new password' : 'Confirm new PIN'} type="password" autoComplete="new-password" required value={password.data.password_confirmation} onChange={(event) => password.setData('password_confirmation', event.target.value)} error={password.errors.password_confirmation} />
                         <Button type="submit" loading={password.processing}>
-                            Update password
+                            {user.is_staff ? 'Update password' : 'Update PIN'}
                         </Button>
                     </form>
                 </Card>
