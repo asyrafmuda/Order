@@ -16,6 +16,9 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
     const type = cart?.type ?? 'pickup';
     const zone = cart?.zone;
     const table = cart?.table ?? null;
+    // Scanned the shop QR code: standing at the counter, so the outlet and "pickup" are settled.
+    const atCounter = !table && Boolean(cart?.at_counter);
+    const fixed = Boolean(table) || atCounter;
 
     const mode = (active: boolean) =>
         cn(
@@ -29,7 +32,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
                 outside its clipping and stretch the whole page sideways on a phone. */}
             <div className="scrollbar-none relative mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto px-4 py-2.5">
                 {/* Which branch: decided by the table QR when seated, otherwise the customer's choice. */}
-                {pickOutlet && !table && (
+                {pickOutlet && !fixed && (
                     <label className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-flame-500/40 bg-flame-900 pr-1 pl-2.5 text-xs font-bold text-flame-300">
                         <Store className="size-3.5" aria-hidden />
                         <span className="sr-only">Outlet</span>
@@ -46,7 +49,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
                         </select>
                     </label>
                 )}
-                {outlet.multi && (!pickOutlet || table) && (
+                {outlet.multi && (!pickOutlet || fixed) && (
                     <span className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 text-xs font-bold text-ink-100">
                         <Store className="size-3.5 text-flame-400" aria-hidden /> {outlet.current.name}
                     </span>
@@ -67,20 +70,38 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
                         </button>
                     </>
                 )}
-                {!table && shop.pickup_enabled && (
+                {atCounter && (
+                    <>
+                        <span className={mode(true)}>
+                            <Store className="size-4" aria-hidden />
+                            Ordering at the counter
+                        </span>
+                        <span className="shrink-0 text-xs text-ink-300">
+                            Ready in about {kitchen.eta_min}–{kitchen.eta_max} min. We call your number.
+                        </span>
+                        <button
+                            type="button"
+                            onClick={() => router.delete(route('shop.leave'), { preserveScroll: true })}
+                            className="h-9 shrink-0 rounded-lg px-2 text-xs font-semibold text-ink-400 underline hover:text-white"
+                        >
+                            Not at the shop?
+                        </button>
+                    </>
+                )}
+                {!fixed && shop.pickup_enabled && (
                     <button type="button" className={mode(type === 'pickup')} onClick={() => cartActions.setType('pickup')} aria-pressed={type === 'pickup'}>
                         <ShoppingBag className="size-4" aria-hidden />
                         Self Pickup ({kitchen.eta_min}–{kitchen.eta_max} min)
                     </button>
                 )}
-                {!table && shop.delivery_enabled && zones.length > 0 && (
+                {!fixed && shop.delivery_enabled && zones.length > 0 && (
                     <button type="button" className={mode(type === 'delivery')} onClick={() => cartActions.setType('delivery')} aria-pressed={type === 'delivery'}>
                         <Bike className="size-4" aria-hidden />
                         Delivery ({(zone?.eta_minutes ?? zones[0].eta_minutes) - 10}–{zone?.eta_minutes ?? zones[0].eta_minutes} min)
                     </button>
                 )}
 
-                {table ? null : type === 'delivery' && zone ? (
+                {fixed ? null : type === 'delivery' && zone ? (
                     <>
                         <label className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 pr-1 pl-2.5 text-xs text-ink-300">
                             <MapPin className="size-3.5 text-brand-400" aria-hidden />

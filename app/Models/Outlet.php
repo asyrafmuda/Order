@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 /**
  * One branch of the business. Orders, tables, delivery areas, staff and
  * sold-out items belong to an outlet; the menu and customers are shared.
  */
-#[Fillable(['name', 'slug', 'is_default', 'is_active', 'sort_order'])]
+#[Fillable(['name', 'slug', 'qr_token', 'is_default', 'is_active', 'sort_order'])]
 class Outlet extends Model
 {
     /** @use HasFactory<OutletFactory> */
@@ -29,6 +30,23 @@ class Outlet extends Model
             'is_default' => 'boolean',
             'is_active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Outlet $outlet) {
+            $outlet->qr_token ??= self::newQrToken();
+        });
+    }
+
+    /**
+     * The value in the outlet's shop QR code: the one on the counter that
+     * customers scan to order on the spot. Regenerating it makes printed
+     * copies stop working.
+     */
+    public static function newQrToken(): string
+    {
+        return Str::lower(Str::random(16));
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\OrderType;
 use App\Exceptions\InvalidCartLine;
 use App\Models\DeliveryZone;
 use App\Models\DiningTable;
+use App\Models\Outlet;
 use App\Models\Product;
 use App\Support\OutletContext;
 use App\Support\OutletPrices;
@@ -27,6 +28,11 @@ class Cart
     private const ZONE = 'cart.zone_id';
 
     private const TABLE = 'cart.table_id';
+
+    private const COUNTER = 'cart.at_counter';
+
+    /** How long a scan of the shop QR code counts as "standing at the counter". */
+    private const COUNTER_HOURS = 3;
 
     private ?PricedCart $priced = null;
 
@@ -151,6 +157,7 @@ class Cart
 
     public function sitAt(DiningTable $table): void
     {
+        $this->leaveCounter();
         $this->session->put(self::TABLE, $table->id);
         $this->table = $table;
         $this->priced = null;
@@ -163,11 +170,45 @@ class Cart
         $this->priced = null;
     }
 
+    /**
+     * Whether the customer scanned the shop QR code and is ordering at the
+     * counter: they are standing there, so the order is a pickup that needs
+     * no name or number and can be paid on the spot. A scan stops counting
+     * after a few hours, and when another outlet is chosen.
+     */
+    public function atCounter(): bool
+    {
+        $scan = $this->session->get(self::COUNTER);
+
+        return is_array($scan)
+            && ! $this->table()
+            && (int) ($scan['outlet_id'] ?? 0) === $this->outlets->current()->id
+            && (int) ($scan['at'] ?? 0) > now()->subHours(self::COUNTER_HOURS)->getTimestamp()
+            && $this->settings->bool('ordering.pickup_enabled');
+    }
+
+    public function arriveAtCounter(Outlet $outlet): void
+    {
+        $this->leaveTable();
+        $this->session->put(self::COUNTER, ['outlet_id' => $outlet->id, 'at' => now()->getTimestamp()]);
+        $this->session->put(self::TYPE, OrderType::Pickup->value);
+        $this->priced = null;
+    }
+
+    public function leaveCounter(): void
+    {
+        $this->session->forget(self::COUNTER);
+    }
+
     public function type(): OrderType
     {
         // Sitting at a table always means dine-in; leave the table to change it.
         if ($this->table()) {
             return OrderType::DineIn;
+        }
+
+        if ($this->atCounter()) {
+            return OrderType::Pickup;
         }
 
         $type = OrderType::tryFrom((string) $this->session->get(self::TYPE)) ?? OrderType::Pickup;
@@ -189,8 +230,10 @@ class Cart
 
     public function setType(OrderType $type): void
     {
-        // Choosing pickup or delivery means the customer is not ordering for the table.
+        // Choosing pickup or delivery means the customer is not ordering for the
+        // table, nor standing at the counter.
         $this->leaveTable();
+        $this->leaveCounter();
         $this->session->put(self::TYPE, $type->value);
         $this->priced = null;
     }
@@ -263,6 +306,7 @@ class Cart
         return [
             ...$priced->toArray(),
             'table' => $table ? ['id' => $table->id, 'name' => $table->name] : null,
+            'at_counter' => $this->atCounter(),
             'upsells' => $upsells->values()->all(),
         ];
     }

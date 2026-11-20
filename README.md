@@ -48,15 +48,25 @@ Staf login dengan email dan password `password`. Pelanggan login dengan nombor t
 | Waiter | waiter@bossburger.test | `/pos` (ambil order di meja), `/counter` |
 | Customer | `012-345 6789`, PIN `135790` | storefront |
 
-## Tiga cara order
+## Cara order
 
 Setiap satu boleh dihidup/matikan di Admin → Settings → Ordering. Kedai tanpa delivery hanya perlu matikan suis Delivery.
 
 | Cara | Siapa | Perlu login? |
 |---|---|---|
 | **Dine-in (QR meja)** | Pelanggan scan kod di meja, atau waiter ambil order di `/pos` dan pilih meja | Tidak. Nama dan telefon pun pilihan |
+| **Di kaunter (QR kedai)** | Pelanggan scan poster di kaunter/kiosk, atau staf tekan di `/pos` | Tidak. Nama dan telefon pun pilihan |
 | **Self pickup** | Pelanggan order dari rumah, datang ambil | Tidak (guest: nama + telefon) |
 | **Delivery** | Pelanggan order dari rumah, rider hantar | Tidak (guest: nama + telefon + alamat) |
+
+### Kiosk atau kaunter tanpa meja
+
+Kedai yang hanya ada kaunter (tiada meja, tiada delivery): di Admin → Settings (atau Outlets) matikan *Delivery* dan *Dine-in by table QR*. Ada dua cara ambil order, dan dua-dua masuk ke skrin dapur yang sama dengan nombor giliran yang sama:
+
+1. **Pelanggan cakap, staf tekan** — `/pos` di telefon atau tablet. Contoh "burger ayam ×3, burger daging ×2 tak nak sos": tekan burger ayam, `+` `+`, *Add*; tekan ikon pilihan pada burger daging, *No Sauce*, `+`, *Add*; *Charge* → cash. Nombor giliran keluar terus dan tiket masuk ke dapur — tak perlu tulis atas kertas.
+2. **Pelanggan scan sendiri** — Admin → **Tables & QR** → *Shop QR code* → **Print poster**, tampal di kaunter. Pelanggan scan, pilih, hantar: tiada app, tiada nama, tiada login. Bayar di kaunter (atau online) dan tunggu nombor dipanggil; telefon mereka tunjuk bila order siap.
+
+Setiap outlet ada kod kedainya sendiri; scan kod itu terus masuk ke menu dan harga outlet tersebut. Order melalui kod kedai dikira "pelanggan ada di kaunter" selama 3 jam selepas scan — sebab itu nama/telefon tak wajib dan bayar di kaunter dibenarkan tanpa akaun (ikut tetapan *Orders placed in the shop can pay at the counter*). Kalau kod tersebar, tekan *New code* dan cetak semula; kod lama terus mati. Sama seperti QR meja, **buka admin melalui alamat sebenar** (bukan `localhost`) sebelum mencetak.
 
 ### Dine-in dengan QR meja
 

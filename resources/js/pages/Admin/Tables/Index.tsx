@@ -1,5 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Plus, Printer, QrCode, RefreshCw } from 'lucide-react';
+import { Plus, Printer, QrCode, RefreshCw, Store } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useState, type FormEvent } from 'react';
 import { ActiveBadge } from '@/components/admin/ActiveBadge';
@@ -23,17 +23,26 @@ export interface DiningTable {
     url: string;
 }
 
-export default function TablesIndex({ tables }: { tables: DiningTable[] }) {
+/** The outlet's own code for the counter or kiosk. */
+export interface ShopCode {
+    /** What the code opens. */
+    url: string;
+    outlet: string;
+    /** False while the outlet is closed to customers or does not take pickup orders. */
+    usable: boolean;
+}
+
+export default function TablesIndex({ tables, shopCode }: { tables: DiningTable[]; shopCode: ShopCode }) {
     const [editing, setEditing] = useState<DiningTable | 'new' | null>(null);
 
     return (
         <BackOfficeLayout
             title="Tables & QR"
-            description="Customers scan the code on their table and order from their seat — no app, no sign-in"
+            description="Customers scan a code at the counter or on their table and order on their phone — no app, no sign-in"
             actions={
                 <>
                     <LinkButton href={route('admin.tables.print')} variant="secondary" size="sm" icon={<Printer className="size-4" aria-hidden />}>
-                        Print QR codes
+                        Print table codes
                     </LinkButton>
                     <Button size="sm" onClick={() => setEditing('new')} icon={<Plus className="size-4" aria-hidden />}>
                         New table
@@ -43,10 +52,48 @@ export default function TablesIndex({ tables }: { tables: DiningTable[] }) {
         >
             <Head title="Tables & QR" />
 
+            <Card className="mb-6 flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+                <div className="shrink-0 self-start rounded-lg bg-white p-2">
+                    <QRCodeSVG value={shopCode.url} size={112} aria-label="Shop QR code" />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-2 text-sm font-bold text-white">
+                        <Store className="size-4 shrink-0 text-flame-400" aria-hidden /> Shop QR code
+                        {!shopCode.usable && <Badge tone="red">Not in use</Badge>}
+                    </p>
+                    <p className="mt-1 text-sm text-ink-300">
+                        One code for the counter or kiosk. Customers scan it, order on their phone and collect when their number is called — no name, no sign-in, and they can pay you on the spot.
+                        No tables needed.
+                    </p>
+                    {!shopCode.usable && <p className="mt-1 text-xs font-medium text-flame-300">Scanning does nothing right now: this outlet is inactive or self pickup is switched off.</p>}
+                    <a href={shopCode.url} target="_blank" rel="noreferrer" className="mt-1 block truncate text-[11px] text-ink-500 hover:text-flame-400" title="Open what a customer sees after scanning">
+                        {shopCode.url.replace(/^https?:\/\//, '')}
+                    </a>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <LinkButton href={route('admin.shop-qr.print')} size="sm" icon={<Printer className="size-4" aria-hidden />}>
+                            Print poster
+                        </LinkButton>
+                        <ConfirmButton
+                            variant="ghost"
+                            size="sm"
+                            title="Issue a new shop QR code?"
+                            message="The printed poster stops working straight away, so reprint it. Use this if the code was shared around and is being misused."
+                            confirmLabel="Issue new code"
+                            onConfirm={() => router.post(route('admin.shop-qr.regenerate'), {}, { preserveScroll: true })}
+                            icon={<RefreshCw className="size-4" aria-hidden />}
+                        >
+                            New code
+                        </ConfirmButton>
+                    </div>
+                </div>
+            </Card>
+
+            <h2 className="mb-3 text-[11px] font-extrabold tracking-[0.15em] text-ink-400 uppercase">Tables (dine-in)</h2>
+
             {tables.length === 0 ? (
                 <Card>
                     <EmptyState icon={<QrCode className="size-8" />} title="No tables yet">
-                        Add your tables, print their QR codes and stick one on each table.
+                        Only for shops with seating: add your tables, print their QR codes and stick one on each table. A kiosk or takeaway counter needs just the shop code above.
                     </EmptyState>
                 </Card>
             ) : (

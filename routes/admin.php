@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ShopQrController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,10 @@ Route::post('/orders/{order}/resync', [OrderController::class, 'resync'])->name(
 
 Route::resource('delivery-zones', DeliveryZoneController::class)->only($crud);
 Route::resource('riders', RiderController::class)->only($crud);
+
+// The outlet's own QR code for the counter or kiosk.
+Route::get('/shop-qr', [ShopQrController::class, 'print'])->name('shop-qr.print');
+Route::post('/shop-qr/regenerate', [ShopQrController::class, 'regenerate'])->name('shop-qr.regenerate');
 
 Route::get('/tables/print', [DiningTableController::class, 'print'])->name('tables.print');
 Route::post('/tables/{table}/regenerate', [DiningTableController::class, 'regenerate'])->name('tables.regenerate');

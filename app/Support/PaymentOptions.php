@@ -17,7 +17,7 @@ class PaymentOptions
     /**
      * @return array<int, array{value: string, label: string, available: bool, reason: ?string}>
      */
-    public function for(OrderType $type, ?User $customer, int $total): array
+    public function for(OrderType $type, ?User $customer, int $total, bool $atCounter = false): array
     {
         $options = [];
 
@@ -26,7 +26,7 @@ class PaymentOptions
                 continue;
             }
 
-            $reason = $this->unavailableReason($method, $type, $customer, $total);
+            $reason = $this->unavailableReason($method, $type, $customer, $total, $atCounter);
 
             $options[] = [
                 'value' => $method->value,
@@ -41,8 +41,10 @@ class PaymentOptions
 
     /**
      * Null when the method can be used, otherwise a sentence for the customer.
+     *
+     * $atCounter: the customer scanned the shop QR code and is standing at the counter.
      */
-    public function unavailableReason(PaymentMethod $method, OrderType $type, ?User $customer, int $total): ?string
+    public function unavailableReason(PaymentMethod $method, OrderType $type, ?User $customer, int $total, bool $atCounter = false): ?string
     {
         if (! $this->settings->bool("payments.{$method->value}_enabled")) {
             return "{$method->label()} is not available right now.";
@@ -59,6 +61,12 @@ class PaymentOptions
         // Seated customers pay at the counter like any walk-in.
         if ($type === OrderType::DineIn) {
             return $this->settings->bool('payments.dine_in_pay_at_counter') ? null : 'Please pay online for table orders';
+        }
+
+        // So do customers who scanned the code at the counter: they are standing right there,
+        // so the account and order-size rules for orders placed from home do not apply.
+        if ($atCounter) {
+            return $this->settings->bool('payments.dine_in_pay_at_counter') ? null : 'Please pay online for orders placed by QR code';
         }
 
         if ($this->settings->bool('payments.cash_requires_account') && ! $customer) {
