@@ -72,7 +72,7 @@ export function StockPanel({ menu, onClose }: StockPanelProps) {
                                             aria-pressed={out}
                                             className={cn(
                                                 'flex h-14 items-center justify-between gap-3 rounded-xl border px-3 text-left text-sm font-bold transition-colors disabled:opacity-50',
-                                                out ? 'border-brand-600 bg-brand-900 text-white' : 'border-ink-600 bg-ink-900 text-ink-100 hover:border-ink-400',
+                                                out ? 'border-danger-600 bg-danger-900 text-strong' : 'border-ink-600 bg-ink-900 text-ink-100 hover:border-ink-400',
                                             )}
                                         >
                                             <span className="min-w-0 truncate">
@@ -82,7 +82,7 @@ export function StockPanel({ menu, onClose }: StockPanelProps) {
                                             <span
                                                 className={cn(
                                                     'shrink-0 rounded-md px-2 py-1 text-[10px] font-extrabold tracking-wide uppercase',
-                                                    out ? 'bg-brand-600 text-white' : locked ? 'bg-ink-700 text-ink-300' : 'bg-go-900 text-go-400',
+                                                    out ? 'bg-danger-600 text-white' : locked ? 'bg-ink-700 text-ink-300' : 'bg-go-900 text-go-400',
                                                 )}
                                             >
                                                 {locked ? product.status_label : out ? 'Sold out' : 'Available'}

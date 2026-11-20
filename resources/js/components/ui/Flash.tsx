@@ -38,7 +38,7 @@ export function Flash() {
                     role="status"
                     className={cn(
                         'pointer-events-auto flex w-full max-w-md animate-slide-up items-start gap-3 rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl',
-                        toast.kind === 'success' ? 'border-go-500/40 bg-go-900 text-go-400' : 'border-brand-600/50 bg-brand-900 text-brand-400',
+                        toast.kind === 'success' ? 'border-go-500/40 bg-go-900 text-go-400' : 'border-danger-600/50 bg-danger-900 text-danger-400',
                     )}
                 >
                     {toast.kind === 'success' ? <CheckCircle2 className="mt-0.5 size-4 shrink-0" /> : <TriangleAlert className="mt-0.5 size-4 shrink-0" />}
@@ -46,7 +46,7 @@ export function Flash() {
                     <button
                         type="button"
                         onClick={() => setToasts((current) => current.filter((item) => item.id !== toast.id))}
-                        className="text-ink-400 hover:text-white"
+                        className="text-ink-400 hover:text-strong"
                         aria-label="Dismiss"
                     >
                         <X className="size-4" />

@@ -64,7 +64,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
                         <button
                             type="button"
                             onClick={() => router.delete(route('tables.leave'), { preserveScroll: true })}
-                            className="h-9 shrink-0 rounded-lg px-2 text-xs font-semibold text-ink-400 underline hover:text-white"
+                            className="h-9 shrink-0 rounded-lg px-2 text-xs font-semibold text-ink-400 underline hover:text-strong"
                         >
                             Not at this table?
                         </button>
@@ -82,7 +82,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
                         <button
                             type="button"
                             onClick={() => router.delete(route('shop.leave'), { preserveScroll: true })}
-                            className="h-9 shrink-0 rounded-lg px-2 text-xs font-semibold text-ink-400 underline hover:text-white"
+                            className="h-9 shrink-0 rounded-lg px-2 text-xs font-semibold text-ink-400 underline hover:text-strong"
                         >
                             Not at the shop?
                         </button>

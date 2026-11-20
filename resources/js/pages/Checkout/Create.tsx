@@ -129,10 +129,10 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
         >
             <Head title="Checkout" />
 
-            <Link href={route('menu.index')} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-300 hover:text-white">
+            <Link href={route('menu.index')} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-300 hover:text-strong">
                 <ArrowLeft className="size-4" aria-hidden /> Back to menu
             </Link>
-            <h1 className="mb-4 font-display text-4xl leading-none text-white uppercase sm:text-5xl lg:mb-6">Checkout</h1>
+            <h1 className="mb-4 font-display text-4xl leading-none text-strong uppercase sm:text-5xl lg:mb-6">Checkout</h1>
 
             <form id="checkout-form" onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-6">
                 <div className="space-y-5">
@@ -167,10 +167,10 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                             <div className="flex items-start gap-3 rounded-xl border border-brand-500 bg-brand-900 p-3.5">
                                 <UtensilsCrossed className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-bold text-white">Dine-in · {table.name}</p>
+                                    <p className="text-sm font-bold text-strong">Dine-in · {table.name}</p>
                                     <p className="text-xs text-ink-300">Stay seated — we will bring your order to the table.</p>
                                 </div>
-                                <button type="button" onClick={() => cartActions.setType('pickup')} className="shrink-0 text-xs font-semibold text-ink-300 underline hover:text-white">
+                                <button type="button" onClick={() => cartActions.setType('pickup')} className="shrink-0 text-xs font-semibold text-ink-300 underline hover:text-strong">
                                     Take away instead
                                 </button>
                             </div>
@@ -179,7 +179,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                             <div className="flex items-start gap-3 rounded-xl border border-brand-500 bg-brand-900 p-3.5">
                                 <ShoppingBag className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-bold text-white">Ordering at the counter{outlet.multi ? ` · ${outlet.current.name}` : ''}</p>
+                                    <p className="text-sm font-bold text-strong">Ordering at the counter{outlet.multi ? ` · ${outlet.current.name}` : ''}</p>
                                     <p className="text-xs text-ink-300">
                                         Ready in about {kitchen.eta_min}–{kitchen.eta_max} min. Stay nearby — we call your number at {shop.counter}.
                                     </p>
@@ -191,7 +191,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                 <button type="button" className={choice(!delivery)} onClick={() => cartActions.setType('pickup')} aria-pressed={!delivery}>
                                     <ShoppingBag className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                     <span>
-                                        <span className="block text-sm font-bold text-white">Self Pickup</span>
+                                        <span className="block text-sm font-bold text-strong">Self Pickup</span>
                                         <span className="block text-xs text-ink-400">
                                             Ready in about {kitchen.eta_min}–{kitchen.eta_max} min at {shop.counter}
                                         </span>
@@ -202,7 +202,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                 <button type="button" className={choice(delivery)} onClick={() => cartActions.setType('delivery')} aria-pressed={delivery}>
                                     <Bike className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                     <span>
-                                        <span className="block text-sm font-bold text-white">Delivery</span>
+                                        <span className="block text-sm font-bold text-strong">Delivery</span>
                                         <span className="block text-xs text-ink-400">Our rider brings it to your door</span>
                                     </span>
                                 </button>
@@ -217,7 +217,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                         {zones.map((zone) => (
                                             <button key={zone.id} type="button" className={choice(cart.zone?.id === zone.id)} onClick={() => cartActions.setZone(zone.id)} aria-pressed={cart.zone?.id === zone.id}>
                                                 <span className="min-w-0">
-                                                    <span className="block text-sm font-bold text-white">{zone.name}</span>
+                                                    <span className="block text-sm font-bold text-strong">{zone.name}</span>
                                                     {zone.areas && <span className="block text-xs text-ink-400">{zone.areas}</span>}
                                                     <span className="mt-1 block text-xs font-bold text-flame-400">
                                                         {money(zone.fee)} · ~{zone.eta_minutes} min
@@ -240,7 +240,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                                     onClick={() => applyAddress(address)}
                                                     className="rounded-lg border border-ink-600 bg-ink-900 px-3 py-2 text-left text-xs hover:border-flame-400"
                                                 >
-                                                    <span className="block font-bold text-white">{address.label}</span>
+                                                    <span className="block font-bold text-strong">{address.label}</span>
                                                     <span className="text-ink-400">{address.line1}</span>
                                                 </button>
                                             ))}
@@ -262,7 +262,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                         ) : (
                             <p className="mt-4 rounded-lg bg-ink-900 px-3 py-2.5 text-xs text-ink-300">
                                 Collect from{' '}
-                                <strong className="text-white">
+                                <strong className="text-strong">
                                     {outlet.multi ? `${outlet.current.name} — ` : ''}
                                     {shop.address}
                                 </strong>
@@ -289,14 +289,14 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                     >
                                         <Icon className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                         <span>
-                                            <span className="block text-sm font-bold text-white">{option.label}</span>
+                                            <span className="block text-sm font-bold text-strong">{option.label}</span>
                                             <span className="block text-xs text-ink-400">{option.reason ?? (option.value === 'cash' && table ? tableHint : option.value === 'cash' && atCounter ? counterHint : paymentHints[option.value])}</span>
                                         </span>
                                     </button>
                                 );
                             })}
                         </div>
-                        {form.errors.payment_method && <p className="mt-2 text-xs font-medium text-brand-400">{form.errors.payment_method}</p>}
+                        {form.errors.payment_method && <p className="mt-2 text-xs font-medium text-danger-400">{form.errors.payment_method}</p>}
                         {!auth.user && paymentMethods.some((option) => option.value === 'cash' && option.reason?.startsWith('Sign in')) && (
                             <p className="mt-3 text-xs text-ink-400">
                                 Want to pay at the counter?{' '}
@@ -346,7 +346,7 @@ function Section({ step, title, aside, children }: { step: number; title: string
     return (
         <Card className="p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
-                <h2 className="flex items-center gap-2.5 text-base font-bold text-white">
+                <h2 className="flex items-center gap-2.5 text-base font-bold text-strong">
                     <span className="flex size-6 items-center justify-center rounded-full bg-brand-600 text-xs font-extrabold">{step}</span>
                     {title}
                 </h2>

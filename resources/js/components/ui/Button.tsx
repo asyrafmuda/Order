@@ -12,9 +12,9 @@ const base =
 const variants: Record<Variant, string> = {
     primary: 'bg-brand-600 text-white hover:bg-brand-500 active:bg-brand-700',
     secondary: 'bg-ink-700 text-ink-100 hover:bg-ink-600',
-    ghost: 'text-ink-300 hover:bg-ink-800 hover:text-white',
+    ghost: 'text-ink-300 hover:bg-ink-800 hover:text-strong',
     success: 'bg-go-500 text-ink-950 hover:bg-go-400',
-    danger: 'border border-brand-600/60 text-brand-400 hover:bg-brand-600 hover:text-white',
+    danger: 'border border-danger-600/60 text-danger-400 hover:bg-danger-600 hover:text-white',
     flame: 'bg-flame-400 text-ink-950 hover:bg-flame-300',
     outline: 'border border-ink-600 text-ink-100 hover:border-ink-400 hover:bg-ink-800',
 };

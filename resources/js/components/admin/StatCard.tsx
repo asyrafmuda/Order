@@ -10,10 +10,10 @@ interface StatCardProps {
 }
 
 const tones = {
-    default: 'text-white',
+    default: 'text-strong',
     flame: 'text-flame-400',
     green: 'text-go-400',
-    red: 'text-brand-400',
+    red: 'text-danger-400',
 };
 
 /** A headline number on the dashboard and reports. */

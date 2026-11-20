@@ -57,7 +57,7 @@ export default function TablesIndex({ tables, shopCode }: { tables: DiningTable[
                     <QRCodeSVG value={shopCode.url} size={112} aria-label="Shop QR code" />
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 text-sm font-bold text-white">
+                    <p className="flex items-center gap-2 text-sm font-bold text-strong">
                         <Store className="size-4 shrink-0 text-flame-400" aria-hidden /> Shop QR code
                         {!shopCode.usable && <Badge tone="red">Not in use</Badge>}
                     </p>
@@ -105,7 +105,7 @@ export default function TablesIndex({ tables, shopCode }: { tables: DiningTable[
                             </div>
                             <div className="flex min-w-0 flex-1 flex-col">
                                 <div className="flex items-start justify-between gap-2">
-                                    <p className="font-display text-3xl leading-none text-white uppercase">{table.name}</p>
+                                    <p className="font-display text-3xl leading-none text-strong uppercase">{table.name}</p>
                                     <ActiveBadge active={table.is_active} />
                                 </div>
                                 <p className="mt-1 text-xs text-ink-400">

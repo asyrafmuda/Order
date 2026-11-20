@@ -12,7 +12,7 @@ export function AccountTabs() {
     return (
         <div className="mb-6">
             <p className="text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">My account</p>
-            <h1 className="font-display text-5xl leading-none text-white uppercase">Hi, {auth.user?.name.split(' ')[0]}</h1>
+            <h1 className="font-display text-5xl leading-none text-strong uppercase">Hi, {auth.user?.name.split(' ')[0]}</h1>
             <nav className="mt-4 flex gap-1 border-b border-ink-700" aria-label="Account">
                 {tabs.map((tab) => {
                     const active = route().current(tab.route);
@@ -22,7 +22,7 @@ export function AccountTabs() {
                             key={tab.route}
                             href={route(tab.route)}
                             aria-current={active ? 'page' : undefined}
-                            className={cn('-mb-px border-b-2 px-3 py-2.5 text-sm font-bold', active ? 'border-brand-500 text-white' : 'border-transparent text-ink-400 hover:text-white')}
+                            className={cn('-mb-px border-b-2 px-3 py-2.5 text-sm font-bold', active ? 'border-brand-500 text-strong' : 'border-transparent text-ink-400 hover:text-strong')}
                         >
                             {tab.label}
                         </Link>

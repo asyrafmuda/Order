@@ -18,37 +18,6 @@ beforeEach(function () {
     $this->actingAs(userWithRole(UserRole::Admin));
 });
 
-/**
- * @param  array<string, array<string, mixed>>  $overrides
- * @return array<string, array<string, mixed>>
- */
-function settingsPayload(array $overrides = []): array
-{
-    return array_replace_recursive([
-        'shop' => [
-            'name' => 'Boss Burger HQ', 'tagline' => 'Night Grill', 'address' => '1 Jalan Besar', 'phone' => '+60 12-345 6789',
-            'whatsapp' => '60123456789', 'maps_url' => 'https://maps.example.com/boss', 'counter' => 'Counter 5',
-        ],
-        'outlets' => ['multi_enabled' => false],
-        'brand' => [
-            'icon' => '🍜', 'primary_color' => '#0F766E', 'accent_color' => '#fde047',
-            'footer_text' => 'Hand-pulled noodles since 1998.', 'badge_text' => '',
-        ],
-        'hours' => ['open' => '10:00', 'close' => '22:00', 'last_order' => '21:30'],
-        'ordering' => [
-            'enabled' => true, 'pickup_enabled' => true, 'delivery_enabled' => false, 'dine_in_enabled' => true,
-            'pickup_eta_min' => 10, 'pickup_eta_max' => 25, 'queue_prefix' => 'b', 'auto_close_hours' => 4,
-        ],
-        'payments' => [
-            'fpx_enabled' => true, 'card_enabled' => true, 'ewallet_enabled' => false, 'cash_enabled' => true,
-            'cash_requires_account' => false, 'cash_max_amount' => 8000, 'dine_in_pay_at_counter' => true,
-        ],
-        'pos' => ['quick_notes' => ['Pedas', ' Potong dua ', '']],
-        'tax' => ['rate' => 8, 'inclusive' => false],
-        'notifications' => ['enabled' => false],
-    ], $overrides);
-}
-
 describe('settings', function () {
     it('saves settings and applies them', function () {
         $this->put(route('admin.settings.update'), settingsPayload())->assertSessionHas('success');

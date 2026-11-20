@@ -2,15 +2,17 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import type { DeliveryStatus, KitchenItemStatus, OrderStatus, PaymentStatus, SyncStatus } from '@/types';
 
-export type Tone = 'neutral' | 'red' | 'flame' | 'green' | 'blue' | 'solid-red' | 'solid-flame' | 'solid-green';
+export type Tone = 'neutral' | 'red' | 'flame' | 'green' | 'blue' | 'solid-red' | 'solid-brand' | 'solid-flame' | 'solid-green';
 
 const tones: Record<Tone, string> = {
     neutral: 'bg-ink-700 text-ink-200',
-    red: 'bg-brand-900 text-brand-400 ring-1 ring-inset ring-brand-600/40',
+    red: 'bg-danger-900 text-danger-400 ring-1 ring-inset ring-danger-600/40',
     flame: 'bg-flame-900 text-flame-400 ring-1 ring-inset ring-flame-500/30',
     green: 'bg-go-900 text-go-400 ring-1 ring-inset ring-go-500/30',
-    blue: 'bg-sky-950 text-sky-300 ring-1 ring-inset ring-sky-500/30',
-    'solid-red': 'bg-brand-600 text-white',
+    blue: 'bg-info-900 text-info-400 ring-1 ring-inset ring-info-400/30',
+    // Solid red is a state (cooking, on the way); solid brand is a highlight in the shop's own colour.
+    'solid-red': 'bg-danger-600 text-white',
+    'solid-brand': 'bg-brand-600 text-white',
     'solid-flame': 'bg-flame-400 text-ink-950',
     'solid-green': 'bg-go-500 text-ink-950',
 };

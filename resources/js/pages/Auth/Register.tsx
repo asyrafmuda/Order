@@ -66,7 +66,7 @@ export default function Register() {
                         error={form.errors.email}
                     />
                 ) : (
-                    <button type="button" onClick={() => setWithEmail(true)} className="text-xs font-semibold text-ink-400 hover:text-white">
+                    <button type="button" onClick={() => setWithEmail(true)} className="text-xs font-semibold text-ink-400 hover:text-strong">
                         + Add an email so you can reset a forgotten PIN yourself
                     </button>
                 )}

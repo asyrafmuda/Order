@@ -17,7 +17,7 @@ export default function AuthLayout({ title, subtitle, children, footer }: AuthLa
                 <Logo />
             </Link>
             <div className="w-full max-w-md rounded-2xl border border-ink-700 bg-ink-850 p-6 shadow-2xl sm:p-8">
-                <h1 className="font-display text-3xl text-white uppercase">{title}</h1>
+                <h1 className="font-display text-3xl text-strong uppercase">{title}</h1>
                 {subtitle && <p className="mt-1 text-sm text-ink-400">{subtitle}</p>}
                 <div className="mt-6">{children}</div>
             </div>

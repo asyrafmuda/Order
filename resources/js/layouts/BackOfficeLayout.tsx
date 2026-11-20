@@ -134,7 +134,7 @@ export default function BackOfficeLayout({ title, description, actions, children
                                             onClick={() => setOpen(false)}
                                             className={cn(
                                                 'flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold transition-colors',
-                                                active ? 'bg-brand-600 text-white' : 'text-ink-300 hover:bg-ink-800 hover:text-white',
+                                                active ? 'bg-brand-600 text-white' : 'text-ink-300 hover:bg-ink-800 hover:text-strong',
                                             )}
                                             aria-current={active ? 'page' : undefined}
                                         >
@@ -149,18 +149,18 @@ export default function BackOfficeLayout({ title, description, actions, children
                 ))}
             </nav>
             <div className="space-y-1 border-t border-ink-700 p-3">
-                <Link href={route('menu.index')} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-ink-300 hover:bg-ink-800 hover:text-white">
+                <Link href={route('menu.index')} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-ink-300 hover:bg-ink-800 hover:text-strong">
                     <Store className="size-4" aria-hidden /> View storefront
                 </Link>
                 <button
                     type="button"
                     onClick={() => router.post(route('logout'))}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-ink-300 hover:bg-ink-800 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-ink-300 hover:bg-ink-800 hover:text-strong"
                 >
                     <LogOut className="size-4" aria-hidden /> Sign out
                 </button>
                 <div className="px-2.5 pt-2">
-                    <p className="truncate text-sm font-bold text-white">{auth.user?.name}</p>
+                    <p className="truncate text-sm font-bold text-strong">{auth.user?.name}</p>
                     <p className="text-xs text-ink-400">{auth.user?.role_label}</p>
                 </div>
             </div>
@@ -183,7 +183,7 @@ export default function BackOfficeLayout({ title, description, actions, children
                     <MenuIcon className="size-5" />
                 </button>
                 <div className="min-w-0 flex-1">
-                    <h1 className="truncate font-display text-2xl leading-none text-white uppercase">{title}</h1>
+                    <h1 className="truncate font-display text-2xl leading-none text-strong uppercase">{title}</h1>
                     {description && <p className="mt-0.5 truncate text-xs text-ink-400">{description}</p>}
                 </div>
                 {/* On phones the outlet sits on its own row under the title, so the title keeps its room. */}
@@ -217,13 +217,13 @@ export default function BackOfficeLayout({ title, description, actions, children
                             className={cn('size-2 rounded-full', {
                                 'bg-go-400': kitchen.level === 'quiet' || kitchen.level === 'normal',
                                 'bg-flame-400': kitchen.level === 'busy',
-                                'bg-brand-500': kitchen.level === 'slammed',
+                                'bg-danger-500': kitchen.level === 'slammed',
                             })}
                         />
                         Kitchen: {kitchen.label} · {kitchen.active_orders} in queue
                     </span>
                     <span className="flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-xs font-semibold text-ink-200">
-                        <span className={cn('size-2 rounded-full', pos.connected ? 'bg-go-400' : 'bg-brand-500')} />
+                        <span className={cn('size-2 rounded-full', pos.connected ? 'bg-go-400' : 'bg-danger-500')} />
                         POS: {pos.label}
                     </span>
                 </div>

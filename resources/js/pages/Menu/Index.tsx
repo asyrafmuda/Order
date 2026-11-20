@@ -72,7 +72,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
     const pill = (active: boolean) =>
         cn(
             'flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-xs font-bold whitespace-nowrap transition-colors',
-            active ? 'bg-brand-600 text-white' : 'border border-ink-700 bg-ink-850 text-ink-300 hover:border-ink-500 hover:text-white',
+            active ? 'bg-brand-600 text-white' : 'border border-ink-700 bg-ink-850 text-ink-300 hover:border-ink-500 hover:text-strong',
         );
 
     return (
@@ -86,7 +86,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                 <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-ink-700 bg-ink-850 px-3 py-2.5 sm:px-4 sm:py-3 lg:mb-4">
                     <Badge tone="solid-flame">Hot deal</Badge>
                     <p className="min-w-0 flex-1 basis-40 text-sm leading-snug">
-                        <strong className="font-extrabold text-white uppercase">Upgrade to {combo.name}</strong>
+                        <strong className="font-extrabold text-strong uppercase">Upgrade to {combo.name}</strong>
                         <span className="hidden text-ink-300 sm:inline"> — {combo.description}</span>
                     </p>
                     <span className="text-sm font-extrabold text-flame-400">+{money(combo.price)}</span>
@@ -125,7 +125,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                                             {category.eyebrow}
                                         </p>
                                     )}
-                                    <h2 id={`category-${category.id}`} className="font-display text-3xl leading-none text-white uppercase sm:text-4xl">
+                                    <h2 id={`category-${category.id}`} className="font-display text-3xl leading-none text-strong uppercase sm:text-4xl">
                                         {category.name}
                                     </h2>
                                 </div>

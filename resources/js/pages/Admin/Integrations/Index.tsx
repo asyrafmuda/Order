@@ -56,13 +56,13 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                 <Card>
                     <CardHeader title="Point of sale" icon={<Plug className="size-4" />} action={<Badge tone={pos.configured ? 'green' : 'red'}>{pos.configured ? 'Configured' : 'Not configured'}</Badge>} />
                     <dl className="space-y-2 px-4 py-3 text-sm">
-                        <Row label="Provider" value={<span className="font-bold text-white capitalize">{pos.provider}</span>} />
+                        <Row label="Provider" value={<span className="font-bold text-strong capitalize">{pos.provider}</span>} />
                         <Row label="Products linked" value={`${pos.products_linked} of ${pos.products_linked + pos.products_unlinked}`} />
                         <Row
                             label="Orders failing to sync"
                             value={
                                 pos.orders_failed > 0 ? (
-                                    <Link href={route('admin.orders.index')} className="font-bold text-brand-400 hover:underline">
+                                    <Link href={route('admin.orders.index')} className="font-bold text-danger-400 hover:underline">
                                         {pos.orders_failed}
                                     </Link>
                                 ) : (
@@ -88,7 +88,7 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                 <Card>
                     <CardHeader title="Payment gateway" icon={<CreditCard className="size-4" />} action={<Badge tone={payment.gateway === 'fake' ? 'flame' : 'green'}>{payment.gateway === 'fake' ? 'Simulated' : 'Live'}</Badge>} />
                     <dl className="space-y-2 px-4 py-3 text-sm">
-                        <Row label="Driver" value={<span className="font-bold text-white capitalize">{payment.gateway}</span>} />
+                        <Row label="Driver" value={<span className="font-bold text-strong capitalize">{payment.gateway}</span>} />
                     </dl>
                     <p className="border-t border-ink-700 px-4 py-3 text-xs leading-relaxed text-ink-400">
                         {payment.gateway === 'fake'
@@ -101,7 +101,7 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                 <Card>
                     <CardHeader title="Customer messaging" icon={<MessageSquareText className="size-4" />} action={<Badge tone={messaging.channel === 'log' ? 'flame' : 'green'}>{messaging.channel === 'log' ? 'Log only' : 'Live'}</Badge>} />
                     <dl className="space-y-2 px-4 py-3 text-sm">
-                        <Row label="Channel" value={<span className="font-bold text-white capitalize">{messaging.channel}</span>} />
+                        <Row label="Channel" value={<span className="font-bold text-strong capitalize">{messaging.channel}</span>} />
                     </dl>
                     <p className="border-t border-ink-700 px-4 py-3 text-xs leading-relaxed text-ink-400">
                         {messaging.channel === 'log'
@@ -141,7 +141,7 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                                     </Td>
                                     <Td>
                                         {log.order_uuid ? (
-                                            <Link href={route('admin.orders.show', log.order_uuid)} className="font-bold text-white hover:text-flame-400">
+                                            <Link href={route('admin.orders.show', log.order_uuid)} className="font-bold text-strong hover:text-flame-400">
                                                 #{log.order_number}
                                             </Link>
                                         ) : (
@@ -151,7 +151,7 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                                     <Td>
                                         <Badge tone={statusTone(log.status)}>{log.status}</Badge>
                                     </Td>
-                                    <Td className="max-w-md text-xs whitespace-normal text-brand-400">{log.error}</Td>
+                                    <Td className="max-w-md text-xs whitespace-normal text-danger-400">{log.error}</Td>
                                 </tr>
                             ))}
                         </tbody>
@@ -180,7 +180,7 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                                     <Td className="text-xs whitespace-nowrap text-ink-300">{dateTime(log.at)}</Td>
                                     <Td>
                                         {log.order_uuid ? (
-                                            <Link href={route('admin.orders.show', log.order_uuid)} className="font-bold text-white hover:text-flame-400">
+                                            <Link href={route('admin.orders.show', log.order_uuid)} className="font-bold text-strong hover:text-flame-400">
                                                 #{log.order_number}
                                             </Link>
                                         ) : (
@@ -197,7 +197,7 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                                     </Td>
                                     <Td className="max-w-lg text-xs leading-relaxed whitespace-pre-line text-ink-300">
                                         {log.message}
-                                        {log.error && <span className="mt-1 block text-brand-400">{log.error}</span>}
+                                        {log.error && <span className="mt-1 block text-danger-400">{log.error}</span>}
                                     </Td>
                                 </tr>
                             ))}

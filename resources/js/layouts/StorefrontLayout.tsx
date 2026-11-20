@@ -149,7 +149,7 @@ export default function StorefrontLayout({ children, search, subheader, bottomBa
                         <a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className="font-semibold text-go-400 hover:underline">
                             WhatsApp us
                         </a>
-                        <Link href={route('orders.track')} className="block hover:text-white">
+                        <Link href={route('orders.track')} className="block hover:text-strong">
                             Track an order
                         </Link>
                     </FooterBlock>
@@ -193,7 +193,7 @@ function BottomTab({ label, icon: Icon, href, active }: { label: string; icon: L
         <Link
             href={href}
             aria-current={active ? 'page' : undefined}
-            className={cn('flex flex-col items-center justify-center gap-1 text-[11px] font-bold', active ? 'text-brand-400' : 'text-ink-400 hover:text-white')}
+            className={cn('flex flex-col items-center justify-center gap-1 text-[11px] font-bold', active ? 'text-brand-400' : 'text-ink-400 hover:text-strong')}
         >
             <Icon className={cn('size-5', active && 'drop-shadow-[0_0_8px_color-mix(in_srgb,var(--color-brand-500)_70%,transparent)]')} aria-hidden />
             {label}
@@ -209,7 +209,7 @@ function NavTab({ label, route: name, match }: Pick<Tab, 'label' | 'route' | 'ma
             href={route(name)}
             className={cn(
                 'rounded-lg px-3 py-2 text-xs font-bold whitespace-nowrap transition-colors',
-                active ? 'bg-brand-600 text-white' : 'text-ink-300 hover:bg-ink-800 hover:text-white',
+                active ? 'bg-brand-600 text-white' : 'text-ink-300 hover:bg-ink-800 hover:text-strong',
             )}
             aria-current={active ? 'page' : undefined}
         >
@@ -221,7 +221,7 @@ function NavTab({ label, route: name, match }: Pick<Tab, 'label' | 'route' | 'ma
 function FooterBlock({ title, children }: { title: string; children: ReactNode }) {
     return (
         <div className="space-y-1.5 text-xs text-ink-400">
-            <h3 className="mb-2 text-[11px] font-extrabold tracking-wider text-white uppercase">{title}</h3>
+            <h3 className="mb-2 text-[11px] font-extrabold tracking-wider text-strong uppercase">{title}</h3>
             {children}
         </div>
     );
@@ -271,7 +271,7 @@ function UserMenu() {
             {open && (
                 <div role="menu" className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-ink-700 bg-ink-800 py-1 shadow-2xl">
                     <div className="border-b border-ink-700 px-3 py-2">
-                        <p className="truncate text-sm font-bold text-white">{auth.user.name}</p>
+                        <p className="truncate text-sm font-bold text-strong">{auth.user.name}</p>
                         <p className="truncate text-xs text-ink-400">{auth.user.email ?? (auth.user.phone ? `+${auth.user.phone}` : '')}</p>
                     </div>
                     {auth.user.is_staff && (

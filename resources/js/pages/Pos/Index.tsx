@@ -195,7 +195,7 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
                 <Link href={auth.user?.home_url ?? '/'} aria-label="Back to workspace">
                     <Logo compact />
                 </Link>
-                <h1 className="hidden font-display text-2xl leading-none whitespace-nowrap text-white uppercase lg:block">Take Order</h1>
+                <h1 className="hidden font-display text-2xl leading-none whitespace-nowrap text-strong uppercase lg:block">Take Order</h1>
                 {outlet.multi && (
                     <span className="hidden max-w-40 shrink-0 truncate rounded-lg border border-flame-500/40 bg-flame-900 px-2.5 py-1.5 text-xs font-bold text-flame-300 lg:block">{outlet.current.name}</span>
                 )}
@@ -225,7 +225,7 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
                         className="h-11 w-full rounded-xl border border-ink-600 bg-ink-850 pr-9 pl-9 text-sm text-ink-100 placeholder:text-ink-500 focus:border-flame-400 focus:outline-none"
                     />
                     {query !== '' && (
-                        <button type="button" onClick={() => setQuery('')} className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-ink-400 hover:text-white" aria-label="Clear search">
+                        <button type="button" onClick={() => setQuery('')} className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-ink-400 hover:text-strong" aria-label="Clear search">
                             <X className="size-4" />
                         </button>
                     )}
@@ -241,7 +241,7 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
                     <Link href={route('kitchen.index')} className="flex h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-bold text-ink-200 hover:bg-ink-800">
                         <ChefHat className="size-4" aria-hidden /> <span className="hidden sm:inline">Kitchen</span>
                     </Link>
-                    <button type="button" onClick={() => router.post(route('logout'))} className="flex h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-bold text-ink-400 hover:bg-ink-800 hover:text-white" aria-label="Sign out">
+                    <button type="button" onClick={() => router.post(route('logout'))} className="flex h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-bold text-ink-400 hover:bg-ink-800 hover:text-strong" aria-label="Sign out">
                         <LogOut className="size-4" aria-hidden />
                     </button>
                 </nav>
@@ -346,7 +346,7 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
                 type="button"
                 onClick={() => setTicketOpen(true)}
                 className={cn(
-                    'flex h-16 shrink-0 items-center justify-between px-4 pb-safe text-white md:hidden',
+                    'flex h-16 shrink-0 items-center justify-between px-4 pb-safe text-strong md:hidden',
                     lines.length > 0 ? 'bg-brand-600' : 'border-t border-ink-700 bg-ink-900 text-ink-300',
                 )}
             >

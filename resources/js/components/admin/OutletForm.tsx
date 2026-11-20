@@ -65,7 +65,7 @@ export function OutletForm({ outlet, template, mode, identity, formId, onSuccess
                                 label="Open to customers"
                                 description="Inactive outlets are hidden from customers. Staff can still finish the orders already in."
                             />
-                            {errors.is_active && <p className="mt-1 text-xs font-medium text-brand-400">{errors.is_active}</p>}
+                            {errors.is_active && <p className="mt-1 text-xs font-medium text-danger-400">{errors.is_active}</p>}
                         </div>
                     )}
                 </div>

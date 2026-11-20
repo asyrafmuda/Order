@@ -138,6 +138,8 @@ export interface SharedProps {
     auth: { user: AuthUser | null };
     flash: { success: string | null; error: string | null; receipt: PosReceipt | null };
     shop: Shop;
+    /** Dark or light, with the CSS custom properties for the chosen brand colours. */
+    theme: { mode: 'dark' | 'light'; css: string; page_color: string };
     kitchen: KitchenLoad;
     pos: { provider: string; label: string; connected: boolean; simulated: boolean };
     cart: Cart | null;

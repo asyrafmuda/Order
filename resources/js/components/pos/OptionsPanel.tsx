@@ -93,7 +93,7 @@ export function OptionsPanel({ product, combo, quickNotes, editing, onSubmit, on
             <header className="flex items-center gap-3 border-b border-ink-700 px-4 py-3">
                 <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">{editing ? 'Edit item' : 'Add item'}</p>
-                    <h2 className="truncate font-display text-2xl leading-none text-white uppercase sm:text-3xl">
+                    <h2 className="truncate font-display text-2xl leading-none text-strong uppercase sm:text-3xl">
                         {product.code && <span className="mr-2 text-ink-400">{product.code}</span>}
                         {product.name}
                     </h2>
@@ -170,13 +170,13 @@ export function OptionsPanel({ product, combo, quickNotes, editing, onSubmit, on
 
             <footer className="flex items-center gap-3 border-t border-ink-700 px-4 py-3">
                 <div className="flex items-center rounded-xl border border-ink-600 bg-ink-850">
-                    <button type="button" className="flex h-14 w-11 items-center justify-center text-ink-200 hover:text-white disabled:opacity-30 sm:w-14" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)} aria-label="Decrease quantity">
+                    <button type="button" className="flex h-14 w-11 items-center justify-center text-ink-200 hover:text-strong disabled:opacity-30 sm:w-14" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)} aria-label="Decrease quantity">
                         <Minus className="size-5" />
                     </button>
-                    <span className="w-8 text-center font-display text-3xl leading-none text-white sm:w-10" aria-live="polite">
+                    <span className="w-8 text-center font-display text-3xl leading-none text-strong sm:w-10" aria-live="polite">
                         {quantity}
                     </span>
-                    <button type="button" className="flex h-14 w-11 items-center justify-center text-ink-200 hover:text-white disabled:opacity-30 sm:w-14" disabled={quantity >= 50} onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">
+                    <button type="button" className="flex h-14 w-11 items-center justify-center text-ink-200 hover:text-strong disabled:opacity-30 sm:w-14" disabled={quantity >= 50} onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">
                         <Plus className="size-5" />
                     </button>
                 </div>
@@ -208,8 +208,8 @@ function Group({ title, hint, attention, children }: { title: string; hint?: str
     return (
         <fieldset>
             <legend className="mb-2 flex w-full items-baseline gap-2">
-                <span className={cn('text-xs font-extrabold tracking-[0.12em] uppercase', attention ? 'text-brand-400' : 'text-ink-200')}>{title}</span>
-                {hint && <span className={cn('text-[11px]', attention ? 'font-bold text-brand-400' : 'text-ink-500')}>{hint}</span>}
+                <span className={cn('text-xs font-extrabold tracking-[0.12em] uppercase', attention ? 'text-danger-400' : 'text-ink-200')}>{title}</span>
+                {hint && <span className={cn('text-[11px]', attention ? 'font-bold text-danger-400' : 'text-ink-500')}>{hint}</span>}
             </legend>
             <div className="flex flex-wrap gap-2">{children}</div>
         </fieldset>
@@ -230,7 +230,7 @@ function Chip({ active, onClick, suffix, large, children }: { active: boolean; o
         >
             {active && !large && <Check className="size-4 shrink-0" aria-hidden />}
             {children}
-            {suffix && <span className={cn('text-xs font-extrabold', active ? 'text-white/90' : 'text-flame-400')}>{suffix}</span>}
+            {suffix && <span className={cn('text-xs font-extrabold', active ? 'text-strong/90' : 'text-flame-400')}>{suffix}</span>}
         </button>
     );
 }

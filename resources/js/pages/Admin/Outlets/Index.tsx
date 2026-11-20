@@ -53,7 +53,7 @@ export default function OutletsIndex({ outlets, multi }: { outlets: OutletRow[];
                     <Card key={outlet.id} className="flex flex-col p-4">
                         <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                                <p className="truncate font-display text-3xl leading-none text-white uppercase">{outlet.name}</p>
+                                <p className="truncate font-display text-3xl leading-none text-strong uppercase">{outlet.name}</p>
                                 <p className="mt-1 text-xs text-ink-400">{outlet.settings.shop.address}</p>
                             </div>
                             <div className="flex shrink-0 flex-col items-end gap-1">
@@ -152,7 +152,7 @@ function Figure({ label, value, highlight }: { label: string; value: string; hig
     return (
         <div className="rounded-lg bg-ink-900 px-2 py-2">
             <dt className="text-[10px] font-bold tracking-wider text-ink-400 uppercase">{label}</dt>
-            <dd className={`font-display text-2xl leading-none whitespace-nowrap ${highlight ? 'text-flame-400' : 'text-white'}`}>{value}</dd>
+            <dd className={`font-display text-2xl leading-none whitespace-nowrap ${highlight ? 'text-flame-400' : 'text-strong'}`}>{value}</dd>
         </div>
     );
 }

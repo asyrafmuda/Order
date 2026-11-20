@@ -131,7 +131,7 @@ export default function ProductForm({ product, categories, stations, modifierGro
         <BackOfficeLayout title={product ? 'Edit product' : 'New product'} description={product?.name ?? 'Add an item to the menu'}>
             <Head title={product ? `Edit ${product.name}` : 'New product'} />
 
-            <Link href={route('admin.products.index')} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-ink-300 hover:text-white">
+            <Link href={route('admin.products.index')} className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-ink-300 hover:text-strong">
                 <ArrowLeft className="size-4" aria-hidden /> All products
             </Link>
 
@@ -241,7 +241,7 @@ export default function ProductForm({ product, categories, stations, modifierGro
                                             </Button>
                                         </div>
                                     ))}
-                                    {errors.variants && <p className="text-xs font-medium text-brand-400">{errors.variants}</p>}
+                                    {errors.variants && <p className="text-xs font-medium text-danger-400">{errors.variants}</p>}
                                 </fieldset>
                             )}
                         </div>
@@ -278,7 +278,7 @@ export default function ProductForm({ product, categories, stations, modifierGro
                                     ))}
                                 </div>
                             )}
-                            {errors.modifier_group_ids && <p className="mt-2 text-xs font-medium text-brand-400">{errors.modifier_group_ids}</p>}
+                            {errors.modifier_group_ids && <p className="mt-2 text-xs font-medium text-danger-400">{errors.modifier_group_ids}</p>}
                         </div>
                     </Card>
                 </div>
@@ -307,7 +307,7 @@ export default function ProductForm({ product, categories, stations, modifierGro
                                     </Button>
                                 )}
                             </div>
-                            {errors.image ? <p className="text-xs font-medium text-brand-400">{errors.image}</p> : <p className="text-xs text-ink-400">JPG, PNG or WebP up to 4 MB. Landscape 4:3 looks best.</p>}
+                            {errors.image ? <p className="text-xs font-medium text-danger-400">{errors.image}</p> : <p className="text-xs text-ink-400">JPG, PNG or WebP up to 4 MB. Landscape 4:3 looks best.</p>}
                         </div>
                     </Card>
 

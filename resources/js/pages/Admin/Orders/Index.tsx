@@ -79,7 +79,7 @@ export default function OrdersIndex({ orders, filters, statuses, types }: Orders
                             {orders.data.map((order) => (
                                 <tr key={order.uuid} className="hover:bg-ink-800/60">
                                     <Td>
-                                        <Link href={route('admin.orders.show', order.uuid)} className="font-extrabold text-white hover:text-flame-400">
+                                        <Link href={route('admin.orders.show', order.uuid)} className="font-extrabold text-strong hover:text-flame-400">
                                             #{order.order_number}
                                         </Link>
                                         <span className="block text-xs text-ink-400">{plural(order.items_count ?? 0, 'item')}</span>

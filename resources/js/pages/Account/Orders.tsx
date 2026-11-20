@@ -31,7 +31,7 @@ export default function AccountOrders({ orders }: { orders: Paginated<Order> }) 
                                     <Link href={route('orders.show', order.uuid)} className="flex items-center gap-4 px-4 py-4 hover:bg-ink-800">
                                         <span className="w-20 shrink-0 font-display text-3xl leading-none text-brand-500">#{order.order_number}</span>
                                         <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-white">{(order.items ?? []).map((item) => `${item.quantity}× ${item.name}`).join(', ')}</span>
+                                            <span className="block truncate text-sm font-semibold text-strong">{(order.items ?? []).map((item) => `${item.quantity}× ${item.name}`).join(', ')}</span>
                                             <span className="text-xs text-ink-400">
                                                 {dateTime(order.created_at)} · {order.type_label} · {order.payment_method_label}
                                             </span>
