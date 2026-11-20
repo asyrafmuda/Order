@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SettingRequest;
 use App\Support\OutletContext;
+use App\Support\PaymentOptions;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,8 @@ class SettingController extends Controller
             'settings' => Arr::undot($known),
             // The saved state: with several outlets, per-outlet details are edited under Outlets.
             'multi' => app(OutletContext::class)->multi(),
+            // False on a live site that has no real payment gateway connected yet.
+            'onlinePaymentReady' => app(PaymentOptions::class)->onlineReady(),
         ]);
     }
 

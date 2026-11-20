@@ -40,7 +40,9 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // Hosts that switch off symlink() cannot link public/storage to
+            // storage/app/public, so uploads are kept in public/storage itself.
+            'root' => env('FILESYSTEM_PUBLIC_IN_WEBROOT', false) ? public_path('storage') : storage_path('app/public'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,

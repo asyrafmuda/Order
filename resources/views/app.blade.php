@@ -13,7 +13,9 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800|bebas-neue:400" rel="stylesheet">
 
-        <title inertia>{{ config('app.name') }}</title>
+        @php($shopName = app(\App\Support\Settings::class)->string('shop.name') ?: config('app.name'))
+        <meta name="shop-name" content="{{ $shopName }}">
+        <title inertia>{{ $shopName }}</title>
 
         @routes
         @viteReactRefresh

@@ -1,0 +1,25 @@
+# Lets the app run when its files are uploaded straight into public_html:
+# every request is passed to the public/ folder, which holds the only files
+# meant to be reachable from the web. If you can point the domain's document
+# root at public/ instead (cPanel → Domains), that is even better.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Never serve the settings file, logs or database dumps, even if mod_rewrite
+# is switched off on this server.
+<FilesMatch "(^\.env|\.(log|sql|sqlite|bak)$|^(composer\.(json|lock)|package(-lock)?\.json|artisan|VERSION)$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews -Indexes
+</IfModule>

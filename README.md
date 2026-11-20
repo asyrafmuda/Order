@@ -254,6 +254,32 @@ php artisan orders:close-stale   # tutup order Ready yang tak diambil
 php artisan shop:enable-realtime # jana kunci Reverb dan hidupkan websocket
 ```
 
+## Jual / pasang di shared hosting
+
+Untuk client yang guna shared hosting (cPanel), tanpa SSH, Composer atau Node:
+
+```bash
+scripts/package.sh          # → dist/order-system-<versi>.zip + dist/PANDUAN-PEMASANGAN.html
+```
+
+ZIP itu siap-upload: pakej PHP (tanpa pakej dev), JavaScript/CSS yang sudah di-build, `.htaccess` di akar supaya boleh extract terus ke `public_html`, dan **tiada** `.env`. Berikan kedua-dua fail kepada client; `PANDUAN-PEMASANGAN.html` menerangkan setiap langkah dalam Bahasa Melayu.
+
+Di server client:
+
+1. Upload & extract ZIP → buka domain → **installer web** di `/install` (semak server → database → kedai & akaun super admin → siap). `.env` dicipta sendiri dengan kunci baru; installer dikunci selepas siap (`storage/app/installed.json`).
+2. Tambah **satu cron job** setiap minit (arahan ditunjuk di skrin terakhir). Ia menjalankan tugas berjadual *dan* queue — shared hosting tiada queue worker. Semua tugas berjalan dalam proses yang sama, jadi ia berfungsi walaupun `proc_open` dimatikan. Dashboard memberi amaran jika cron tidak berjalan.
+3. **Kemas kini:** naikkan nombor dalam fail `VERSION`, bina ZIP baru, client upload & overwrite. Jika ada migration baru, laman menunjukkan skrin *Finish the update* sehingga super admin mengesahkan dengan kata laluan; jika tiada, versi direkod senyap-senyap. `.env` dan gambar yang dimuat naik tidak tersentuh.
+
+Pemasangan oleh installer menetapkan: `APP_ENV=production`, sesi & cache dalam fail, queue dalam database (diproses oleh cron), `BROADCAST_CONNECTION=log` (tiada websocket — skrin guna polling), bayaran online **dimatikan** (gateway `fake` tidak dibenarkan di production; lihat `PAYMENT_FAKE_IN_PRODUCTION`), dan jika `symlink()` disekat, gambar disimpan terus dalam `public/storage` (`FILESYSTEM_PUBLIC_IN_WEBROOT`).
+
+Laman sedia ada (dipasang dari command line, seperti MacBook dev) dikesan secara automatik dan **tidak** dibawa ke installer.
+
+Ujian pemasangan penuh terhadap MySQL (pilihan):
+
+```bash
+INSTALLER_TEST_DB=nama_db_kosong INSTALLER_TEST_USER=user INSTALLER_TEST_PASSWORD=pass php artisan test tests/Feature/Install
+```
+
 ## Production
 
 - `APP_ENV=production`, `APP_DEBUG=false`, `npm run build`, `php artisan optimize`.

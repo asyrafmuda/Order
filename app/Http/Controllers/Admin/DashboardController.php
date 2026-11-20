@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Support\Installer\Installation;
+use App\Support\Installer\SchedulerHeartbeat;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -36,7 +38,14 @@ class DashboardController extends Controller
 
         $recent = Order::query()->forOutlet($this->outlet())->with('items')->latest()->limit(8)->get();
 
+        $heartbeat = app(SchedulerHeartbeat::class);
+
         return Inertia::render('Admin/Dashboard', [
+            // Super admins are told when the cron job that sends messages and
+            // POS receipts is not running.
+            'cronMissing' => $request->user()->isAdmin() && $heartbeat->isMissing(app(Installation::class))
+                ? ['last_run' => $heartbeat->lastRun()?->toIso8601String(), 'command' => 'php '.base_path('artisan').' schedule:run >> /dev/null 2>&1']
+                : null,
             'stats' => [
                 'sales' => (int) $todaySales->sales,
                 'orders' => (int) $todaySales->orders,

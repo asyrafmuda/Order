@@ -40,6 +40,17 @@ class PaymentOptions
     }
 
     /**
+     * Whether a real payment gateway takes online payments. The fake gateway
+     * approves anything, so on a live site it never does.
+     */
+    public function onlineReady(): bool
+    {
+        return config('payment.default') !== 'fake'
+            || ! app()->isProduction()
+            || config('payment.fake_in_production');
+    }
+
+    /**
      * Null when the method can be used, otherwise a sentence for the customer.
      *
      * $atCounter: the customer scanned the shop QR code and is standing at the counter.
@@ -51,7 +62,7 @@ class PaymentOptions
         }
 
         if ($method->isOnline()) {
-            return null;
+            return $this->onlineReady() ? null : 'Online payment is not set up yet';
         }
 
         if ($type === OrderType::Delivery) {
