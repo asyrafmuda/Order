@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\UserRole;
+use App\Models\Outlet;
 use App\Models\User;
 use App\Rules\PinOrPassword;
 use App\Rules\UniquePhone;
@@ -34,6 +35,7 @@ class UserRequest extends FormRequest
             'phone' => [$customer ? 'required' : 'nullable', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/', new UniquePhone($user?->id)],
             'role' => ['required', Rule::enum(UserRole::class)],
             'is_active' => ['required', 'boolean'],
+            'outlet_id' => ['nullable', Rule::exists(Outlet::class, 'id')],
             'password' => [$user ? 'nullable' : 'required', $customer ? new PinOrPassword : Password::defaults()],
         ];
     }

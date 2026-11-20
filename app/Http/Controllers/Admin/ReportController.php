@@ -54,6 +54,7 @@ class ReportController extends Controller
                 ]),
             'byProduct' => OrderItem::query()
                 ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                ->where('orders.outlet_id', $this->outlet()->id)
                 ->where('orders.payment_status', PaymentStatus::Paid)
                 ->where('orders.status', '!=', OrderStatus::Cancelled)
                 ->whereBetween('orders.business_date', [$from->toDateString(), $to->toDateString()])
@@ -120,7 +121,7 @@ class ReportController extends Controller
      */
     private function sales(CarbonImmutable $from, CarbonImmutable $to): Builder
     {
-        return Order::query()
+        return Order::query()->forOutlet($this->outlet())
             ->paid()
             ->where('status', '!=', OrderStatus::Cancelled)
             ->whereBetween('business_date', [$from->toDateString(), $to->toDateString()]);

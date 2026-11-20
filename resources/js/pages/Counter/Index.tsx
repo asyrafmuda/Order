@@ -33,7 +33,7 @@ const partial = { preserveScroll: true, preserveState: true, only: ['selected', 
 export default function CounterIndex({ kitchenOrders, readyOrders, deliveryOrders, riders, stats, selected, lookupFailed }: CounterProps) {
     const verify = useForm({ code: '' });
 
-    useLiveReload([{ name: 'staff', private: true }], {
+    useLiveReload([{ name: 'staff', private: true, perOutlet: true }], {
         only: ['kitchenOrders', 'readyOrders', 'deliveryOrders', 'riders', 'stats', 'selected', 'kitchen'],
     });
 

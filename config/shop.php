@@ -22,6 +22,10 @@ return [
         'shop.maps_url' => 'https://maps.google.com/?q=Boss+Burger',
         'shop.counter' => 'Counter 2',
 
+        // Several branches under one business. Off: everything runs as the
+        // single default outlet.
+        'outlets.multi_enabled' => false,
+
         // Branding: everything a different shop would want to change to
         // make the storefront its own. Edited under Admin → Settings.
         'brand.icon' => '🍔',

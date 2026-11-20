@@ -30,7 +30,7 @@ let nextKey = 0;
 const newKey = () => `line-${Date.now()}-${nextKey++}`;
 
 export default function PosIndex({ categories, combo, quickNotes, tables, tax, recent }: PosProps) {
-    const { auth, flash } = usePage().props;
+    const { auth, flash, outlet } = usePage().props;
     const now = useNow(30000);
     const searchRef = useRef<HTMLInputElement>(null);
 
@@ -196,6 +196,9 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
                     <Logo compact />
                 </Link>
                 <h1 className="hidden font-display text-2xl leading-none whitespace-nowrap text-white uppercase lg:block">Take Order</h1>
+                {outlet.multi && (
+                    <span className="hidden max-w-40 shrink-0 truncate rounded-lg border border-flame-500/40 bg-flame-900 px-2.5 py-1.5 text-xs font-bold text-flame-300 lg:block">{outlet.current.name}</span>
+                )}
 
                 <label className="relative mx-auto block w-full max-w-md">
                     <span className="sr-only">Search the menu</span>
@@ -243,6 +246,10 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
                     </button>
                 </nav>
             </header>
+            {/* With several outlets, say which one this sale is rung up at. */}
+            {outlet.multi && (
+                <p className="truncate border-b border-ink-700 bg-flame-900/60 px-3 py-1 text-[11px] font-bold tracking-wide text-flame-300 lg:hidden">Selling at {outlet.current.name}</p>
+            )}
 
             <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] md:grid-cols-[minmax(0,1fr)_21rem] lg:grid-cols-[9rem_minmax(0,1fr)_24rem] lg:grid-rows-[minmax(0,1fr)]">
                 <nav

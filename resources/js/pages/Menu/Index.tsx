@@ -63,7 +63,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search burgers, sauces..."
+                placeholder="Search the menu..."
                 className="h-10 w-full rounded-lg border border-ink-600 bg-ink-850 pr-3 pl-9 text-sm text-ink-100 placeholder:text-ink-500 focus:border-flame-400 focus:outline-none"
             />
         </label>

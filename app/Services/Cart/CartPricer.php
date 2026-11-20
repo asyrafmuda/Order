@@ -9,6 +9,7 @@ use App\Models\DeliveryZone;
 use App\Models\Modifier;
 use App\Models\ModifierGroup;
 use App\Models\Product;
+use App\Support\OutletStock;
 use App\Support\Settings;
 use Illuminate\Support\Collection;
 
@@ -18,7 +19,10 @@ use Illuminate\Support\Collection;
  */
 class CartPricer
 {
-    public function __construct(private readonly Settings $settings) {}
+    public function __construct(
+        private readonly Settings $settings,
+        private readonly OutletStock $stock,
+    ) {}
 
     /**
      * Price the given raw lines. Lines that can no longer be sold are skipped
@@ -69,7 +73,8 @@ class CartPricer
      */
     private function resolve(array $raw, ?Product $product, ?ComboOffer $combo): PricedLine
     {
-        if (! $product || ! $product->status->isOrderable() || ! $product->category->is_active) {
+        // Sold out is per outlet: an item can be gone here and on sale elsewhere.
+        if (! $product || ! $this->stock->isOrderable($product) || ! $product->category->is_active) {
             throw new InvalidCartLine(($product->name ?? 'This item').' is not available right now.');
         }
 

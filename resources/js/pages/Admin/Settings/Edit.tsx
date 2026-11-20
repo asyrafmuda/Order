@@ -1,35 +1,34 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Bell, Clock, Palette, Percent, ShoppingBag, Store, Trash2, Upload, Wallet, Zap } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Bell, Building2, MapPin, Palette, Percent, ShoppingBag, Store, Trash2, Upload, Wallet, Zap } from 'lucide-react';
 import { useRef, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { MoneyInput } from '@/components/admin/MoneyInput';
+import { OutletFields, toOutletForm, type OutletSettings } from '@/components/admin/OutletFields';
 import { Input, Textarea, Toggle } from '@/components/ui/Form';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
 import { inputToSen, senToInput } from '@/lib/format';
 
-interface Settings {
-    shop: { name: string; tagline: string | null; address: string; phone: string; whatsapp: string; maps_url: string | null; counter: string };
+interface Settings extends OutletSettings {
+    outlets: { multi_enabled: boolean };
+    shop: OutletSettings['shop'] & { name: string; tagline: string | null };
     brand: { icon: string; primary_color: string; accent_color: string; footer_text: string | null; badge_text: string | null };
-    hours: { open: string; close: string; last_order: string };
-    ordering: { enabled: boolean; pickup_enabled: boolean; delivery_enabled: boolean; dine_in_enabled: boolean; pickup_eta_min: number; pickup_eta_max: number; queue_prefix: string; auto_close_hours: number };
+    ordering: OutletSettings['ordering'] & { auto_close_hours: number };
     payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number; dine_in_pay_at_counter: boolean };
     pos: { quick_notes: string[] };
     tax: { rate: number; inclusive: boolean };
     notifications: { enabled: boolean };
 }
 
-export default function SettingsEdit({ settings }: { settings: Settings }) {
+export default function SettingsEdit({ settings, multi }: { settings: Settings; multi: boolean }) {
+    const outlet = toOutletForm(settings);
+
     const form = useForm({
-        shop: { ...settings.shop, tagline: settings.shop.tagline ?? '', maps_url: settings.shop.maps_url ?? '' },
+        outlets: { multi_enabled: settings.outlets.multi_enabled },
+        shop: { ...outlet.shop, name: settings.shop.name, tagline: settings.shop.tagline ?? '' },
         brand: { ...settings.brand, footer_text: settings.brand.footer_text ?? '', badge_text: settings.brand.badge_text ?? '' },
-        hours: settings.hours,
-        ordering: {
-            ...settings.ordering,
-            pickup_eta_min: String(settings.ordering.pickup_eta_min),
-            pickup_eta_max: String(settings.ordering.pickup_eta_max),
-            auto_close_hours: String(settings.ordering.auto_close_hours),
-        },
+        hours: outlet.hours,
+        ordering: { ...outlet.ordering, auto_close_hours: String(settings.ordering.auto_close_hours) },
         payments: { ...settings.payments, cash_max_amount: senToInput(settings.payments.cash_max_amount) },
         pos: { quick_notes: (settings.pos?.quick_notes ?? []).join('\n') },
         tax: { ...settings.tax, rate: String(settings.tax.rate) },
@@ -74,54 +73,41 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
             <Head title="Settings" />
 
             <form id="settings-form" onSubmit={submit} className="mx-auto max-w-3xl space-y-6">
+                <Section title="Outlets" icon={<Building2 className="size-4" />}>
+                    <Toggle
+                        checked={data.outlets.multi_enabled}
+                        onChange={(checked) => set('outlets', 'multi_enabled', checked)}
+                        label="This business has more than one outlet"
+                        description="Each outlet gets its own orders, queue numbers, tables, delivery areas, staff, opening hours and sold-out list. The menu, prices and customers stay shared. Off: everything runs as one outlet."
+                    />
+                    {errors['outlets.multi_enabled'] && <p className="mt-2 text-xs font-medium text-brand-400">{errors['outlets.multi_enabled']}</p>}
+                    {data.outlets.multi_enabled && !multi && <p className="mt-3 rounded-lg bg-ink-900 px-3 py-2 text-xs text-ink-300">Save, then add your other outlets under Outlets. Your current details become the main outlet.</p>}
+                </Section>
+
                 <Section title="Shop" icon={<Store className="size-4" />}>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <Input label="Shop name" required value={data.shop.name} onChange={(event) => set('shop', 'name', event.target.value)} error={errors['shop.name']} />
                         <Input label="Tagline" value={data.shop.tagline} onChange={(event) => set('shop', 'tagline', event.target.value)} error={errors['shop.tagline']} />
-                        <Input label="Address" required wrapperClassName="sm:col-span-2" value={data.shop.address} onChange={(event) => set('shop', 'address', event.target.value)} error={errors['shop.address']} />
-                        <Input label="Phone" required value={data.shop.phone} onChange={(event) => set('shop', 'phone', event.target.value)} error={errors['shop.phone']} />
-                        <Input
-                            label="WhatsApp number"
-                            required
-                            hint="Digits only, international format: 60123456789"
-                            value={data.shop.whatsapp}
-                            onChange={(event) => set('shop', 'whatsapp', event.target.value)}
-                            error={errors['shop.whatsapp']}
-                        />
-                        <Input
-                            label="Map link"
-                            type="url"
-                            placeholder="https://maps.google.com/?q=..."
-                            value={data.shop.maps_url}
-                            onChange={(event) => set('shop', 'maps_url', event.target.value)}
-                            error={errors['shop.maps_url']}
-                        />
-                        <Input
-                            label="Pickup counter"
-                            required
-                            hint="Where customers collect, e.g. “Counter 2”."
-                            value={data.shop.counter}
-                            onChange={(event) => set('shop', 'counter', event.target.value)}
-                            error={errors['shop.counter']}
-                        />
                     </div>
                 </Section>
 
-                <Section title="Opening hours" icon={<Clock className="size-4" />}>
-                    <div className="grid gap-4 sm:grid-cols-3">
-                        <Input label="Opens" type="time" required value={data.hours.open} onChange={(event) => set('hours', 'open', event.target.value)} error={errors['hours.open']} />
-                        <Input
-                            label="Last order"
-                            type="time"
-                            required
-                            hint="Online ordering stops at this time."
-                            value={data.hours.last_order}
-                            onChange={(event) => set('hours', 'last_order', event.target.value)}
-                            error={errors['hours.last_order']}
-                        />
-                        <Input label="Closes" type="time" required value={data.hours.close} onChange={(event) => set('hours', 'close', event.target.value)} error={errors['hours.close']} />
-                    </div>
-                </Section>
+                {multi ? (
+                    <Section title="Outlet details" icon={<MapPin className="size-4" />}>
+                        <p className="text-sm text-ink-300">
+                            Each outlet has its own address, phone, opening hours and ways of ordering.{' '}
+                            <Link href={route('admin.outlets.index')} className="font-semibold text-flame-400 hover:underline">
+                                Manage them under Outlets
+                            </Link>
+                            .
+                        </p>
+                    </Section>
+                ) : (
+                    <OutletFields
+                        data={data}
+                        errors={errors}
+                        set={(group, key, value) => form.setData((current) => ({ ...current, [group]: { ...current[group], [key]: value } }))}
+                    />
+                )}
 
                 <Section title="Branding" icon={<Palette className="size-4" />}>
                     <div className="space-y-5">
@@ -184,54 +170,8 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
                     </div>
                 </Section>
 
-                <Section title="Ordering" icon={<ShoppingBag className="size-4" />}>
+                <Section title="Uncollected orders" icon={<ShoppingBag className="size-4" />}>
                     <div className="space-y-4">
-                        <Toggle
-                            checked={data.ordering.enabled}
-                            onChange={(checked) => set('ordering', 'enabled', checked)}
-                            label="Accept online orders"
-                            description="Switch off to pause ordering immediately, e.g. when the kitchen is overwhelmed."
-                        />
-                        <div className="grid gap-4 sm:grid-cols-3">
-                            <Toggle checked={data.ordering.pickup_enabled} onChange={(checked) => set('ordering', 'pickup_enabled', checked)} label="Self pickup" description="Order from home, collect at the shop." />
-                            <Toggle checked={data.ordering.delivery_enabled} onChange={(checked) => set('ordering', 'delivery_enabled', checked)} label="Delivery" description="Switch off if you do not deliver. Needs an active delivery zone." />
-                            <Toggle checked={data.ordering.dine_in_enabled} onChange={(checked) => set('ordering', 'dine_in_enabled', checked)} label="Dine-in by table QR" description="Customers scan the code on their table. Set up under Tables & QR." />
-                        </div>
-                        {(errors['ordering.delivery_enabled'] || errors['ordering.pickup_enabled']) && (
-                            <p className="text-xs font-medium text-brand-400">{errors['ordering.delivery_enabled'] ?? errors['ordering.pickup_enabled']}</p>
-                        )}
-                        <div className="grid gap-4 sm:grid-cols-3">
-                            <Input
-                                label="Prep time from (min)"
-                                type="number"
-                                min={1}
-                                max={180}
-                                required
-                                value={data.ordering.pickup_eta_min}
-                                onChange={(event) => set('ordering', 'pickup_eta_min', event.target.value)}
-                                error={errors['ordering.pickup_eta_min']}
-                            />
-                            <Input
-                                label="Prep time to (min)"
-                                type="number"
-                                min={1}
-                                max={240}
-                                required
-                                hint="Shown as “15–20 min”; extra time is added when the kitchen is busy."
-                                value={data.ordering.pickup_eta_max}
-                                onChange={(event) => set('ordering', 'pickup_eta_max', event.target.value)}
-                                error={errors['ordering.pickup_eta_max']}
-                            />
-                            <Input
-                                label="Queue prefix"
-                                required
-                                maxLength={3}
-                                hint="Order numbers look like A001 and restart daily."
-                                value={data.ordering.queue_prefix}
-                                onChange={(event) => set('ordering', 'queue_prefix', event.target.value.toUpperCase())}
-                                error={errors['ordering.queue_prefix']}
-                            />
-                        </div>
                         <Input
                             label="Close uncollected orders after (hours)"
                             type="number"

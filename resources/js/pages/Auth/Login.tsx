@@ -7,6 +7,7 @@ import AuthLayout from '@/layouts/AuthLayout';
 const demoAccounts = [
     ['Customer', '012-345 6789', '135790'],
     ['Admin', 'admin@bossburger.test', 'password'],
+    ['Manager', 'manager@bossburger.test', 'password'],
     ['Cashier', 'cashier@bossburger.test', 'password'],
     ['Waiter', 'waiter@bossburger.test', 'password'],
     ['Kitchen', 'kitchen@bossburger.test', 'password'],

@@ -27,23 +27,23 @@ class DashboardController extends Controller
             ->toBase()
             ->first();
 
-        $statusCounts = Order::query()
+        $statusCounts = Order::query()->forOutlet($this->outlet())
             ->where('business_date', $today->toDateString())
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->toBase()
             ->pluck('total', 'status');
 
-        $recent = Order::query()->with('items')->latest()->limit(8)->get();
+        $recent = Order::query()->forOutlet($this->outlet())->with('items')->latest()->limit(8)->get();
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'sales' => (int) $todaySales->sales,
                 'orders' => (int) $todaySales->orders,
                 'average' => $todaySales->orders > 0 ? (int) round($todaySales->sales / $todaySales->orders) : 0,
-                'active' => Order::query()->active()->count(),
-                'awaiting_payment' => Order::query()->where('status', OrderStatus::PendingPayment)->count(),
-                'pos_failures' => Order::query()
+                'active' => Order::query()->forOutlet($this->outlet())->active()->count(),
+                'awaiting_payment' => Order::query()->forOutlet($this->outlet())->where('status', OrderStatus::PendingPayment)->count(),
+                'pos_failures' => Order::query()->forOutlet($this->outlet())
                     ->where('business_date', $today->toDateString())
                     ->where('pos_sync_status', SyncStatus::Failed)
                     ->count(),
@@ -94,6 +94,7 @@ class DashboardController extends Controller
     {
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.outlet_id', $this->outlet()->id)
             ->where('orders.payment_status', PaymentStatus::Paid)
             ->where('orders.status', '!=', OrderStatus::Cancelled)
             ->where('orders.business_date', '>=', $from->toDateString())
@@ -118,6 +119,6 @@ class DashboardController extends Controller
      */
     private function sales()
     {
-        return Order::query()->paid()->where('status', '!=', OrderStatus::Cancelled);
+        return Order::query()->forOutlet($this->outlet())->paid()->where('status', '!=', OrderStatus::Cancelled);
     }
 }

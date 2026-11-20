@@ -29,7 +29,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
     const { kitchen, pos } = usePage().props;
     const now = useNow(15000);
 
-    useLiveReload([{ name: 'shop' }], { only: ['board', 'stations', 'sync', 'kitchen'] });
+    useLiveReload([{ name: 'shop', perOutlet: true }], { only: ['board', 'stations', 'sync', 'kitchen'] });
 
     const preparing = board.filter((order) => order.status !== 'ready');
     const ready = board.filter((order) => order.status === 'ready');

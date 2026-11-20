@@ -48,7 +48,7 @@ const paymentHints: Record<PaymentMethod, string> = {
 const tableHint = 'Pay at the counter before you leave';
 
 export default function CheckoutCreate({ zones, paymentMethods, customer, addresses }: CheckoutProps) {
-    const { cart, shop, auth, kitchen } = usePage().props;
+    const { cart, shop, auth, kitchen, outlet } = usePage().props;
     const delivery = cart?.type === 'delivery';
     // Sitting at a table: the QR code already says where the food goes.
     const table = cart?.table ?? null;
@@ -245,7 +245,12 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                             </div>
                         ) : (
                             <p className="mt-4 rounded-lg bg-ink-900 px-3 py-2.5 text-xs text-ink-300">
-                                Collect from <strong className="text-white">{shop.address}</strong>. Show your pickup code at {shop.counter}.
+                                Collect from{' '}
+                                <strong className="text-white">
+                                    {outlet.multi ? `${outlet.current.name} — ` : ''}
+                                    {shop.address}
+                                </strong>
+                                . Show your pickup code at {shop.counter}.
                             </p>
                         )}
                     </Section>

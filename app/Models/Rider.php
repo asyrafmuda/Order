@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +25,16 @@ class Rider extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Riders who work at the outlet.
+     *
+     * @param  Builder<Rider>  $query
+     */
+    public function scopeForOutlet(Builder $query, Outlet $outlet): void
+    {
+        $query->whereHas('user', fn (Builder $user) => $user->inOutlet($outlet));
     }
 
     /** @return HasMany<Delivery, $this> */

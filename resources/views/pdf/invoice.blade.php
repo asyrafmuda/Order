@@ -33,7 +33,7 @@
                 <td>
                     <div class="brand">{{ $shop['name'] }}</div>
                     <div class="muted">{{ $shop['tagline'] }}</div>
-                    <div class="muted" style="margin-top: 6px;">{{ $shop['address'] }}<br>{{ $shop['phone'] }}</div>
+                    <div class="muted" style="margin-top: 6px;">@if ($shop['outlet']){{ $shop['outlet'] }}<br>@endif{{ $shop['address'] }}<br>{{ $shop['phone'] }}</div>
                 </td>
                 <td class="right">
                     <div style="font-size: 18px; font-weight: bold;">INVOICE</div>

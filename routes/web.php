@@ -11,6 +11,7 @@ use App\Http\Controllers\KitchenStatusController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderLookupController;
+use App\Http\Controllers\OutletChoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\Webhooks\LoyverseWebhookController;
@@ -24,6 +25,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', MenuController::class)->name('menu.index');
 Route::get('/kitchen-status', KitchenStatusController::class)->name('status.index');
+
+// Multi-outlet: the customer picks which branch to order from.
+Route::put('/outlet', OutletChoiceController::class)->name('outlets.choose');
 
 // Dine-in: the QR code on each table.
 Route::get('/t/{token}', [TableController::class, 'show'])->name('tables.show');

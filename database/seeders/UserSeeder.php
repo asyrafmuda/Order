@@ -17,6 +17,7 @@ class UserSeeder extends Seeder
     {
         $accounts = [
             ['Boss Admin', 'admin@bossburger.test', '60120000001', UserRole::Admin],
+            ['Outlet Manager', 'manager@bossburger.test', '60120000007', UserRole::Manager],
             ['Counter Crew', 'cashier@bossburger.test', '60120000002', UserRole::Cashier],
             ['Floor Crew', 'waiter@bossburger.test', '60120000006', UserRole::Waiter],
             ['Grill Master', 'kitchen@bossburger.test', '60120000003', UserRole::Kitchen],

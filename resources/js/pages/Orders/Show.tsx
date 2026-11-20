@@ -15,7 +15,9 @@ import { minutesUntil, money, time } from '@/lib/format';
 import type { KitchenItemStatus, Order, OrderItem } from '@/types';
 
 export default function OrderShow({ order }: { order: Order }) {
-    const { shop, pos } = usePage().props;
+    const { shop: business, pos, outlet: outlets } = usePage().props;
+    // Address, counter and contact come from the outlet the order was placed at.
+    const shop = { ...business, ...(order.outlet ?? {}), name: business.name };
     const now = useNow(15000);
 
     useLiveReload([{ name: `orders.${order.uuid}` }], { only: ['order', 'kitchen', 'flash'], enabled: !order.is_final });
@@ -118,7 +120,8 @@ export default function OrderShow({ order }: { order: Order }) {
                                     </>
                                 )}
                                 <span className="flex items-center gap-1.5 text-ink-300">
-                                    <Store className="size-4 text-flame-400" aria-hidden /> {shop.name} · {shop.address}
+                                    <Store className="size-4 text-flame-400" aria-hidden /> {shop.name}
+                                    {outlets.multi && order.outlet ? ` ${order.outlet.name}` : ''} · {shop.address}
                                 </span>
                             </div>
 

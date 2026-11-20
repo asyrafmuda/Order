@@ -31,7 +31,7 @@ class OrderController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
-        $orders = Order::query()
+        $orders = Order::query()->forOutlet($this->outlet())
             ->with(['items', 'delivery'])
             ->when($filters['search'] ?? null, function ($query, string $search) {
                 $term = '%'.ltrim(trim($search), '#').'%';

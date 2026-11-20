@@ -5,6 +5,8 @@ import { getEcho } from '@/echo';
 interface LiveChannel {
     name: string;
     private?: boolean;
+    /** Listen on the channel of the outlet this screen is showing ("staff" becomes "staff.3"). */
+    perOutlet?: boolean;
 }
 
 interface Options {
@@ -20,8 +22,9 @@ interface Options {
  * broadcast arrives on one of the channels. Falls back to polling when
  * Reverb is not configured.
  */
-export function useLiveReload(channels: LiveChannel[], { only, interval = 8000, enabled = true }: Options): void {
-    const { realtime } = usePage().props;
+export function useLiveReload(listenOn: LiveChannel[], { only, interval = 8000, enabled = true }: Options): void {
+    const { realtime, outlet } = usePage().props;
+    const channels = listenOn.map((channel) => (channel.perOutlet ? { ...channel, name: `${channel.name}.${outlet.current.id}` } : channel));
     const onlyRef = useRef(only);
     onlyRef.current = only;
 

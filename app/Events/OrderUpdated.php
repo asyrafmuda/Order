@@ -28,8 +28,9 @@ class OrderUpdated implements ShouldBroadcast, ShouldDispatchAfterCommit
     {
         return [
             new Channel('orders.'.$this->order->uuid),
-            new Channel('shop'),
-            new PrivateChannel('staff'),
+            // Each outlet's screens only hear about that outlet's orders.
+            new Channel('shop.'.$this->order->outlet_id),
+            new PrivateChannel('staff.'.$this->order->outlet_id),
         ];
     }
 

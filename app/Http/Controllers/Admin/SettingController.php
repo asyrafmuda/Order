@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SettingRequest;
+use App\Support\OutletContext;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,6 +23,8 @@ class SettingController extends Controller
 
         return Inertia::render('Admin/Settings/Edit', [
             'settings' => Arr::undot($known),
+            // The saved state: with several outlets, per-outlet details are edited under Outlets.
+            'multi' => app(OutletContext::class)->multi(),
         ]);
     }
 

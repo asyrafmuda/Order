@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToOutlet;
 use Database\Factories\DiningTableFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,11 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'token', 'seats', 'sort_order', 'is_active'])]
+#[Fillable(['outlet_id', 'name', 'token', 'seats', 'sort_order', 'is_active'])]
 class DiningTable extends Model
 {
     /** @use HasFactory<DiningTableFactory> */
-    use HasFactory;
+    use BelongsToOutlet, HasFactory;
 
     /**
      * @return array<string, string>

@@ -10,7 +10,7 @@ interface ProductImageProps {
     dimmed?: boolean;
 }
 
-/** Product photo, or a smoky-grill placeholder when none has been uploaded. */
+/** Product photo, or an icon placeholder when none has been uploaded. */
 export function ProductImage({ src, alt, icon, className, dimmed }: ProductImageProps) {
     const { shop } = usePage().props;
 

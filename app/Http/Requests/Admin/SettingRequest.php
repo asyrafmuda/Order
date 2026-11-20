@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\OrderStatus;
+use App\Models\Order;
+use App\Models\Outlet;
 use App\Support\BrandPalette;
+use App\Support\OutletContext;
+use App\Support\Settings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Validator;
@@ -23,7 +28,9 @@ class SettingRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
+            'outlets.multi_enabled' => ['required', 'boolean'],
+
             'shop.name' => ['required', 'string', 'max:80'],
             'shop.tagline' => ['nullable', 'string', 'max:80'],
             'shop.address' => ['required', 'string', 'max:255'],
@@ -67,6 +74,16 @@ class SettingRequest extends FormRequest
 
             'notifications.enabled' => ['required', 'boolean'],
         ];
+
+        // With several outlets, each outlet's address, hours and ways of
+        // ordering are edited under Outlets, so this form does not send them.
+        if (app(OutletContext::class)->multi()) {
+            foreach (Settings::OUTLET_KEYS as $key) {
+                $rules[$key] = ['exclude'];
+            }
+        }
+
+        return $rules;
     }
 
     /**
@@ -76,9 +93,25 @@ class SettingRequest extends FormRequest
     {
         return [
             function (Validator $validator) {
-                $anyChannel = $this->boolean('ordering.pickup_enabled')
+                $multi = app(OutletContext::class)->multi();
+
+                $anyChannel = $multi
+                    || $this->boolean('ordering.pickup_enabled')
                     || $this->boolean('ordering.delivery_enabled')
                     || $this->boolean('ordering.dine_in_enabled');
+
+                // Switching multi-outlet off folds everything back into the main
+                // outlet, which would hide other outlets' unfinished orders.
+                if ($multi && ! $this->boolean('outlets.multi_enabled')) {
+                    $open = Order::query()
+                        ->whereIn('status', [OrderStatus::PendingPayment, ...OrderStatus::active()])
+                        ->where('outlet_id', '!=', Outlet::default()->id)
+                        ->count();
+
+                    if ($open > 0) {
+                        $validator->errors()->add('outlets.multi_enabled', "Other outlets still have {$open} open order(s). Finish or cancel them before switching multi-outlet off.");
+                    }
+                }
 
                 if (! $anyChannel) {
                     $validator->errors()->add('ordering.delivery_enabled', 'Keep at least one of pickup, delivery or dine-in switched on.');
@@ -163,14 +196,16 @@ class SettingRequest extends FormRequest
         $settings['pos.quick_notes'] = $quickNotes;
 
         $booleans = [
-            'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'ordering.dine_in_enabled', 'tax.inclusive',
-            'notifications.enabled', 'payments.dine_in_pay_at_counter',
+            'outlets.multi_enabled', 'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'ordering.dine_in_enabled',
+            'tax.inclusive', 'notifications.enabled', 'payments.dine_in_pay_at_counter',
             'payments.fpx_enabled', 'payments.card_enabled', 'payments.ewallet_enabled', 'payments.cash_enabled',
             'payments.cash_requires_account',
         ];
 
         foreach ($booleans as $key) {
-            $settings[$key] = filter_var($settings[$key], FILTER_VALIDATE_BOOLEAN);
+            if (array_key_exists($key, $settings)) {
+                $settings[$key] = filter_var($settings[$key], FILTER_VALIDATE_BOOLEAN);
+            }
         }
 
         $settings['brand.primary_color'] = strtolower($settings['brand.primary_color']);
@@ -180,9 +215,11 @@ class SettingRequest extends FormRequest
         $settings['ordering.auto_close_hours'] = (int) $settings['ordering.auto_close_hours'];
         $settings['payments.cash_max_amount'] = (int) $settings['payments.cash_max_amount'];
 
-        $settings['ordering.pickup_eta_min'] = (int) $settings['ordering.pickup_eta_min'];
-        $settings['ordering.pickup_eta_max'] = (int) $settings['ordering.pickup_eta_max'];
-        $settings['ordering.queue_prefix'] = strtoupper($settings['ordering.queue_prefix']);
+        if (array_key_exists('ordering.queue_prefix', $settings)) {
+            $settings['ordering.pickup_eta_min'] = (int) $settings['ordering.pickup_eta_min'];
+            $settings['ordering.pickup_eta_max'] = (int) $settings['ordering.pickup_eta_max'];
+            $settings['ordering.queue_prefix'] = strtoupper($settings['ordering.queue_prefix']);
+        }
         $settings['tax.rate'] = (float) $settings['tax.rate'];
 
         return $settings;

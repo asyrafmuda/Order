@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Support\OrderTimeline;
 use App\Support\Phone;
+use App\Support\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +33,21 @@ class OrderResource extends JsonResource
             'source' => $this->source->value,
             'source_label' => $this->source->label(),
             'table_label' => $this->table_label,
+            // The ticket shows where to collect: the order's own outlet, not
+            // whichever outlet the viewer happens to be browsing.
+            'outlet' => $this->whenLoaded('outlet', function () {
+                $details = app(Settings::class)->forOutlet($this->outlet);
+
+                return [
+                    'id' => $this->outlet->id,
+                    'name' => $this->outlet->name,
+                    'address' => $details['shop.address'],
+                    'phone' => $details['shop.phone'],
+                    'whatsapp' => $details['shop.whatsapp'],
+                    'maps_url' => $details['shop.maps_url'],
+                    'counter' => $details['shop.counter'],
+                ];
+            }),
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'is_final' => $this->status->isFinal(),
@@ -169,6 +185,7 @@ class OrderResource extends JsonResource
     public static function relations(): array
     {
         return [
+            'outlet',
             'items.modifiers',
             'items.product.category',
             'items.station',

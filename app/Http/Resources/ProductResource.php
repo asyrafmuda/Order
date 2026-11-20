@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ProductStatus;
 use App\Models\Product;
+use App\Support\OutletStock;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,6 +18,10 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // "status" is the business-wide switch; whether the item can be
+        // ordered also depends on the outlet being viewed.
+        $soldOutHere = app(OutletStock::class)->isSoldOut($this->resource);
+
         return [
             'id' => $this->id,
             'category_id' => $this->category_id,
@@ -28,8 +34,9 @@ class ProductResource extends JsonResource
             'price' => $this->price,
             'from_price' => $this->from_price,
             'status' => $this->status->value,
-            'status_label' => $this->status->label(),
-            'is_orderable' => $this->status->isOrderable(),
+            'status_label' => $soldOutHere && $this->status->isOrderable() ? ProductStatus::SoldOut->label() : $this->status->label(),
+            'is_orderable' => $this->status->isOrderable() && ! $soldOutHere,
+            'sold_out_here' => $soldOutHere,
             'badge' => $this->badge,
             'tags' => $this->tags ?? [],
             'is_combo_eligible' => $this->is_combo_eligible,

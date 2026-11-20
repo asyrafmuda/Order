@@ -33,7 +33,7 @@ export default function KitchenIndex({ orders, ready, stations, filters, menu }:
     const { fresh, sound, toggle: toggleSound } = useOrderChime(orders.map((order) => order.uuid));
     const soldOut = menu.flatMap((category) => category.products).filter((product) => product.status === 'sold_out').length;
 
-    useLiveReload([{ name: 'staff', private: true }], { only: ['orders', 'ready', 'stations', 'kitchen', 'menu'] });
+    useLiveReload([{ name: 'staff', private: true, perOutlet: true }], { only: ['orders', 'ready', 'stations', 'kitchen', 'menu'] });
 
     const selectStation = (stationId: number | null) =>
         router.get(route('kitchen.index'), stationId ? { station: stationId } : {}, { preserveScroll: true, preserveState: true, replace: true });

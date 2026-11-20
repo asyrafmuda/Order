@@ -9,6 +9,7 @@ use App\Enums\OrderType;
 use App\Http\Requests\CheckoutRequest;
 use App\Models\DeliveryZone;
 use App\Services\Cart\Cart;
+use App\Support\OutletContext;
 use App\Support\PaymentOptions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class CheckoutController extends Controller
         $user = $request->user();
 
         return Inertia::render('Checkout/Create', [
-            'zones' => DeliveryZone::query()->active()->orderBy('sort_order')->get(['id', 'name', 'areas', 'fee', 'min_order', 'eta_minutes']),
+            'zones' => DeliveryZone::query()->active()->forOutlet(app(OutletContext::class)->current())->orderBy('sort_order')->get(['id', 'name', 'areas', 'fee', 'min_order', 'eta_minutes']),
             'paymentMethods' => $paymentOptions->for($priced->type, $user, $priced->total()),
             'customer' => [
                 'name' => $user?->name ?? '',

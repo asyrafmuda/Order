@@ -3,12 +3,12 @@ import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { cn } from '@/lib/cn';
-import type { ProductStatus } from '@/types';
 
 export interface StockCategory {
     name: string;
     icon: string | null;
-    products: { id: number; code: string | null; name: string; status: ProductStatus; status_label: string }[];
+    /** "locked" items are switched off for the whole business; only an admin changes them. */
+    products: { id: number; code: string | null; name: string; status: 'available' | 'sold_out' | 'locked'; status_label: string }[];
 }
 
 interface StockPanelProps {
@@ -23,7 +23,7 @@ export function StockPanel({ menu, onClose }: StockPanelProps) {
     const term = query.trim().toLowerCase();
     const soldOut = menu.flatMap((category) => category.products).filter((product) => product.status === 'sold_out').length;
 
-    const toggle = (id: number, status: ProductStatus) => {
+    const toggle = (id: number, status: 'available' | 'sold_out' | 'locked') => {
         setPending(id);
         router.patch(
             route('kitchen.products.status', id),
@@ -95,7 +95,7 @@ export function StockPanel({ menu, onClose }: StockPanelProps) {
                     );
                 })}
             </div>
-            <p className="mt-5 text-xs text-ink-400">Sold out items stay on the menu but cannot be ordered, online or at the counter. Tap again when they are back.</p>
+            <p className="mt-5 text-xs text-ink-400">Sold out items stay on the menu but cannot be ordered at this outlet, online or at the counter. Tap again when they are back.</p>
         </Modal>
     );
 }

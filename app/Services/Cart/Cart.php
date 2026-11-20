@@ -7,6 +7,8 @@ use App\Exceptions\InvalidCartLine;
 use App\Models\DeliveryZone;
 use App\Models\DiningTable;
 use App\Models\Product;
+use App\Support\OutletContext;
+use App\Support\OutletStock;
 use App\Support\Settings;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Str;
@@ -33,6 +35,8 @@ class Cart
         private readonly Session $session,
         private readonly CartPricer $pricer,
         private readonly Settings $settings,
+        private readonly OutletContext $outlets,
+        private readonly OutletStock $stock,
     ) {}
 
     /**
@@ -139,7 +143,8 @@ class Cart
             return null;
         }
 
-        return $this->table ??= DiningTable::query()->active()->find($tableId);
+        // The table must be in the outlet being ordered from; picking another outlet leaves it.
+        return $this->table ??= DiningTable::query()->active()->forOutlet($this->outlets->current())->find($tableId);
     }
 
     public function sitAt(DiningTable $table): void
@@ -193,6 +198,7 @@ class Cart
         $zoneId = $this->session->get(self::ZONE);
 
         return DeliveryZone::query()->active()
+            ->forOutlet($this->outlets->current())
             ->when($zoneId, fn ($query) => $query->orderByRaw('id = ? desc', [$zoneId]))
             ->orderBy('sort_order')
             ->first();
@@ -238,7 +244,7 @@ class Cart
         $upsells = $priced->isEmpty() ? collect() : Product::query()
             ->where('is_upsell', true)
             ->where('status', 'available')
-            ->whereNotIn('id', $inCart)
+            ->whereNotIn('id', [...$inCart, ...$this->stock->soldOutIds()])
             ->whereDoesntHave('variants')
             ->ordered()
             ->limit(2)

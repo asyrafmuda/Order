@@ -29,6 +29,7 @@ function settingsPayload(array $overrides = []): array
             'name' => 'Boss Burger HQ', 'tagline' => 'Night Grill', 'address' => '1 Jalan Besar', 'phone' => '+60 12-345 6789',
             'whatsapp' => '60123456789', 'maps_url' => 'https://maps.example.com/boss', 'counter' => 'Counter 5',
         ],
+        'outlets' => ['multi_enabled' => false],
         'brand' => [
             'icon' => '🍜', 'primary_color' => '#0F766E', 'accent_color' => '#fde047',
             'footer_text' => 'Hand-pulled noodles since 1998.', 'badge_text' => '',

@@ -8,6 +8,7 @@ use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\SyncStatus;
+use App\Models\Concerns\BelongsToOutlet;
 use Carbon\CarbonImmutable;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
-    'uuid', 'business_date', 'queue_number', 'order_number', 'pickup_code', 'user_id', 'placed_by_id', 'dining_table_id', 'table_label', 'customer_name',
+    'outlet_id', 'uuid', 'business_date', 'queue_number', 'order_number', 'pickup_code', 'user_id', 'placed_by_id', 'dining_table_id', 'table_label', 'customer_name',
     'customer_phone', 'customer_email', 'type', 'source', 'status', 'payment_status', 'payment_method', 'notes',
     'subtotal', 'delivery_fee', 'discount', 'tax_amount', 'tax_rate', 'tax_inclusive', 'total',
     'estimated_ready_at', 'confirmed_at', 'preparing_at', 'ready_at', 'dispatched_at', 'completed_at',
@@ -29,7 +30,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
-    use HasFactory;
+    use BelongsToOutlet, HasFactory;
 
     /**
      * @var array<string, mixed>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Kitchen;
 
 use App\Enums\KitchenItemStatus;
 use App\Enums\OrderStatus;
+use App\Enums\ProductStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Category;
@@ -11,6 +12,7 @@ use App\Models\KitchenStation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Support\OutletStock;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -28,7 +30,7 @@ class KitchenController extends Controller
         $stations = KitchenStation::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
         $stationId = $stations->firstWhere('id', $request->integer('station'))?->id;
 
-        $queue = Order::query()
+        $queue = Order::query()->forOutlet($this->outlet())
             ->inKitchen()
             ->with(['items.modifiers', 'items.station'])
             ->when($stationId, fn ($query) => $query->whereHas(
@@ -39,7 +41,7 @@ class KitchenController extends Controller
             ->orderBy('id')
             ->get();
 
-        $ready = Order::query()
+        $ready = Order::query()->forOutlet($this->outlet())
             ->where('status', OrderStatus::Ready)
             ->where('ready_at', '>=', now()->subMinutes(self::RECENTLY_READY_MINUTES))
             ->with(['items.modifiers', 'items.station'])
@@ -63,6 +65,8 @@ class KitchenController extends Controller
      */
     private function menu(): array
     {
+        $stock = app(OutletStock::class);
+
         return Category::query()
             ->active()
             ->ordered()
@@ -76,8 +80,14 @@ class KitchenController extends Controller
                     'id' => $product->id,
                     'code' => $product->code,
                     'name' => $product->name,
-                    'status' => $product->status->value,
-                    'status_label' => $product->status->label(),
+                    // "sold_out" here means sold out at this outlet (the crew can undo it);
+                    // "locked" items are switched off for the whole business by an admin.
+                    'status' => match (true) {
+                        $product->status !== ProductStatus::Available => 'locked',
+                        $stock->isSoldOut($product) => 'sold_out',
+                        default => 'available',
+                    },
+                    'status_label' => $product->status === ProductStatus::Available ? ProductStatus::Available->label() : $product->status->label(),
                 ])->all(),
             ])
             ->values()
@@ -93,7 +103,7 @@ class KitchenController extends Controller
     private function stationLoad($stations): array
     {
         $counts = OrderItem::query()
-            ->whereHas('order', fn ($query) => $query->inKitchen())
+            ->whereHas('order', fn ($query) => $query->forOutlet($this->outlet())->inKitchen())
             ->whereIn('kitchen_status', [KitchenItemStatus::Queued, KitchenItemStatus::Cooking])
             ->selectRaw('kitchen_station_id, kitchen_status, sum(quantity) as total')
             ->groupBy('kitchen_station_id', 'kitchen_status')
