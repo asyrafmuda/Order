@@ -7,12 +7,33 @@ import { MoneyInput } from '@/components/admin/MoneyInput';
 import { OutletFields, toOutletForm, type OutletSettings } from '@/components/admin/OutletFields';
 import { Input, Textarea, Toggle } from '@/components/ui/Form';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
+import { cn } from '@/lib/cn';
 import { inputToSen, senToInput } from '@/lib/format';
+
+type Theme = 'dark' | 'light';
+
+/** What each theme is drawn on, for the small previews. */
+const themes: { value: Theme; label: string; hint: string; page: string; surface: string; border: string; text: string; muted: string }[] = [
+    { value: 'dark', label: 'Dark', hint: 'Black background, light text.', page: '#09090b', surface: '#141418', border: '#292930', text: '#ffffff', muted: '#8b8b96' },
+    { value: 'light', label: 'Light', hint: 'White background, dark text.', page: '#f4f4f6', surface: '#ffffff', border: '#dfdfe5', text: '#0c0c0f', muted: '#666672' },
+];
+
+/** Ready-made looks: one tap sets the theme and both colours. */
+const looks: { name: string; theme: Theme; primary: string; accent: string }[] = [
+    { name: 'Grill Night', theme: 'dark', primary: '#ee2b32', accent: '#ffb938' },
+    { name: 'Midnight Blue', theme: 'dark', primary: '#2563eb', accent: '#38bdf8' },
+    { name: 'Forest', theme: 'dark', primary: '#16a34a', accent: '#facc15' },
+    { name: 'Royal Purple', theme: 'dark', primary: '#7c3aed', accent: '#f0abfc' },
+    { name: 'Clean Red', theme: 'light', primary: '#dc2626', accent: '#f59e0b' },
+    { name: 'Fresh Green', theme: 'light', primary: '#15803d', accent: '#f59e0b' },
+    { name: 'Ocean', theme: 'light', primary: '#0369a1', accent: '#f97316' },
+    { name: 'Coffee', theme: 'light', primary: '#7c4a2d', accent: '#c2410c' },
+];
 
 interface Settings extends OutletSettings {
     outlets: { multi_enabled: boolean };
     shop: OutletSettings['shop'] & { name: string; tagline: string | null };
-    brand: { icon: string; primary_color: string; accent_color: string; footer_text: string | null; badge_text: string | null };
+    brand: { theme: Theme; icon: string; primary_color: string; accent_color: string; footer_text: string | null; badge_text: string | null };
     ordering: OutletSettings['ordering'] & { auto_close_hours: number };
     payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number; dine_in_pay_at_counter: boolean };
     pos: { quick_notes: string[] };
@@ -80,7 +101,7 @@ export default function SettingsEdit({ settings, multi }: { settings: Settings; 
                         label="This business has more than one outlet"
                         description="Each outlet gets its own orders, queue numbers, tables, delivery areas, staff, opening hours and sold-out list. The menu, prices and customers stay shared. Off: everything runs as one outlet."
                     />
-                    {errors['outlets.multi_enabled'] && <p className="mt-2 text-xs font-medium text-brand-400">{errors['outlets.multi_enabled']}</p>}
+                    {errors['outlets.multi_enabled'] && <p className="mt-2 text-xs font-medium text-danger-400">{errors['outlets.multi_enabled']}</p>}
                     {data.outlets.multi_enabled && !multi && <p className="mt-3 rounded-lg bg-ink-900 px-3 py-2 text-xs text-ink-300">Save, then add your other outlets under Outlets. Your current details become the main outlet.</p>}
                 </Section>
 
@@ -132,8 +153,81 @@ export default function SettingsEdit({ settings, multi }: { settings: Settings; 
                                     )}
                                 </div>
                                 <p className="text-xs text-ink-400">Square PNG, JPG or WebP, up to 1 MB. Without a logo the icon below is shown.</p>
-                                {pageErrors.logo && <p className="text-xs font-medium text-brand-400">{pageErrors.logo}</p>}
+                                {pageErrors.logo && <p className="text-xs font-medium text-danger-400">{pageErrors.logo}</p>}
                             </div>
+                        </div>
+
+                        <div>
+                            <span className="block text-xs font-semibold text-ink-300">Theme</span>
+                            <div className="mt-1.5 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Theme">
+                                {themes.map((theme) => {
+                                    const active = data.brand.theme === theme.value;
+
+                                    return (
+                                        <button
+                                            key={theme.value}
+                                            type="button"
+                                            role="radio"
+                                            aria-checked={active}
+                                            onClick={() => set('brand', 'theme', theme.value)}
+                                            className={cn('rounded-xl border p-2.5 text-left transition-colors', active ? 'border-brand-500 ring-1 ring-brand-500' : 'border-ink-600 hover:border-ink-400')}
+                                        >
+                                            {/* A miniature of a menu card in this theme, in the colours picked below. */}
+                                            <span className="block rounded-lg p-2.5" style={{ background: theme.page }} aria-hidden>
+                                                <span className="flex items-center justify-between gap-2 rounded-md border p-2" style={{ background: theme.surface, borderColor: theme.border }}>
+                                                    <span className="min-w-0">
+                                                        <span className="block truncate text-xs font-bold" style={{ color: theme.text }}>
+                                                            {data.shop.name || 'Your shop'}
+                                                        </span>
+                                                        <span className="block text-[10px]" style={{ color: theme.muted }}>
+                                                            Chicken burger
+                                                        </span>
+                                                    </span>
+                                                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-extrabold" style={{ background: data.brand.accent_color, color: '#111' }}>
+                                                        RM 12.90
+                                                    </span>
+                                                    <span className="shrink-0 rounded-md px-2 py-1 text-[10px] font-bold text-white" style={{ background: data.brand.primary_color }}>
+                                                        Add
+                                                    </span>
+                                                </span>
+                                            </span>
+                                            <span className="mt-2 block text-sm font-bold text-strong">{theme.label}</span>
+                                            <span className="block text-xs text-ink-400">{theme.hint}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {errors['brand.theme'] && <p className="mt-1 text-xs font-medium text-danger-400">{errors['brand.theme']}</p>}
+                        </div>
+
+                        <div>
+                            <span className="block text-xs font-semibold text-ink-300">Ready-made looks</span>
+                            <div className="mt-1.5 flex flex-wrap gap-2">
+                                {looks.map((look) => {
+                                    const active = data.brand.theme === look.theme && data.brand.primary_color.toLowerCase() === look.primary && data.brand.accent_color.toLowerCase() === look.accent;
+
+                                    return (
+                                        <button
+                                            key={look.name}
+                                            type="button"
+                                            aria-pressed={active}
+                                            onClick={() => form.setData('brand', { ...data.brand, theme: look.theme, primary_color: look.primary, accent_color: look.accent })}
+                                            className={cn(
+                                                'flex h-10 items-center gap-2 rounded-lg border px-2.5 text-xs font-bold transition-colors',
+                                                active ? 'border-brand-500 text-strong ring-1 ring-brand-500' : 'border-ink-600 text-ink-200 hover:border-ink-400',
+                                            )}
+                                        >
+                                            <span className="flex overflow-hidden rounded-full ring-1 ring-ink-600" aria-hidden>
+                                                <span className="size-4" style={{ background: look.theme === 'dark' ? '#141418' : '#ffffff' }} />
+                                                <span className="size-4" style={{ background: look.primary }} />
+                                                <span className="size-4" style={{ background: look.accent }} />
+                                            </span>
+                                            {look.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <p className="mt-1.5 text-xs text-ink-400">Pick one as a starting point, or set your own colours below. Nothing changes for customers until you save.</p>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-3">
@@ -201,7 +295,7 @@ export default function SettingsEdit({ settings, multi }: { settings: Settings; 
                                 label="Cash at counter"
                                 description="These orders reach the kitchen before anyone has paid, so keep the limits below tight."
                             />
-                            {errors['payments.cash_enabled'] && <p className="mt-2 text-xs font-medium text-brand-400">{errors['payments.cash_enabled']}</p>}
+                            {errors['payments.cash_enabled'] && <p className="mt-2 text-xs font-medium text-danger-400">{errors['payments.cash_enabled']}</p>}
                             {data.payments.cash_enabled && (
                                 <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:items-start">
                                     <Toggle
@@ -292,7 +386,7 @@ function ColorField({ label, hint, value, onChange, error }: { label: string; hi
                 <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#000000'} onChange={(event) => onChange(event.target.value)} className="size-7 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0" aria-label={label} />
                 <input type="text" value={value} maxLength={7} onChange={(event) => onChange(event.target.value)} className="w-full bg-transparent font-mono text-sm text-ink-100 focus:outline-none" aria-label={`${label} hex code`} />
             </label>
-            {error ? <p className="text-xs font-medium text-brand-400">{error}</p> : <p className="text-xs text-ink-400">{hint}</p>}
+            {error ? <p className="text-xs font-medium text-danger-400">{error}</p> : <p className="text-xs text-ink-400">{hint}</p>}
         </div>
     );
 }

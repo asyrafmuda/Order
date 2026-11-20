@@ -156,7 +156,7 @@ function PriceForm({ outlet, onSaved, ...menu }: PricesProps & { outlet: { id: n
         <form onSubmit={submit} className="mx-auto max-w-3xl space-y-5 pb-24">
             <Card className="space-y-3 p-4">
                 <p className="text-sm text-ink-200">
-                    The menu is shared by every outlet. Type a price only where <span className="font-bold text-white">{outlet.name}</span> charges something different; leave the rest blank and
+                    The menu is shared by every outlet. Type a price only where <span className="font-bold text-strong">{outlet.name}</span> charges something different; leave the rest blank and
                     they follow the standard price, also when that changes later.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
@@ -197,7 +197,7 @@ function PriceForm({ outlet, onSaved, ...menu }: PricesProps & { outlet: { id: n
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm leading-snug text-ink-100">
                                             {row.code && <span className="mr-1.5 text-xs font-bold text-ink-400">{row.code}</span>}
-                                            <span className="font-semibold text-white">{row.name}</span>
+                                            <span className="font-semibold text-strong">{row.name}</span>
                                             {row.detail && <span className="text-ink-300"> · {row.detail}</span>}
                                         </p>
                                         <p className="mt-0.5 text-xs text-ink-400">
@@ -210,7 +210,7 @@ function PriceForm({ outlet, onSaved, ...menu }: PricesProps & { outlet: { id: n
                                             )}
                                         </p>
                                         {errors[row.key] && (
-                                            <p className="mt-0.5 text-xs font-medium text-brand-400" role="alert">
+                                            <p className="mt-0.5 text-xs font-medium text-danger-400" role="alert">
                                                 {errors[row.key]}
                                             </p>
                                         )}
@@ -222,7 +222,7 @@ function PriceForm({ outlet, onSaved, ...menu }: PricesProps & { outlet: { id: n
                                         max="10000"
                                         value={typed}
                                         onChange={(value) => setValues((current) => ({ ...current, [row.key]: value }))}
-                                        className={cn(difference !== 0 && 'font-bold ring-1 ring-flame-500/70', errors[row.key] && 'ring-1 ring-brand-500')}
+                                        className={cn(difference !== 0 && 'font-bold ring-1 ring-flame-500/70', errors[row.key] && 'ring-1 ring-danger-500')}
                                     />
                                 </li>
                             );

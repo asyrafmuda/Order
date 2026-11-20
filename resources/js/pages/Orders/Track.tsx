@@ -25,7 +25,7 @@ export default function OrderTrack({ recent }: { recent: Order[] }) {
                 <p className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">
                     <span className="size-1.5 rounded-full bg-brand-500" aria-hidden /> Live from the kitchen
                 </p>
-                <h1 className="font-display text-5xl leading-none text-white uppercase">Order Tracking &amp; Digital Ticket</h1>
+                <h1 className="font-display text-5xl leading-none text-strong uppercase">Order Tracking &amp; Digital Ticket</h1>
             </div>
 
             <div className="grid gap-5 lg:grid-cols-[24rem_minmax(0,1fr)]">
@@ -69,7 +69,7 @@ export default function OrderTrack({ recent }: { recent: Order[] }) {
                                     <Link href={route('orders.show', order.uuid)} className="flex items-center gap-4 px-4 py-3.5 hover:bg-ink-800">
                                         <span className="font-display text-3xl leading-none text-brand-500">#{order.order_number}</span>
                                         <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-white">{(order.items ?? []).map((item) => `${item.quantity}× ${item.name}`).join(', ')}</span>
+                                            <span className="block truncate text-sm font-semibold text-strong">{(order.items ?? []).map((item) => `${item.quantity}× ${item.name}`).join(', ')}</span>
                                             <span className="text-xs text-ink-400">
                                                 {dateTime(order.created_at)} · {order.type_label}
                                             </span>

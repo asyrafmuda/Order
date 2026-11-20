@@ -56,7 +56,7 @@ export default function KitchenStationsIndex({ stations }: { stations: Station[]
                             {stations.map((station) => (
                                 <tr key={station.id} className="hover:bg-ink-800/60">
                                     <Td className="w-16 text-ink-400">{station.sort_order}</Td>
-                                    <Td className="font-bold text-white">{station.name}</Td>
+                                    <Td className="font-bold text-strong">{station.name}</Td>
                                     <Td>{station.categories_count}</Td>
                                     <Td>{station.products_count}</Td>
                                     <Td>

@@ -26,13 +26,13 @@ export function TicketPanel({ action, className }: TicketPanelProps) {
                 <div className="flex items-center gap-2.5">
                     <ReceiptText className="size-5 text-flame-400" aria-hidden />
                     <div>
-                        <h2 className="text-sm leading-tight font-bold text-white">Current Ticket</h2>
+                        <h2 className="text-sm leading-tight font-bold text-strong">Current Ticket</h2>
                         <p className="text-[11px] font-semibold text-go-400">
                             {cart.count > 0 ? `${cart.count} item${cart.count === 1 ? '' : 's'}` : 'Nothing added yet'}
                         </p>
                     </div>
                 </div>
-                <Badge tone="solid-red">{cart.table ? cart.table.name : cart.type === 'delivery' ? 'Delivery' : 'Pickup'}</Badge>
+                <Badge tone="solid-brand">{cart.table ? cart.table.name : cart.type === 'delivery' ? 'Delivery' : 'Pickup'}</Badge>
             </header>
 
             {cart.lines.length === 0 ? (
@@ -91,7 +91,7 @@ export function TicketPanel({ action, className }: TicketPanelProps) {
                     ))}
                 <p className="text-center text-[11px] text-ink-500">Your order goes straight to the {shop.name} kitchen once it is confirmed.</p>
                 {cart.lines.length > 0 && !action && (
-                    <button type="button" onClick={() => cartActions.clear()} className="mx-auto flex items-center gap-1 text-[11px] font-semibold text-ink-500 hover:text-brand-400">
+                    <button type="button" onClick={() => cartActions.clear()} className="mx-auto flex items-center gap-1 text-[11px] font-semibold text-ink-500 hover:text-danger-400">
                         <Trash2 className="size-3" aria-hidden /> Clear ticket
                     </button>
                 )}
@@ -110,13 +110,13 @@ function TicketLine({ line }: { line: CartLine }) {
     return (
         <li className="px-4 py-3">
             <div className="flex items-start justify-between gap-3">
-                <p className="min-w-0 text-[13px] leading-snug font-bold text-white">
+                <p className="min-w-0 text-[13px] leading-snug font-bold text-strong">
                     {line.code && <span className="text-ink-300">{line.code}. </span>}
                     {line.name}
                 </p>
                 <div className="flex shrink-0 items-center gap-2">
                     <span className="text-sm font-extrabold text-flame-400">{money(line.line_total)}</span>
-                    <button type="button" onClick={() => cartActions.remove(line.id)} className="text-ink-500 hover:text-brand-400" aria-label={`Remove ${line.name}`}>
+                    <button type="button" onClick={() => cartActions.remove(line.id)} className="text-ink-500 hover:text-danger-400" aria-label={`Remove ${line.name}`}>
                         <X className="size-4" />
                     </button>
                 </div>
@@ -157,7 +157,7 @@ export function Totals({ cart }: { cart: Pick<Cart, 'subtotal' | 'delivery_fee' 
                 </div>
             )}
             <div className="flex items-end justify-between pt-2">
-                <dt className="text-sm font-bold text-white">Total Amount</dt>
+                <dt className="text-sm font-bold text-strong">Total Amount</dt>
                 <dd className="font-display text-4xl leading-none whitespace-nowrap text-flame-400">{money(cart.total)}</dd>
             </div>
         </dl>

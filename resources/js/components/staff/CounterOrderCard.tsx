@@ -31,7 +31,7 @@ export function CounterOrderCard({ order, selected, onSelect }: CounterOrderCard
         >
             <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                    <p className="font-display text-3xl leading-none text-white">{order.order_number}</p>
+                    <p className="font-display text-3xl leading-none text-strong">{order.order_number}</p>
                     <p className="mt-1 truncate text-xs font-semibold text-ink-200">{order.customer_name}</p>
                     <p className="text-[11px] text-ink-400">
                         {order.type === 'dine_in' ? `Dine-in${order.table_label ? ` · ${order.table_label}` : ''}` : order.source === 'pos' ? 'Counter order' : null}
@@ -63,7 +63,7 @@ export function CounterOrderCard({ order, selected, onSelect }: CounterOrderCard
             )}
 
             <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-ink-700 pt-2">
-                <span className={cn('text-[11px]', waiting >= 30 ? 'font-bold text-brand-400' : waiting >= 15 ? 'font-bold text-flame-400' : 'text-ink-400')}>
+                <span className={cn('text-[11px]', waiting >= 30 ? 'font-bold text-danger-400' : waiting >= 15 ? 'font-bold text-flame-400' : 'text-ink-400')}>
                     {order.ready_at
                         ? `Ready ${time(order.ready_at)}${order.status === 'ready' && waiting >= 5 ? ` · ${waiting} min wait` : ''}`
                         : order.estimated_ready_at

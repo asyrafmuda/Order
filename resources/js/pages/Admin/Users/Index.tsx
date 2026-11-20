@@ -39,7 +39,7 @@ interface UsersProps {
 }
 
 const roleTones: Record<Role, Tone> = {
-    admin: 'solid-red',
+    admin: 'solid-brand',
     manager: 'solid-flame',
     cashier: 'flame',
     waiter: 'flame',
@@ -112,7 +112,7 @@ export default function UsersIndex({ users, filters, roles, outlets, multi }: Us
                                 return (
                                     <tr key={user.id} className="hover:bg-ink-800/60">
                                         <Td>
-                                            <span className="font-bold text-white">
+                                            <span className="font-bold text-strong">
                                                 {user.name}
                                                 {self && <span className="ml-2 text-xs font-semibold text-flame-400">You</span>}
                                             </span>
@@ -239,7 +239,7 @@ function UserForm({ user, roles, outlets, multi, self, onClose }: { user: UserRo
                     label="Account active"
                     description={self ? 'You cannot deactivate your own account.' : 'Inactive users cannot sign in.'}
                 />
-                {form.errors.is_active && <p className="text-xs font-medium text-brand-400">{form.errors.is_active}</p>}
+                {form.errors.is_active && <p className="text-xs font-medium text-danger-400">{form.errors.is_active}</p>}
                 <div className="flex justify-end gap-2 pt-2">
                     <Button variant="ghost" onClick={onClose}>
                         Cancel

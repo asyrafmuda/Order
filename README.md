@@ -83,9 +83,20 @@ Akaun adalah pilihan — untuk sejarah order, alamat tersimpan dan bayar di kaun
 
 OTP melalui SMS/WhatsApp belum ada; ia boleh ditambah di atas `App\Contracts\MessageChannel` bila penyedia mesej disambung.
 
-## Jenama kedai
+## Jenama dan tema
 
-Admin → Settings → **Branding**: nama, tagline, logo (atau emoji), warna utama dan warna aksen, teks footer. Semua skrin, invois PDF dan favicon ikut tetapan ini — tiada kod yang perlu diubah untuk kedai lain. Warna yang terlalu pudar untuk dibaca atas latar gelap ditolak semasa simpan.
+Admin → Settings → **Branding**. Tiada kod yang perlu diubah untuk kedai lain.
+
+- **Theme:** *Dark* (latar hitam, default) atau *Light* (latar putih). Terpakai pada semua skrin — pelanggan, POS, dapur, admin.
+- **Ready-made looks:** lapan gabungan siap (Grill Night, Midnight Blue, Forest, Royal Purple, Clean Red, Fresh Green, Ocean, Coffee). Satu tekan mengisi tema dan dua warna; boleh diubah lagi selepas itu.
+- **Main colour / Accent colour:** warna sendiri. Warna utama untuk butang dan sorotan; aksen untuk harga dan lencana.
+- Nama, tagline, logo (atau emoji) dan teks footer.
+
+Perubahan terpakai sebaik sahaja *Save* ditekan, tanpa refresh; pelanggan mendapatnya pada halaman seterusnya.
+
+Yang dijaga oleh sistem: warna utama yang terlalu pudar untuk teks putih pada butang ditolak; pada tema gelap, aksen yang terlalu gelap ditolak; pada tema cerah, aksen digelapkan sendiri untuk teks supaya harga kekal terbaca. Ralat, butang padam, *sold out* dan tiket lewat **sentiasa merah** walau apa pun warna jenama.
+
+Dalam kod: `App\Support\BrandPalette` menukar tetapan kepada CSS custom properties (`--color-ink-*`, `--color-brand-*`, `--color-flame-*`, `--color-strong`, …) yang menimpa default dalam `resources/css/app.css`. Guna token itu (`bg-ink-850`, `text-strong`, `text-danger-400`) dan jangan tulis warna tetap seperti `text-white` kecuali di atas latar berwarna pekat.
 
 ## Banyak outlet (cawangan)
 

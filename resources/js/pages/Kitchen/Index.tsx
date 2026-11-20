@@ -52,12 +52,12 @@ export default function KitchenIndex({ orders, ready, stations, filters, menu }:
                         onClick={() => setStockOpen(true)}
                         className={cn(
                             'flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-bold',
-                            soldOut > 0 ? 'border-brand-600 bg-brand-900 text-brand-400' : 'border-ink-700 bg-ink-850 text-ink-200 hover:border-ink-500',
+                            soldOut > 0 ? 'border-danger-600 bg-danger-900 text-danger-400' : 'border-ink-700 bg-ink-850 text-ink-200 hover:border-ink-500',
                         )}
                     >
                         <PackageX className="size-4" aria-hidden />
                         <span className="hidden sm:inline">Stock</span>
-                        {soldOut > 0 && <span className="rounded bg-brand-600 px-1.5 text-xs text-white">{soldOut}</span>}
+                        {soldOut > 0 && <span className="rounded bg-danger-600 px-1.5 text-xs text-white">{soldOut}</span>}
                     </button>
                     <button
                         type="button"
@@ -167,7 +167,7 @@ function StationTab({ label, queued, cooking, active, onClick }: StationTabProps
                 <span className={cn('rounded-md px-1.5 py-0.5', cooking > 0 ? 'bg-ink-950/50 text-flame-300' : 'bg-ink-950/30 text-ink-400')} aria-label={`${cooking} cooking`}>
                     🔥 {cooking}
                 </span>
-                <span className={cn('rounded-md px-1.5 py-0.5', queued > 0 ? 'bg-ink-950/50 text-white' : 'bg-ink-950/30 text-ink-400')} aria-label={`${queued} waiting`}>
+                <span className={cn('rounded-md px-1.5 py-0.5', queued > 0 ? 'bg-ink-950/50 text-strong' : 'bg-ink-950/30 text-ink-400')} aria-label={`${queued} waiting`}>
                     ⏳ {queued}
                 </span>
             </span>

@@ -67,7 +67,7 @@ export function RiderDeliveryCard({ delivery }: { delivery: RiderDelivery }) {
         <Card className={onTheWay ? 'border-brand-500' : readyToCollect ? 'border-go-500/60' : undefined}>
             <div className="flex items-start justify-between gap-3 border-b border-ink-700 px-4 py-3">
                 <div>
-                    <p className="font-display text-4xl leading-none text-white">{order.order_number}</p>
+                    <p className="font-display text-4xl leading-none text-strong">{order.order_number}</p>
                     <p className="mt-1 text-xs text-ink-400">
                         {delivery.zone ?? 'Delivery'}
                         {delivery.assigned_at && ` · assigned ${time(delivery.assigned_at)}`}
@@ -88,7 +88,7 @@ export function RiderDeliveryCard({ delivery }: { delivery: RiderDelivery }) {
                 <div className="flex items-start gap-2.5">
                     <MapPin className="mt-0.5 size-5 shrink-0 text-brand-400" aria-hidden />
                     <div className="min-w-0">
-                        <p className="text-sm font-bold text-white">{delivery.recipient_name}</p>
+                        <p className="text-sm font-bold text-strong">{delivery.recipient_name}</p>
                         <p className="text-sm leading-snug text-ink-200">{delivery.address}</p>
                     </div>
                 </div>

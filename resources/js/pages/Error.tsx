@@ -15,7 +15,7 @@ export default function Error({ status }: { status: number }) {
         <div className="flex min-h-dvh flex-col items-center justify-center gap-3 px-4 text-center">
             <Head title={title} />
             <p className="font-display text-8xl text-brand-500">{status}</p>
-            <h1 className="font-display text-3xl text-white uppercase">{title}</h1>
+            <h1 className="font-display text-3xl text-strong uppercase">{title}</h1>
             <p className="max-w-sm text-sm text-ink-400">{description}</p>
             <Link href="/" className={buttonClass('primary', 'md', 'mt-4')}>
                 Back to the menu

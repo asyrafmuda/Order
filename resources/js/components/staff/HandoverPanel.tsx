@@ -145,13 +145,13 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                 )}
 
                 {order.status === 'cancelled' && order.cancel_reason && (
-                    <p className="rounded-lg bg-brand-900 px-3 py-2 text-sm font-semibold text-brand-400">Cancelled: {order.cancel_reason}</p>
+                    <p className="rounded-lg bg-danger-900 px-3 py-2 text-sm font-semibold text-danger-400">Cancelled: {order.cancel_reason}</p>
                 )}
 
                 {delivery && (
                     <section className="space-y-3 rounded-lg border border-ink-700 bg-ink-900 p-3" aria-label="Delivery">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                            <h3 className="flex items-center gap-2 text-sm font-bold text-white">
+                            <h3 className="flex items-center gap-2 text-sm font-bold text-strong">
                                 <Bike className="size-4 text-flame-400" aria-hidden /> Delivery
                                 {delivery.zone && <span className="font-normal text-ink-400">· {delivery.zone}</span>}
                             </h3>
@@ -243,7 +243,7 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                 )}
 
                 {cancelling && (
-                    <form onSubmit={cancel} className="space-y-3 rounded-lg border border-brand-600/50 bg-brand-900/40 p-3">
+                    <form onSubmit={cancel} className="space-y-3 rounded-lg border border-danger-600/50 bg-danger-900/40 p-3">
                         <Input
                             label="Reason for cancelling"
                             hint={order.is_paid ? 'The payment will be refunded and the customer is notified.' : 'The customer is notified with this reason.'}
@@ -279,7 +279,7 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                                 <li key={item.id} className="flex items-start gap-3 px-3 py-2.5">
                                     <span className="w-7 shrink-0 text-sm font-extrabold text-flame-400">{item.quantity}×</span>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-bold text-white">
+                                        <p className="text-sm font-bold text-strong">
                                             {item.code && <span className="text-ink-400">{item.code}. </span>}
                                             {item.name}
                                         </p>
@@ -306,7 +306,7 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                             </div>
                         )}
                         <div className="flex items-end justify-between pt-1">
-                            <dt className="font-bold text-white">Total</dt>
+                            <dt className="font-bold text-strong">Total</dt>
                             <dd className="font-display text-3xl leading-none text-flame-400">{money(order.total)}</dd>
                         </div>
                     </dl>

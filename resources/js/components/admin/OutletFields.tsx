@@ -128,7 +128,7 @@ export function OutletFields({ data, errors, set }: OutletFieldsProps) {
                         <Toggle checked={data.ordering.dine_in_enabled} onChange={(checked) => set('ordering', 'dine_in_enabled', checked)} label="Dine-in by table QR" description="Customers scan the code on their table. Set up under Tables & QR." />
                     </div>
                     {(errors['ordering.delivery_enabled'] || errors['ordering.pickup_enabled']) && (
-                        <p className="text-xs font-medium text-brand-400">{errors['ordering.delivery_enabled'] ?? errors['ordering.pickup_enabled']}</p>
+                        <p className="text-xs font-medium text-danger-400">{errors['ordering.delivery_enabled'] ?? errors['ordering.pickup_enabled']}</p>
                     )}
                     <div className="grid gap-4 sm:grid-cols-3">
                         <Input

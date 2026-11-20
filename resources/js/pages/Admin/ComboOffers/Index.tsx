@@ -32,7 +32,7 @@ export default function ComboOffersIndex({ offers, eligibleProducts }: { offers:
 
             <p className="mb-4 rounded-lg border border-ink-700 bg-ink-850 px-4 py-3 text-sm text-ink-300">
                 One combo is offered at a time — activating a combo switches the others off. It can be added to{' '}
-                <strong className="text-white">{eligibleProducts}</strong> product{eligibleProducts === 1 ? '' : 's'} marked “Combo upgrade” in{' '}
+                <strong className="text-strong">{eligibleProducts}</strong> product{eligibleProducts === 1 ? '' : 's'} marked “Combo upgrade” in{' '}
                 <Link href={route('admin.products.index')} className="font-semibold text-flame-400 hover:underline">
                     Products
                 </Link>
@@ -59,7 +59,7 @@ export default function ComboOffersIndex({ offers, eligibleProducts }: { offers:
                             {offers.map((offer) => (
                                 <tr key={offer.id} className="hover:bg-ink-800/60">
                                     <Td>
-                                        <span className="font-bold text-white">{offer.name}</span>
+                                        <span className="font-bold text-strong">{offer.name}</span>
                                         {offer.description && <span className="block text-xs text-ink-400">{offer.description}</span>}
                                     </Td>
                                     <Td className="text-xs text-ink-300">{offer.choices.length > 0 ? offer.choices.join(' / ') : '—'}</Td>

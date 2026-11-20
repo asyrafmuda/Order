@@ -76,7 +76,7 @@ export default function RiderIndex({ rider, deliveries, completed }: RiderProps)
                                     <li key={delivery.id} className="flex items-center gap-3 px-4 py-3">
                                         <CircleCheckBig className="size-5 shrink-0 text-go-400" aria-hidden />
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-bold text-white">
+                                            <p className="text-sm font-bold text-strong">
                                                 {delivery.order.order_number} · {delivery.recipient_name}
                                             </p>
                                             <p className="truncate text-xs text-ink-400">{delivery.address}</p>

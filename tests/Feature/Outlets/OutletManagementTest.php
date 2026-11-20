@@ -44,7 +44,7 @@ function businessSettings(array $overrides = []): array
             'whatsapp' => '60123456789', 'maps_url' => null, 'counter' => 'Counter 5',
         ],
         'outlets' => ['multi_enabled' => true],
-        'brand' => ['icon' => '🍔', 'primary_color' => '#B91C1C', 'accent_color' => '#F59E0B', 'footer_text' => '', 'badge_text' => ''],
+        'brand' => ['theme' => 'dark', 'icon' => '🍔', 'primary_color' => '#B91C1C', 'accent_color' => '#F59E0B', 'footer_text' => '', 'badge_text' => ''],
         'hours' => ['open' => '00:00', 'close' => '23:59', 'last_order' => '23:59'],
         'ordering' => [
             'enabled' => true, 'pickup_enabled' => true, 'delivery_enabled' => true, 'dine_in_enabled' => true,

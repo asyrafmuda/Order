@@ -43,11 +43,11 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
                 )}
             >
                 <div className="flex items-center justify-between gap-4 border-b border-ink-700 px-5 py-4">
-                    <h2 className="min-w-0 text-base font-bold text-white">{title}</h2>
+                    <h2 className="min-w-0 text-base font-bold text-strong">{title}</h2>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-lg p-1.5 text-ink-400 hover:bg-ink-700 hover:text-white"
+                        className="rounded-lg p-1.5 text-ink-400 hover:bg-ink-700 hover:text-strong"
                         aria-label="Close"
                     >
                         <X className="size-5" />

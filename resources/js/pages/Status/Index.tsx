@@ -23,7 +23,7 @@ interface StatusProps {
     sync: { synced_today: number; failed_today: number; completed_today: number; last_synced_at: string | null };
 }
 
-const loadTone = { quiet: 'text-go-400', normal: 'text-go-400', busy: 'text-flame-400', slammed: 'text-brand-400' } as const;
+const loadTone = { quiet: 'text-go-400', normal: 'text-go-400', busy: 'text-flame-400', slammed: 'text-danger-400' } as const;
 
 export default function StatusIndex({ board, stations, sync }: StatusProps) {
     const { kitchen, pos } = usePage().props;
@@ -42,14 +42,14 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
                 <p className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">
                     <span className="size-1.5 animate-pulse-soft rounded-full bg-brand-500" aria-hidden /> Live board
                 </p>
-                <h1 className="font-display text-5xl leading-none text-white uppercase">Kitchen &amp; POS Status</h1>
+                <h1 className="font-display text-5xl leading-none text-strong uppercase">Kitchen &amp; POS Status</h1>
             </div>
 
             <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Stat icon={<ChefHat className="size-5" />} label="Kitchen load" value={kitchen.label} valueClassName={loadTone[kitchen.level]} hint={`${kitchen.active_orders} order${kitchen.active_orders === 1 ? '' : 's'} in the queue`} />
                 <Stat icon={<Timer className="size-5" />} label="Current wait" value={`${kitchen.eta_min}–${kitchen.eta_max} min`} hint="For a new pickup order" />
                 <Stat icon={<Flame className="size-5" />} label="Cooking now" value={String(kitchen.cooking_items)} hint="Items cooking right now" />
-                <Stat icon={<Plug className="size-5" />} label={`POS (${pos.label})`} value={pos.simulated ? 'Demo mode' : pos.connected ? 'Connected' : 'Offline'} valueClassName={pos.connected ? 'text-go-400' : 'text-brand-400'} hint={sync.last_synced_at ? `Last ticket synced ${time(sync.last_synced_at)}` : 'No tickets synced yet'} />
+                <Stat icon={<Plug className="size-5" />} label={`POS (${pos.label})`} value={pos.simulated ? 'Demo mode' : pos.connected ? 'Connected' : 'Offline'} valueClassName={pos.connected ? 'text-go-400' : 'text-danger-400'} hint={sync.last_synced_at ? `Last ticket synced ${time(sync.last_synced_at)}` : 'No tickets synced yet'} />
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">
@@ -64,7 +64,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
 
                                 return (
                                     <li key={order.order_number} className={cn('rounded-xl border p-3 text-center', order.status === 'preparing' ? 'border-brand-600/50 bg-brand-900' : 'border-ink-700 bg-ink-900')}>
-                                        <p className="font-display text-4xl leading-none text-white">{order.order_number}</p>
+                                        <p className="font-display text-4xl leading-none text-strong">{order.order_number}</p>
                                         <p className="mt-1 text-[11px] font-bold tracking-wide text-ink-300 uppercase">{order.status === 'preparing' ? 'Cooking' : 'In queue'}</p>
                                         {left !== null && <p className="text-[11px] text-flame-400">{left > 0 ? `~${left} min` : 'almost ready'}</p>}
                                     </li>
@@ -100,7 +100,7 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
                         return (
                             <li key={station.id} className="border-t border-ink-800 p-4 first:border-t-0 sm:border-l sm:[&:nth-child(-n+2)]:border-t-0 sm:[&:nth-child(2n+1)]:border-l-0 lg:[&:nth-child(-n+3)]:border-t-0 lg:[&:nth-child(2n+1)]:border-l lg:[&:nth-child(3n+1)]:border-l-0">
                                 <div className="flex items-center justify-between gap-2">
-                                    <p className="flex items-center gap-2 text-sm font-bold text-white">
+                                    <p className="flex items-center gap-2 text-sm font-bold text-strong">
                                         <span className={cn('size-2 rounded-full', busy ? 'animate-pulse-soft bg-brand-500' : station.queued > 0 ? 'bg-flame-400' : 'bg-go-400')} />
                                         Station {index + 1}: {station.name}
                                     </p>
@@ -125,7 +125,7 @@ function Stat({ icon, label, value, hint, valueClassName }: { icon: React.ReactN
                 <span className="text-flame-400">{icon}</span>
                 {label}
             </p>
-            <p className={cn('mt-2 font-display text-4xl leading-none text-white', valueClassName)}>{value}</p>
+            <p className={cn('mt-2 font-display text-4xl leading-none text-strong', valueClassName)}>{value}</p>
             <p className="mt-1 text-xs text-ink-400">{hint}</p>
         </Card>
     );

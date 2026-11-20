@@ -51,13 +51,13 @@ export function ProductCard({ product, icon, customisable, disabled, onAdd, onCu
                     {!product.is_orderable ? (
                         <Badge tone="red">{product.status_label}</Badge>
                     ) : (
-                        product.badge && <Badge tone={product.badge.toLowerCase().includes('pick') ? 'solid-red' : 'green'}>{product.badge}</Badge>
+                        product.badge && <Badge tone={product.badge.toLowerCase().includes('pick') ? 'solid-brand' : 'green'}>{product.badge}</Badge>
                     )}
                 </span>
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-3.5">
-                <h3 className="text-sm leading-snug font-bold text-white sm:text-[15px]">{product.name}</h3>
+                <h3 className="text-sm leading-snug font-bold text-strong sm:text-[15px]">{product.name}</h3>
                 {product.description && <p className="line-clamp-2 text-xs leading-relaxed text-ink-400">{product.description}</p>}
 
                 {product.tags.length > 0 && (

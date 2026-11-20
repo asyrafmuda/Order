@@ -10,6 +10,7 @@ use App\Support\OutletContext;
 use App\Support\Settings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
@@ -40,6 +41,7 @@ class SettingRequest extends FormRequest
             'shop.counter' => ['required', 'string', 'max:40'],
 
             'brand.icon' => ['required', 'string', 'max:8'],
+            'brand.theme' => ['required', Rule::in(BrandPalette::THEMES)],
             'brand.primary_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'brand.accent_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'brand.footer_text' => ['nullable', 'string', 'max:255'],
@@ -123,8 +125,12 @@ class SettingRequest extends FormRequest
                     $validator->errors()->add('brand.primary_color', 'This colour is too light for white button text. Pick a darker or stronger one.');
                 }
 
-                if ($validator->errors()->missing('brand.accent_color') && BrandPalette::contrast((string) $this->input('brand.accent_color'), '#0f0f12') < 4.5) {
-                    $validator->errors()->add('brand.accent_color', 'This colour is too dark to read on the dark background. Pick a lighter one.');
+                // On the dark theme the accent is used as it is for prices, so it must be light
+                // enough to read there. The light theme darkens it by itself where needed.
+                $dark = $this->input('brand.theme') !== BrandPalette::LIGHT;
+
+                if ($dark && $validator->errors()->missing('brand.accent_color') && BrandPalette::contrast((string) $this->input('brand.accent_color'), BrandPalette::SURFACES[BrandPalette::DARK]) < 4.5) {
+                    $validator->errors()->add('brand.accent_color', 'This colour is too dark to read on the dark theme. Pick a lighter one, or switch to the light theme.');
                 }
 
                 $anyPayment = collect(['fpx', 'card', 'ewallet', 'cash'])
@@ -151,6 +157,7 @@ class SettingRequest extends FormRequest
             'shop.maps_url' => 'map link',
             'shop.counter' => 'pickup counter',
             'brand.icon' => 'icon',
+            'brand.theme' => 'theme',
             'brand.primary_color' => 'main colour',
             'brand.accent_color' => 'accent colour',
             'brand.footer_text' => 'footer text',

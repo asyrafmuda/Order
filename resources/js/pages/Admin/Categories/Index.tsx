@@ -53,7 +53,7 @@ export default function CategoriesIndex({ categories, stations }: CategoriesProp
                                 <tr key={category.id} className="hover:bg-ink-800/60">
                                     <Td className="w-16 text-ink-400">{category.sort_order}</Td>
                                     <Td>
-                                        <span className="font-bold text-white">
+                                        <span className="font-bold text-strong">
                                             <span className="mr-2" aria-hidden>
                                                 {category.icon}
                                             </span>

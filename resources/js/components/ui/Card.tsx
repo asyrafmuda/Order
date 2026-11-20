@@ -17,7 +17,7 @@ interface CardHeaderProps {
 export function CardHeader({ title, icon, action, className }: CardHeaderProps) {
     return (
         <div className={cn('flex items-center justify-between gap-3 border-b border-ink-700 px-4 py-3', className)}>
-            <h2 className="flex min-w-0 items-center gap-2 text-sm font-bold text-white">
+            <h2 className="flex min-w-0 items-center gap-2 text-sm font-bold text-strong">
                 {icon && <span className="shrink-0 text-flame-400">{icon}</span>}
                 <span className="truncate">{title}</span>
             </h2>

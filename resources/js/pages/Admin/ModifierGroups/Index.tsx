@@ -48,7 +48,7 @@ export default function ModifierGroupsIndex({ groups }: { groups: ModifierGroup[
                         <tbody>
                             {groups.map((group) => (
                                 <tr key={group.id} className="hover:bg-ink-800/60">
-                                    <Td className="font-bold text-white">{group.name}</Td>
+                                    <Td className="font-bold text-strong">{group.name}</Td>
                                     <Td className="max-w-md whitespace-normal">
                                         <div className="flex flex-wrap gap-1">
                                             {(group.modifiers ?? []).map((modifier) => (
@@ -194,7 +194,7 @@ function GroupForm({ group, nextSort, onClose }: { group: ModifierGroup | null; 
                             </div>
                         ))}
                     </div>
-                    {errors.modifiers && <p className="mt-2 text-xs font-medium text-brand-400">{errors.modifiers}</p>}
+                    {errors.modifiers && <p className="mt-2 text-xs font-medium text-danger-400">{errors.modifiers}</p>}
                 </fieldset>
 
                 <div className="flex justify-end gap-2">

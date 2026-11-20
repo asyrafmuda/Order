@@ -42,18 +42,18 @@ export function KitchenTicket({ order, now, stationId }: KitchenTicketProps) {
             className={cn('flex flex-col overflow-hidden rounded-xl border-2 bg-ink-850', {
                 'border-ink-700': urgency === 'ok',
                 'border-flame-500/70': urgency === 'warn',
-                'border-brand-500': urgency === 'late',
+                'border-danger-500': urgency === 'late',
             })}
             aria-label={`Order ${order.order_number}`}
         >
             <header className="space-y-2 border-b border-ink-700 px-4 pt-3 pb-2.5">
                 <div className="flex items-start justify-between gap-3">
-                    <p className="font-display text-5xl leading-none text-white">{order.order_number}</p>
+                    <p className="font-display text-5xl leading-none text-strong">{order.order_number}</p>
                     <span
                         className={cn('flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-sm font-extrabold tabular-nums', {
                             'bg-go-900 text-go-400': urgency === 'ok',
                             'bg-flame-900 text-flame-400': urgency === 'warn',
-                            'animate-pulse-soft bg-brand-600 text-white': urgency === 'late',
+                            'animate-pulse-soft bg-danger-600 text-white': urgency === 'late',
                         })}
                         aria-label={`${elapsed} minutes in the kitchen`}
                     >
@@ -140,7 +140,7 @@ function KitchenTicketItem({ item, dimmed, busy, onChange }: KitchenTicketItemPr
             <span className={cn('w-9 shrink-0 font-display text-3xl leading-none', isDone ? 'text-ink-500' : 'text-flame-400')}>{item.quantity}×</span>
 
             <div className="min-w-0 flex-1">
-                <p className={cn('text-[15px] leading-snug font-bold', isDone ? 'text-ink-400 line-through' : 'text-white')}>
+                <p className={cn('text-[15px] leading-snug font-bold', isDone ? 'text-ink-400 line-through' : 'text-strong')}>
                     {item.code && <span className="text-ink-400">{item.code}. </span>}
                     {item.name}
                 </p>
@@ -153,7 +153,7 @@ function KitchenTicketItem({ item, dimmed, busy, onChange }: KitchenTicketItemPr
                     </ul>
                 )}
                 {item.combo_name && (
-                    <p className="mt-0.5 text-sm font-semibold text-sky-300">
+                    <p className="mt-0.5 text-sm font-semibold text-info-400">
                         {item.combo_name}
                         {item.combo_choice && `: ${item.combo_choice}`}
                     </p>

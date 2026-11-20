@@ -98,7 +98,7 @@ export default function ReportsIndex({ filters, scope, today, totals, byOutlet, 
                                 onClick={() => apply({ ...range, outlet: option.value })}
                                 className={cn(
                                     'min-w-0 flex-1 truncate rounded-md px-3 py-1.5 text-sm font-bold transition-colors sm:flex-none',
-                                    range.outlet === option.value ? 'bg-brand-600 text-white' : 'text-ink-300 hover:text-white',
+                                    range.outlet === option.value ? 'bg-brand-600 text-white' : 'text-ink-300 hover:text-strong',
                                 )}
                             >
                                 {option.label}
@@ -158,7 +158,7 @@ export default function ReportsIndex({ filters, scope, today, totals, byOutlet, 
                                         return (
                                             <tr key={row.id}>
                                                 <Td>
-                                                    <span className="font-semibold text-white">{row.name}</span>
+                                                    <span className="font-semibold text-strong">{row.name}</span>
                                                     {!row.is_active && <span className="ml-2 text-xs text-ink-400">inactive</span>}
                                                 </Td>
                                                 <Td className="text-right">{row.orders}</Td>
@@ -233,7 +233,7 @@ export default function ReportsIndex({ filters, scope, today, totals, byOutlet, 
                                     <tr key={product.name}>
                                         <Td>
                                             {product.code && <span className="mr-2 text-ink-400">{product.code}</span>}
-                                            <span className="font-semibold text-white">{product.name}</span>
+                                            <span className="font-semibold text-strong">{product.name}</span>
                                         </Td>
                                         <Td className="text-right">{product.quantity}</Td>
                                         <Td className="text-right font-bold text-flame-400">{money(product.revenue)}</Td>

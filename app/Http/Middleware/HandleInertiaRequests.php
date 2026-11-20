@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Contracts\PosProvider;
 use App\Models\Outlet;
 use App\Services\Cart\Cart;
+use App\Support\BrandPalette;
 use App\Support\KitchenLoad;
 use App\Support\OutletContext;
 use App\Support\Settings;
@@ -36,6 +37,8 @@ class HandleInertiaRequests extends Middleware
                 'receipt' => $request->session()->get('receipt'),
             ],
             'shop' => fn () => $this->shop(),
+            // Dark or light plus the brand colours, as CSS the page applies straight away.
+            'theme' => fn () => ['mode' => app(BrandPalette::class)->theme(), 'css' => app(BrandPalette::class)->css(), 'page_color' => app(BrandPalette::class)->pageColor()],
             'kitchen' => fn () => app(KitchenLoad::class)->snapshot(),
             'pos' => fn () => $this->pos(app(PosProvider::class)),
             'cart' => fn () => $isBackOffice ? null : app(Cart::class)->toArray(),

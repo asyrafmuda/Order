@@ -59,7 +59,7 @@ export default function RidersIndex({ riders }: { riders: Rider[] }) {
                         <tbody>
                             {riders.map((rider) => (
                                 <tr key={rider.id} className="hover:bg-ink-800/60">
-                                    <Td className="font-bold text-white">{rider.name}</Td>
+                                    <Td className="font-bold text-strong">{rider.name}</Td>
                                     <Td>
                                         {rider.phone ? `+${rider.phone}` : '—'}
                                         <span className="block text-xs text-ink-400">{rider.email}</span>

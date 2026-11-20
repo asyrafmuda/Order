@@ -30,6 +30,8 @@ return [
         // make the storefront its own. Edited under Admin → Settings.
         'brand.icon' => '🍔',
         'brand.logo_path' => null,
+        // dark | light: the background the whole interface is drawn on.
+        'brand.theme' => 'dark',
         'brand.primary_color' => '#ee2b32',
         'brand.accent_color' => '#ffb938',
         'brand.footer_text' => 'Sizzling smash patties, melted cheddar and bold midnight street grill vibes, crafted fresh daily.',

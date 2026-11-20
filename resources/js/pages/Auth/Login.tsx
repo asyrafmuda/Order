@@ -61,7 +61,7 @@ export default function Login({ demo }: { demo: boolean }) {
                 />
                 <div className="flex items-center justify-between">
                     <Checkbox label="Keep me signed in" checked={form.data.remember} onChange={(event) => form.setData('remember', event.target.checked)} />
-                    <Link href={route('password.request')} className="text-sm text-ink-400 hover:text-white">
+                    <Link href={route('password.request')} className="text-sm text-ink-400 hover:text-strong">
                         Forgot PIN?
                     </Link>
                 </div>

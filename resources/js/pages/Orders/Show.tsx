@@ -48,7 +48,7 @@ export default function OrderShow({ order }: { order: Order }) {
             subheader={
                 <div className="no-print border-b border-ink-700 bg-ink-900">
                     <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 text-xs">
-                        <p className="flex items-center gap-2 font-bold text-white">
+                        <p className="flex items-center gap-2 font-bold text-strong">
                             <span className={cn('size-2 rounded-full', cancelled ? 'bg-ink-500' : order.status === 'pending_payment' ? 'animate-pulse-soft bg-flame-400' : 'bg-go-400')} />
                             {headline}
                         </p>
@@ -73,7 +73,7 @@ export default function OrderShow({ order }: { order: Order }) {
                     <div className="grid gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
                         <div>
                             <div className="flex flex-wrap items-center gap-2">
-                                <Badge tone={cancelled ? 'neutral' : 'solid-red'}>{cancelled ? 'Cancelled' : order.is_final ? 'Order closed' : 'Live kitchen order'}</Badge>
+                                <Badge tone={cancelled ? 'neutral' : 'solid-brand'}>{cancelled ? 'Cancelled' : order.is_final ? 'Order closed' : 'Live kitchen order'}</Badge>
                                 <Badge tone="neutral">{order.status_label}</Badge>
                                 {order.estimated_ready_at && !order.is_final && (
                                     <span className="flex items-center gap-1 text-xs text-ink-300">
@@ -85,7 +85,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             <div className="mt-5 flex flex-wrap items-end gap-x-10 gap-y-4">
                                 <div>
                                     <p className="text-[11px] font-extrabold tracking-[0.15em] text-ink-400 uppercase">Queue token</p>
-                                    <p className="font-display text-7xl leading-none text-white uppercase">
+                                    <p className="font-display text-7xl leading-none text-strong uppercase">
                                         Order <span className="text-brand-500">#{order.order_number}</span>
                                     </p>
                                 </div>
@@ -160,7 +160,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             <div className="flex items-center gap-4 rounded-xl border border-ink-700 bg-ink-900 p-4 md:flex-col md:justify-center md:text-center">
                                 <UtensilsCrossed className="size-10 shrink-0 text-flame-400" aria-hidden />
                                 <div>
-                                    <p className="font-display text-4xl leading-none text-white uppercase">{order.table_label ?? 'Your table'}</p>
+                                    <p className="font-display text-4xl leading-none text-strong uppercase">{order.table_label ?? 'Your table'}</p>
                                     <p className="mt-1 text-[11px] text-ink-400">Stay seated, we will bring it over.</p>
                                 </div>
                             </div>
@@ -185,7 +185,7 @@ export default function OrderShow({ order }: { order: Order }) {
 
                     <div className="border-t border-ink-700 p-5 md:px-6">
                         <div className="mb-3 flex items-center justify-between">
-                            <h2 className="flex items-center gap-2 text-sm font-bold text-white">
+                            <h2 className="flex items-center gap-2 text-sm font-bold text-strong">
                                 <TrendingUp className="size-4 text-flame-400" aria-hidden /> Live Order Lifecycle
                             </h2>
                             {!order.is_final && (
@@ -227,7 +227,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             {order.tax_rate > 0 && <Row label={`Service tax (SST ${order.tax_rate}%)`} value={order.tax_inclusive ? `Included (${money(order.tax_amount)})` : money(order.tax_amount)} />}
                             <div className="flex items-end justify-between pt-2">
                                 <dt>
-                                    <span className="block text-base font-bold text-white">{order.is_paid ? 'Total Paid' : 'Total'}</span>
+                                    <span className="block text-base font-bold text-strong">{order.is_paid ? 'Total Paid' : 'Total'}</span>
                                     <span className={cn('flex items-center gap-1 text-[11px] font-semibold', order.is_paid ? 'text-go-400' : 'text-flame-400')}>
                                         <span className={cn('size-1.5 rounded-full', order.is_paid ? 'bg-go-400' : 'bg-flame-400')} />
                                         {order.is_paid ? `Payment settled via ${order.payment_method_label}` : order.payment_status === 'refunded' ? 'Refunded' : `${order.payment_method_label} · ${order.payment_status_label}`}
@@ -265,7 +265,7 @@ export default function OrderShow({ order }: { order: Order }) {
                                     <p className="flex items-start gap-2 text-ink-200">
                                         <MapPin className="mt-0.5 size-4 shrink-0 text-brand-400" aria-hidden />
                                         <span>
-                                            <strong className="block text-white">{order.delivery.recipient_name}</strong>
+                                            <strong className="block text-strong">{order.delivery.recipient_name}</strong>
                                             {order.delivery.address}
                                             {order.delivery.zone && <span className="block text-xs text-ink-400">{order.delivery.zone}</span>}
                                         </span>
@@ -273,7 +273,7 @@ export default function OrderShow({ order }: { order: Order }) {
                                     {order.delivery.notes && <p className="text-xs text-ink-400">Rider note: {order.delivery.notes}</p>}
                                     {order.delivery.rider ? (
                                         <div className="rounded-lg bg-ink-900 p-3 text-xs">
-                                            <p className="font-bold text-white">Rider: {order.delivery.rider.name}</p>
+                                            <p className="font-bold text-strong">Rider: {order.delivery.rider.name}</p>
                                             <p className="text-ink-400">
                                                 {order.delivery.rider.vehicle_type}
                                                 {order.delivery.rider.plate_number && ` · ${order.delivery.rider.plate_number}`}
@@ -293,7 +293,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             <Card>
                                 <CardHeader icon={<UtensilsCrossed className="size-4" />} title={order.table_label ?? 'Table service'} />
                                 <div className="space-y-2 p-4 text-sm text-ink-300">
-                                    <p className="font-semibold text-white">We will bring your order to the table.</p>
+                                    <p className="font-semibold text-strong">We will bring your order to the table.</p>
                                     <p className="text-xs">
                                         {order.is_paid || order.is_final
                                             ? 'Nothing else to do — enjoy your meal.'
@@ -305,7 +305,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             <Card>
                                 <CardHeader icon={<Store className="size-4" />} title="Pick-Up Counter Desk" />
                                 <div className="space-y-2 p-4 text-sm text-ink-300">
-                                    <p className="font-semibold text-white">{shop.address}</p>
+                                    <p className="font-semibold text-strong">{shop.address}</p>
                                     <p className="text-xs">
                                         Head to <strong className="text-ink-100">{shop.counter}</strong> and show the QR code or pass <strong className="font-mono text-flame-400">{order.pickup_code}</strong> when your number is called.
                                         {!order.is_paid && !order.is_final && ' Payment is taken at the counter.'}
@@ -342,7 +342,7 @@ function ManifestLine({ item, showKitchen }: { item: OrderItem; showKitchen: boo
                 <ProductImage src={item.image_url} alt="" icon={item.icon} />
             </div>
             <div className="min-w-0 flex-1">
-                <p className="text-sm leading-snug font-bold text-white">
+                <p className="text-sm leading-snug font-bold text-strong">
                     {item.name} <span className="ml-1 rounded bg-brand-600 px-1.5 py-0.5 text-[10px] font-extrabold">{item.quantity}x</span>
                 </p>
                 {details.length > 0 && <p className="text-[11px] text-ink-400">{details.join(' • ')}</p>}
@@ -387,7 +387,7 @@ function StationMonitor({ items, idle }: { items: OrderItem[]; idle: boolean }) 
                     return (
                         <li key={name} className="space-y-2 px-4 py-3.5">
                             <div className="flex items-center justify-between gap-2">
-                                <p className="flex items-center gap-2 text-sm font-bold text-white">
+                                <p className="flex items-center gap-2 text-sm font-bold text-strong">
                                     <span className={cn('size-2 rounded-full', status === 'done' ? 'bg-go-400' : status === 'cooking' ? 'animate-pulse-soft bg-brand-500' : 'bg-ink-500')} />
                                     Station {index + 1}: {name}
                                 </p>

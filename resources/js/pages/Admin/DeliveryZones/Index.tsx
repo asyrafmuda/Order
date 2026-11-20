@@ -51,7 +51,7 @@ export default function DeliveryZonesIndex({ zones }: { zones: DeliveryZone[] })
                                 <tr key={zone.id} className="hover:bg-ink-800/60">
                                     <Td className="w-16 text-ink-400">{zone.sort_order}</Td>
                                     <Td>
-                                        <span className="font-bold text-white">{zone.name}</span>
+                                        <span className="font-bold text-strong">{zone.name}</span>
                                         {zone.areas && <span className="block text-xs text-ink-400">{zone.areas}</span>}
                                     </Td>
                                     <Td className="font-bold text-flame-400">{money(zone.fee)}</Td>

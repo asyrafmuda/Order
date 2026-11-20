@@ -103,7 +103,7 @@ export function PaymentDialog({ total, initial = 'cash', processing, errors, onC
                         >
                             <method.icon className="size-5" aria-hidden />
                             <span className="text-sm leading-none font-extrabold">{method.label}</span>
-                            <span className={cn('text-[10px]', payment === method.value ? 'text-white/80' : 'text-ink-500')}>{method.hint}</span>
+                            <span className={cn('text-[10px]', payment === method.value ? 'text-strong/80' : 'text-ink-500')}>{method.hint}</span>
                         </button>
                     ))}
                 </div>
@@ -135,13 +135,13 @@ export function PaymentDialog({ total, initial = 'cash', processing, errors, onC
                                 />
                             </label>
                         </div>
-                        <div className={cn('flex items-end justify-between rounded-xl px-4 py-3', short ? 'bg-brand-900' : 'bg-go-900')} aria-live="polite">
-                            <span className={cn('text-xs font-extrabold tracking-[0.15em] uppercase', short ? 'text-brand-400' : 'text-go-400')}>{short ? 'Still short by' : 'Change'}</span>
-                            <span className={cn('font-display text-4xl leading-none whitespace-nowrap sm:text-5xl', short ? 'text-brand-400' : 'text-white')}>
+                        <div className={cn('flex items-end justify-between rounded-xl px-4 py-3', short ? 'bg-danger-900' : 'bg-go-900')} aria-live="polite">
+                            <span className={cn('text-xs font-extrabold tracking-[0.15em] uppercase', short ? 'text-danger-400' : 'text-go-400')}>{short ? 'Still short by' : 'Change'}</span>
+                            <span className={cn('font-display text-4xl leading-none whitespace-nowrap sm:text-5xl', short ? 'text-danger-400' : 'text-strong')}>
                                 {short ? money(total - (received ?? 0)) : change !== null ? money(change) : <span className="text-ink-500">RM 0.00</span>}
                             </span>
                         </div>
-                        {errors.tendered && <p className="text-xs font-medium text-brand-400">{errors.tendered}</p>}
+                        {errors.tendered && <p className="text-xs font-medium text-danger-400">{errors.tendered}</p>}
                     </div>
                 )}
 
@@ -151,7 +151,7 @@ export function PaymentDialog({ total, initial = 'cash', processing, errors, onC
                         <label className="block">
                             <span className="mb-1 block text-xs font-semibold text-ink-300">Mobile number</span>
                             <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="012-345 6789" className="h-10 w-full rounded-lg border border-ink-600 bg-ink-900 px-3 text-sm text-ink-100 placeholder:text-ink-500 focus:border-flame-400 focus:outline-none" />
-                            {errors.customer_phone && <span className="mt-1 block text-xs font-medium text-brand-400">{errors.customer_phone}</span>}
+                            {errors.customer_phone && <span className="mt-1 block text-xs font-medium text-danger-400">{errors.customer_phone}</span>}
                         </label>
                         <label className="block">
                             <span className="mb-1 block text-xs font-semibold text-ink-300">Note for the whole order</span>
@@ -160,7 +160,7 @@ export function PaymentDialog({ total, initial = 'cash', processing, errors, onC
                     </div>
                 </details>
 
-                {errors.lines && <p className="rounded-lg bg-brand-900 px-3 py-2 text-sm font-medium text-brand-400">{errors.lines}</p>}
+                {errors.lines && <p className="rounded-lg bg-danger-900 px-3 py-2 text-sm font-medium text-danger-400">{errors.lines}</p>}
             </div>
         </Modal>
     );

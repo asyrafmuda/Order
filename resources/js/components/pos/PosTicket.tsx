@@ -63,7 +63,7 @@ export function PosTicket(props: PosTicketProps) {
                             role="radio"
                             aria-checked={type === value}
                             onClick={() => props.onType(value)}
-                            className={cn('flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-bold transition-colors', type === value ? 'bg-brand-600 text-white' : 'text-ink-300 hover:text-white')}
+                            className={cn('flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-bold transition-colors', type === value ? 'bg-brand-600 text-white' : 'text-ink-300 hover:text-strong')}
                         >
                             <Icon className="size-4" aria-hidden /> {label}
                         </button>
@@ -106,11 +106,11 @@ export function PosTicket(props: PosTicketProps) {
                             <p className="flex items-center gap-2 text-sm font-bold text-go-400">
                                 <CircleCheckBig className="size-5" aria-hidden /> Sent to the kitchen
                             </p>
-                            <button type="button" onClick={props.onDismissReceipt} className="text-ink-400 hover:text-white" aria-label="Dismiss">
+                            <button type="button" onClick={props.onDismissReceipt} className="text-ink-400 hover:text-strong" aria-label="Dismiss">
                                 <X className="size-4" />
                             </button>
                         </div>
-                        <p className="mt-2 font-display text-6xl leading-none text-white">#{receipt.order_number}</p>
+                        <p className="mt-2 font-display text-6xl leading-none text-strong">#{receipt.order_number}</p>
                         <p className="mt-1 text-sm text-ink-200">
                             {money(receipt.total)} · {receipt.paid ? `paid, ${receipt.method_label}` : 'to be paid at hand-over'}
                         </p>
@@ -164,19 +164,19 @@ export function PosTicket(props: PosTicketProps) {
                             return (
                                 <li key={line.key} className="flex gap-2 px-3 py-2.5">
                                     <div className="flex shrink-0 flex-col items-center rounded-lg bg-ink-850">
-                                        <button type="button" onClick={() => props.onQuantity(line.key, line.quantity + 1)} className="flex size-9 items-center justify-center text-ink-200 hover:text-white" aria-label={`One more ${line.product.name}`}>
+                                        <button type="button" onClick={() => props.onQuantity(line.key, line.quantity + 1)} className="flex size-9 items-center justify-center text-ink-200 hover:text-strong" aria-label={`One more ${line.product.name}`}>
                                             <Plus className="size-4" />
                                         </button>
-                                        <span className="font-display text-2xl leading-none text-white" aria-label={`Quantity ${line.quantity}`}>
+                                        <span className="font-display text-2xl leading-none text-strong" aria-label={`Quantity ${line.quantity}`}>
                                             {line.quantity}
                                         </span>
-                                        <button type="button" onClick={() => props.onQuantity(line.key, line.quantity - 1)} className="flex size-9 items-center justify-center text-ink-200 hover:text-white" aria-label={`One less ${line.product.name}`}>
-                                            {line.quantity === 1 ? <Trash2 className="size-4 text-brand-400" /> : <Minus className="size-4" />}
+                                        <button type="button" onClick={() => props.onQuantity(line.key, line.quantity - 1)} className="flex size-9 items-center justify-center text-ink-200 hover:text-strong" aria-label={`One less ${line.product.name}`}>
+                                            {line.quantity === 1 ? <Trash2 className="size-4 text-danger-400" /> : <Minus className="size-4" />}
                                         </button>
                                     </div>
                                     <button type="button" onClick={() => props.onEdit(line)} className="group min-w-0 flex-1 rounded-lg px-1 text-left hover:bg-ink-850" aria-label={`Edit ${line.product.name}`}>
                                         <span className="flex items-start justify-between gap-2">
-                                            <span className="text-sm leading-snug font-bold text-white">
+                                            <span className="text-sm leading-snug font-bold text-strong">
                                                 {line.product.code && <span className="text-ink-400">{line.product.code} </span>}
                                                 {line.product.name}
                                             </span>
@@ -189,7 +189,7 @@ export function PosTicket(props: PosTicketProps) {
                                                         key={detail}
                                                         className={cn(
                                                             'rounded px-1.5 py-0.5 text-[11px] font-bold',
-                                                            /^no /i.test(detail) ? 'bg-brand-900 text-brand-400' : /^extra /i.test(detail) ? 'bg-go-900 text-go-400' : 'bg-ink-700 text-ink-200',
+                                                            /^no /i.test(detail) ? 'bg-danger-900 text-danger-400' : /^extra /i.test(detail) ? 'bg-go-900 text-go-400' : 'bg-ink-700 text-ink-200',
                                                         )}
                                                     >
                                                         {detail}
@@ -231,7 +231,7 @@ export function PosTicket(props: PosTicketProps) {
                         type="button"
                         onClick={props.onClear}
                         disabled={lines.length === 0}
-                        className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-ink-800 text-[10px] font-bold text-ink-300 hover:bg-ink-700 hover:text-white disabled:opacity-40"
+                        className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl bg-ink-800 text-[10px] font-bold text-ink-300 hover:bg-ink-700 hover:text-strong disabled:opacity-40"
                     >
                         <Trash2 className="size-4" aria-hidden /> Clear
                     </button>

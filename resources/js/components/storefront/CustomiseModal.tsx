@@ -77,7 +77,7 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
     const option = (active: boolean) =>
         cn(
             'flex min-h-11 w-full flex-wrap items-center justify-between gap-x-2 rounded-lg border px-3 py-2 text-left text-sm leading-tight transition-colors',
-            active ? 'border-brand-500 bg-brand-900 text-white' : 'border-ink-600 bg-ink-900 text-ink-200 hover:border-ink-400',
+            active ? 'border-brand-500 bg-brand-900 text-strong' : 'border-ink-600 bg-ink-900 text-ink-200 hover:border-ink-400',
         );
 
     return (
@@ -93,13 +93,13 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
             footer={
                 <div className="flex w-full items-center gap-3">
                     <div className="flex items-center rounded-lg border border-ink-600">
-                        <button type="button" className="p-2.5 text-ink-300 hover:text-white disabled:opacity-40" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} aria-label="Decrease quantity">
+                        <button type="button" className="p-2.5 text-ink-300 hover:text-strong disabled:opacity-40" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} aria-label="Decrease quantity">
                             <Minus className="size-4" />
                         </button>
                         <span className="w-8 text-center text-sm font-bold" aria-live="polite">
                             {quantity}
                         </span>
-                        <button type="button" className="p-2.5 text-ink-300 hover:text-white disabled:opacity-40" onClick={() => setQuantity(Math.min(20, quantity + 1))} disabled={quantity >= 20} aria-label="Increase quantity">
+                        <button type="button" className="p-2.5 text-ink-300 hover:text-strong disabled:opacity-40" onClick={() => setQuantity(Math.min(20, quantity + 1))} disabled={quantity >= 20} aria-label="Increase quantity">
                             <Plus className="size-4" />
                         </button>
                     </div>
@@ -160,7 +160,7 @@ export function CustomiseModal({ product, combo, preselectCombo = false, onClose
                         <label className="flex cursor-pointer items-start gap-3">
                             <input type="checkbox" className="mt-1 size-4 accent-flame-400" checked={withCombo} onChange={(event) => setWithCombo(event.target.checked)} />
                             <span className="min-w-0 flex-1">
-                                <span className="flex items-center justify-between gap-2 text-sm font-bold text-white">
+                                <span className="flex items-center justify-between gap-2 text-sm font-bold text-strong">
                                     Upgrade to {combo.name}
                                     <span className="text-flame-400">+{money(combo.price)}</span>
                                 </span>

@@ -23,7 +23,7 @@ interface ProductsIndexProps {
 
 const statusColor: Record<ProductStatus, string> = {
     available: 'border-go-500/40 text-go-400',
-    sold_out: 'border-brand-600/50 text-brand-400',
+    sold_out: 'border-danger-600/50 text-danger-400',
     coming_soon: 'border-flame-500/40 text-flame-400',
     hidden: 'border-ink-600 text-ink-400',
 };
@@ -102,7 +102,7 @@ export default function ProductsIndex({ products, filters, categories, statuses 
                                                 <ProductImage src={product.image_url} alt="" icon={product.category?.icon} />
                                             </div>
                                             <div className="min-w-0">
-                                                <Link href={route('admin.products.edit', product.id)} className="font-bold text-white hover:text-flame-400">
+                                                <Link href={route('admin.products.edit', product.id)} className="font-bold text-strong hover:text-flame-400">
                                                     {product.name}
                                                 </Link>
                                                 <span className="block text-xs text-ink-400">

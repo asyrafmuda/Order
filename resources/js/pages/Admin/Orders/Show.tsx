@@ -64,7 +64,7 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
             <Head title={`Order #${order.order_number}`} />
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-                <Link href={route('admin.orders.index')} className="mr-2 flex items-center gap-1 text-sm font-semibold text-ink-300 hover:text-white">
+                <Link href={route('admin.orders.index')} className="mr-2 flex items-center gap-1 text-sm font-semibold text-ink-300 hover:text-strong">
                     <ArrowLeft className="size-4" aria-hidden /> All orders
                 </Link>
                 <OrderStatusBadge status={order.status} label={order.status_label} />
@@ -77,8 +77,8 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
             </div>
 
             {order.status === 'cancelled' && order.cancel_reason && (
-                <p className="mb-4 rounded-lg border border-brand-600/40 bg-brand-900 px-4 py-3 text-sm text-ink-100">
-                    <strong className="font-bold text-brand-400">Cancelled:</strong> {order.cancel_reason}
+                <p className="mb-4 rounded-lg border border-danger-600/40 bg-danger-900 px-4 py-3 text-sm text-ink-100">
+                    <strong className="font-bold text-danger-400">Cancelled:</strong> {order.cancel_reason}
                 </p>
             )}
 
@@ -96,9 +96,9 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
 
                                 return (
                                     <li key={item.id} className="flex items-start gap-3 px-4 py-3">
-                                        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-ink-700 text-sm font-extrabold text-white">{item.quantity}×</span>
+                                        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-ink-700 text-sm font-extrabold text-strong">{item.quantity}×</span>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-bold text-white">
+                                            <p className="text-sm font-bold text-strong">
                                                 {item.code && <span className="text-ink-400">{item.code}. </span>}
                                                 {item.name}
                                             </p>
@@ -122,7 +122,7 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
                             {order.delivery_fee > 0 && <Row label="Delivery fee" value={money(order.delivery_fee)} />}
                             {order.tax_amount > 0 && <Row label={`SST ${order.tax_rate}%${order.tax_inclusive ? ' (included)' : ''}`} value={money(order.tax_amount)} />}
                             <div className="flex items-end justify-between pt-2">
-                                <dt className="font-bold text-white">Total</dt>
+                                <dt className="font-bold text-strong">Total</dt>
                                 <dd className="font-display text-3xl leading-none text-flame-400">{money(order.total)}</dd>
                             </div>
                         </dl>
@@ -166,7 +166,7 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
                                             <span className="ml-auto text-xs text-ink-400">{dateTime(log.at)}</span>
                                         </div>
                                         <p className="mt-1.5 text-xs leading-relaxed whitespace-pre-line text-ink-300">{log.message}</p>
-                                        {log.error && <p className="mt-1 text-xs text-brand-400">{log.error}</p>}
+                                        {log.error && <p className="mt-1 text-xs text-danger-400">{log.error}</p>}
                                     </li>
                                 ))}
                             </ul>
@@ -193,7 +193,7 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
                             />
                             <Row label="Taken" value={order.source_label} />
                             {order.customer_email && <Row label="Email" value={order.customer_email} />}
-                            <Row label="Pickup code" value={<span className="font-mono font-bold tracking-widest text-white">{order.pickup_code}</span>} />
+                            <Row label="Pickup code" value={<span className="font-mono font-bold tracking-widest text-strong">{order.pickup_code}</span>} />
                         </dl>
                     </Card>
 
@@ -257,7 +257,7 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
                                             </span>
                                             <span className="ml-auto text-ink-500">{dateTime(log.at)}</span>
                                         </div>
-                                        {log.error && <p className="mt-1 text-brand-400">{log.error}</p>}
+                                        {log.error && <p className="mt-1 text-danger-400">{log.error}</p>}
                                     </li>
                                 ))}
                             </ul>

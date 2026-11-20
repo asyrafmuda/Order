@@ -85,7 +85,7 @@ export default function CounterIndex({ kitchenOrders, readyOrders, deliveryOrder
                     </Button>
                 </form>
                 {lookupFailed && (
-                    <p className="mt-3 flex items-center gap-2 rounded-lg bg-brand-900 px-3 py-2 text-sm font-semibold text-brand-400" role="alert">
+                    <p className="mt-3 flex items-center gap-2 rounded-lg bg-danger-900 px-3 py-2 text-sm font-semibold text-danger-400" role="alert">
                         <TriangleAlert className="size-4 shrink-0" aria-hidden />
                         No order matches that code. Ask the customer for their order number instead.
                     </p>
@@ -126,7 +126,7 @@ function Stat({ icon, label, value, hint, highlight }: StatProps) {
             </span>
             <div className="min-w-0">
                 <p className="text-[11px] font-bold tracking-wider text-ink-400 uppercase">{label}</p>
-                <p className={`font-display text-2xl leading-none whitespace-nowrap sm:text-3xl ${highlight ? 'text-flame-400' : 'text-white'}`}>{value}</p>
+                <p className={`font-display text-2xl leading-none whitespace-nowrap sm:text-3xl ${highlight ? 'text-flame-400' : 'text-strong'}`}>{value}</p>
                 {hint && <p className="mt-0.5 text-[11px] text-ink-400">{hint}</p>}
             </div>
         </Card>

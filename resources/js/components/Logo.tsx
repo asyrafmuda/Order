@@ -16,7 +16,7 @@ export function Logo({ className, compact = false }: { className?: string; compa
             {!compact && (
                 // A long shop name is cut short with "…" rather than pushing the header off a phone screen.
                 <span className="min-w-0 leading-none">
-                    <span className="block truncate font-display text-xl text-white uppercase">{shop.name}</span>
+                    <span className="block truncate font-display text-xl text-strong uppercase">{shop.name}</span>
                     <span className="block truncate text-[10px] font-bold tracking-[0.2em] text-flame-400 uppercase">{shop.tagline}</span>
                 </span>
             )}

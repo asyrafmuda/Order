@@ -22,12 +22,12 @@ export function Field({ label, error, hint, required, className, children }: Fie
             {label && (
                 <label htmlFor={id} className="block text-xs font-semibold text-ink-300">
                     {label}
-                    {required && <span className="ml-0.5 text-brand-400">*</span>}
+                    {required && <span className="ml-0.5 text-danger-400">*</span>}
                 </label>
             )}
             {children(id)}
             {error ? (
-                <p className="text-xs font-medium text-brand-400" role="alert">
+                <p className="text-xs font-medium text-danger-400" role="alert">
                     {error}
                 </p>
             ) : (
@@ -59,10 +59,10 @@ export function Input({
                 prefix ? (
                     <div className="relative">
                         <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-ink-400">{prefix}</span>
-                        <input id={id} className={cn(control, 'h-10 pl-11', error && 'border-brand-500', className)} {...props} />
+                        <input id={id} className={cn(control, 'h-10 pl-11', error && 'border-danger-500', className)} {...props} />
                     </div>
                 ) : (
-                    <input id={id} className={cn(control, 'h-10', error && 'border-brand-500', className)} {...props} />
+                    <input id={id} className={cn(control, 'h-10', error && 'border-danger-500', className)} {...props} />
                 )
             }
         </Field>
@@ -72,7 +72,7 @@ export function Input({
 export function Textarea({ label, error, hint, wrapperClassName, className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement> & ControlProps) {
     return (
         <Field label={label} error={error} hint={hint} required={props.required} className={wrapperClassName}>
-            {(id) => <textarea id={id} rows={3} className={cn(control, 'py-2', error && 'border-brand-500', className)} {...props} />}
+            {(id) => <textarea id={id} rows={3} className={cn(control, 'py-2', error && 'border-danger-500', className)} {...props} />}
         </Field>
     );
 }
@@ -89,7 +89,7 @@ export function Select({
     return (
         <Field label={label} error={error} hint={hint} required={props.required} className={wrapperClassName}>
             {(id) => (
-                <select id={id} className={cn(control, 'h-10', error && 'border-brand-500', className)} {...props}>
+                <select id={id} className={cn(control, 'h-10', error && 'border-danger-500', className)} {...props}>
                     {children}
                 </select>
             )}

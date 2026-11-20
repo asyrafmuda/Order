@@ -39,9 +39,9 @@ export function ProductTile({ product, icon, inTicket, customisable, opensOption
                     <span className="text-sm leading-none" aria-hidden>
                         {icon}
                     </span>
-                    {!available && <span className="text-[10px] font-extrabold tracking-wide text-brand-400 uppercase">{product.status_label}</span>}
+                    {!available && <span className="text-[10px] font-extrabold tracking-wide text-danger-400 uppercase">{product.status_label}</span>}
                 </span>
-                <span className="line-clamp-2 pr-7 text-[13px] leading-tight font-bold text-white">{product.name}</span>
+                <span className="line-clamp-2 pr-7 text-[13px] leading-tight font-bold text-strong">{product.name}</span>
                 <span className="flex items-end justify-between">
                     <span className="text-sm font-extrabold text-flame-400">
                         {(product.variants?.length ?? 0) > 1 && <span className="mr-1 text-[10px] font-semibold text-ink-400">from</span>}
@@ -59,7 +59,7 @@ export function ProductTile({ product, icon, inTicket, customisable, opensOption
                 <button
                     type="button"
                     onClick={onCustomise}
-                    className="absolute top-1.5 right-1.5 flex size-8 items-center justify-center rounded-lg bg-ink-700 text-ink-200 hover:bg-ink-600 hover:text-white"
+                    className="absolute top-1.5 right-1.5 flex size-8 items-center justify-center rounded-lg bg-ink-700 text-ink-200 hover:bg-ink-600 hover:text-strong"
                     aria-label={`Options for ${product.name}`}
                     title="Options"
                 >

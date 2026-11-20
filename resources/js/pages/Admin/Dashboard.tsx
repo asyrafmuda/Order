@@ -33,7 +33,7 @@ export default function Dashboard({ stats, chart, topProducts, statuses, recent 
         >
             <Head title="Dashboard" />
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
                 <StatCard label="Sales today" value={money(stats.sales)} tone="flame" icon={<Banknote className="size-4" />} hint="Paid orders, excluding cancelled" />
                 <StatCard label="Paid orders" value={stats.orders} icon={<ReceiptText className="size-4" />} hint={`${totalToday} placed today in total`} />
                 <StatCard label="Average ticket" value={money(stats.average)} icon={<Trophy className="size-4" />} />
@@ -77,7 +77,7 @@ export default function Dashboard({ stats, chart, topProducts, statuses, recent 
                                 <li key={product.name} className="flex items-center gap-3 px-4 py-3">
                                     <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-ink-700 text-xs font-extrabold text-flame-400">{index + 1}</span>
                                     <span className="min-w-0 flex-1">
-                                        <span className="block truncate text-sm font-semibold text-white">{product.name}</span>
+                                        <span className="block truncate text-sm font-semibold text-strong">{product.name}</span>
                                         <span className="block text-xs text-ink-400">{money(product.revenue)}</span>
                                     </span>
                                     <span className="text-sm font-extrabold text-ink-100">×{product.quantity}</span>
@@ -99,7 +99,7 @@ export default function Dashboard({ stats, chart, topProducts, statuses, recent 
                                     className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-ink-800"
                                 >
                                     <OrderStatusBadge status={status.value} label={status.label} />
-                                    <span className={cn('text-sm font-extrabold', status.count > 0 ? 'text-white' : 'text-ink-500')}>{status.count}</span>
+                                    <span className={cn('text-sm font-extrabold', status.count > 0 ? 'text-strong' : 'text-ink-500')}>{status.count}</span>
                                 </Link>
                             </li>
                         ))}
@@ -133,7 +133,7 @@ export default function Dashboard({ stats, chart, topProducts, statuses, recent 
                                 {recent.map((order) => (
                                     <tr key={order.uuid} className="hover:bg-ink-800/60">
                                         <Td>
-                                            <Link href={route('admin.orders.show', order.uuid)} className="font-extrabold text-white hover:text-flame-400">
+                                            <Link href={route('admin.orders.show', order.uuid)} className="font-extrabold text-strong hover:text-flame-400">
                                                 #{order.order_number}
                                             </Link>
                                             <span className="block text-xs text-ink-400">
@@ -169,7 +169,7 @@ function SalesChart({ data }: { data: DashboardProps['chart'] }) {
     return (
         <div className="p-4">
             <p className="text-xs text-ink-400">
-                <strong className="text-sm font-extrabold text-white">{money(total)}</strong> across {plural(data.reduce((sum, day) => sum + day.orders, 0), 'paid order')}
+                <strong className="text-sm font-extrabold text-strong">{money(total)}</strong> across {plural(data.reduce((sum, day) => sum + day.orders, 0), 'paid order')}
             </p>
             <div className="mt-4 flex h-44 items-end gap-1.5" role="img" aria-label="Daily sales for the last 14 days">
                 {data.map((day, index) => {
@@ -178,7 +178,7 @@ function SalesChart({ data }: { data: DashboardProps['chart'] }) {
 
                     return (
                         <div key={day.date} className="group relative flex h-full flex-1 flex-col justify-end" title={`${label}: ${money(day.sales)} · ${plural(day.orders, 'order')}`}>
-                            <span className="pointer-events-none absolute -top-1 left-1/2 z-10 hidden -translate-x-1/2 -translate-y-full rounded-md bg-ink-700 px-2 py-1 text-[10px] font-semibold whitespace-nowrap text-white shadow-lg group-hover:block">
+                            <span className="pointer-events-none absolute -top-1 left-1/2 z-10 hidden -translate-x-1/2 -translate-y-full rounded-md bg-ink-700 px-2 py-1 text-[10px] font-semibold whitespace-nowrap text-strong shadow-lg group-hover:block">
                                 {money(day.sales)} · {day.orders}
                             </span>
                             <div
