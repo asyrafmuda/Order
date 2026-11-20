@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { FlaskConical, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +17,7 @@ interface FakePaymentProps {
 
 /** Simulated bank page of the "fake" payment gateway. Never shown when a real gateway is configured. */
 export default function FakePayment({ payment }: FakePaymentProps) {
+    const { shop } = usePage().props;
     const [busy, setBusy] = useState<'approve' | 'decline' | null>(null);
 
     const respond = (action: 'approve' | 'decline') => {
@@ -36,7 +37,7 @@ export default function FakePayment({ payment }: FakePaymentProps) {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">{payment.method_label}</p>
-                            <p className="text-lg font-bold">Boss Burger · Order #{payment.order_number}</p>
+                            <p className="text-lg font-bold">{shop.name} · Order #{payment.order_number}</p>
                         </div>
                         <Lock className="size-5 text-emerald-600" aria-hidden />
                     </div>

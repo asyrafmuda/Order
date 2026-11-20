@@ -4,6 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="theme-color" content="#0b0b0d">
+        {{-- Brand colours chosen in Admin → Settings override the theme defaults. --}}
+        <style>{!! app(\App\Support\BrandPalette::class)->css() !!}</style>
         <meta name="shop-timezone" content="{{ config('app.timezone') }}">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="preconnect" href="https://fonts.bunny.net">

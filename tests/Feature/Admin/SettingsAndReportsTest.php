@@ -10,6 +10,8 @@ use App\Exceptions\PosException;
 use App\Models\PosSyncLog;
 use App\Support\Settings;
 use App\Support\ShopHours;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -26,6 +28,10 @@ function settingsPayload(array $overrides = []): array
         'shop' => [
             'name' => 'Boss Burger HQ', 'tagline' => 'Night Grill', 'address' => '1 Jalan Besar', 'phone' => '+60 12-345 6789',
             'whatsapp' => '60123456789', 'maps_url' => 'https://maps.example.com/boss', 'counter' => 'Counter 5',
+        ],
+        'brand' => [
+            'icon' => '🍜', 'primary_color' => '#0F766E', 'accent_color' => '#fde047',
+            'footer_text' => 'Hand-pulled noodles since 1998.', 'badge_text' => '',
         ],
         'hours' => ['open' => '10:00', 'close' => '22:00', 'last_order' => '21:30'],
         'ordering' => [
@@ -237,4 +243,50 @@ it('keeps at least one payment method on', function () {
     $this->put(route('admin.settings.update'), settingsPayload(['payments' => [
         'fpx_enabled' => false, 'card_enabled' => false, 'ewallet_enabled' => false, 'cash_enabled' => false,
     ]]))->assertSessionHasErrors('payments.cash_enabled');
+});
+
+describe('branding', function () {
+    it('re-skins the storefront for a different shop', function () {
+        $this->put(route('admin.settings.update'), settingsPayload())->assertSessionHas('success');
+
+        $this->get(route('menu.index'))
+            ->assertSee('--color-brand-500:#0f766e', false)
+            ->assertSee('--color-flame-400:#fde047', false)
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('shop.icon', '🍜')
+                ->where('shop.footer_text', 'Hand-pulled noodles since 1998.')
+                ->where('shop.badge_text', '')
+                ->where('shop.logo_url', null));
+    });
+
+    it('refuses colours that would make text unreadable', function (string $key, string $colour) {
+        $this->put(route('admin.settings.update'), settingsPayload(['brand' => [$key => $colour]]))
+            ->assertSessionHasErrors("brand.{$key}");
+    })->with([
+        'main colour too light for white text' => ['primary_color', '#fde047'],
+        'accent too dark for the dark background' => ['accent_color', '#1e293b'],
+        'not a colour' => ['primary_color', 'red'],
+    ]);
+
+    it('uploads and removes a logo', function () {
+        Storage::fake('public');
+
+        $this->post(route('admin.settings.logo.store'), ['logo' => UploadedFile::fake()->image('logo.png', 200, 200)])
+            ->assertSessionHas('success');
+
+        $path = app(Settings::class)->get('brand.logo_path');
+        Storage::disk('public')->assertExists($path);
+
+        $this->get(route('menu.index'))->assertInertia(fn (Assert $page) => $page->where('shop.logo_url', fn ($url) => str_contains($url, $path)));
+
+        $this->delete(route('admin.settings.logo.destroy'))->assertSessionHas('success');
+
+        Storage::disk('public')->assertMissing($path);
+        expect(app(Settings::class)->get('brand.logo_path'))->toBeNull();
+    });
+
+    it('rejects files that are not images', function () {
+        $this->post(route('admin.settings.logo.store'), ['logo' => UploadedFile::fake()->create('logo.pdf', 100, 'application/pdf')])
+            ->assertSessionHasErrors('logo');
+    });
 });

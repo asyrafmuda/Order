@@ -7,6 +7,7 @@ use App\Actions\Payments\StartPayment;
 use App\Enums\OrderStatus;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Support\BrandPalette;
 use App\Support\Settings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,7 @@ class OrderController extends Controller
         return Pdf::loadView('pdf.invoice', [
             'order' => $order,
             'showContact' => OrderResource::showsContactDetails($request, $order),
+            'brandColor' => BrandPalette::mix(app(BrandPalette::class)->primary(), '#000000', 0.10),
             'shop' => [
                 'name' => $settings->string('shop.name'),
                 'tagline' => $settings->string('shop.tagline'),

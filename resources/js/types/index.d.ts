@@ -35,6 +35,11 @@ export interface AuthUser {
 
 export interface Shop {
     name: string;
+    /** Emoji used as the logo and as the placeholder for items without a photo. */
+    icon: string;
+    logo_url: string | null;
+    footer_text: string;
+    badge_text: string;
     tagline: string;
     address: string;
     phone: string;

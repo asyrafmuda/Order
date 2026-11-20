@@ -1,6 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
-import { Bell, Clock, Percent, ShoppingBag, Store, Wallet, Zap } from 'lucide-react';
-import type { FormEvent, ReactNode } from 'react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Bell, Clock, Palette, Percent, ShoppingBag, Store, Trash2, Upload, Wallet, Zap } from 'lucide-react';
+import { useRef, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { MoneyInput } from '@/components/admin/MoneyInput';
@@ -10,6 +10,7 @@ import { inputToSen, senToInput } from '@/lib/format';
 
 interface Settings {
     shop: { name: string; tagline: string | null; address: string; phone: string; whatsapp: string; maps_url: string | null; counter: string };
+    brand: { icon: string; primary_color: string; accent_color: string; footer_text: string | null; badge_text: string | null };
     hours: { open: string; close: string; last_order: string };
     ordering: { enabled: boolean; pickup_enabled: boolean; delivery_enabled: boolean; dine_in_enabled: boolean; pickup_eta_min: number; pickup_eta_max: number; queue_prefix: string; auto_close_hours: number };
     payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number; dine_in_pay_at_counter: boolean };
@@ -21,6 +22,7 @@ interface Settings {
 export default function SettingsEdit({ settings }: { settings: Settings }) {
     const form = useForm({
         shop: { ...settings.shop, tagline: settings.shop.tagline ?? '', maps_url: settings.shop.maps_url ?? '' },
+        brand: { ...settings.brand, footer_text: settings.brand.footer_text ?? '', badge_text: settings.brand.badge_text ?? '' },
         hours: settings.hours,
         ordering: {
             ...settings.ordering,
@@ -35,6 +37,14 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
     });
 
     const { data } = form;
+    const { shop, errors: pageErrors } = usePage<{ errors: Record<string, string | undefined> }>().props;
+    const logoInput = useRef<HTMLInputElement>(null);
+
+    const uploadLogo = (file: File | undefined) => {
+        if (file) {
+            router.post(route('admin.settings.logo.store'), { logo: file }, { preserveScroll: true, forceFormData: true });
+        }
+    };
     const errors = form.errors as Record<string, string | undefined>;
 
     // Update one key inside a settings group, e.g. set('shop', 'name', 'Boss Burger').
@@ -110,6 +120,67 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
                             error={errors['hours.last_order']}
                         />
                         <Input label="Closes" type="time" required value={data.hours.close} onChange={(event) => set('hours', 'close', event.target.value)} error={errors['hours.close']} />
+                    </div>
+                </Section>
+
+                <Section title="Branding" icon={<Palette className="size-4" />}>
+                    <div className="space-y-5">
+                        <div className="flex flex-wrap items-center gap-4">
+                            {shop.logo_url ? (
+                                <img src={shop.logo_url} alt="Current logo" className="size-16 rounded-xl object-cover ring-1 ring-ink-600" />
+                            ) : (
+                                <span className="flex size-16 items-center justify-center rounded-xl bg-brand-600 text-3xl" aria-hidden>
+                                    {data.brand.icon}
+                                </span>
+                            )}
+                            <div className="space-y-2">
+                                <div className="flex flex-wrap gap-2">
+                                    <input ref={logoInput} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => uploadLogo(event.target.files?.[0])} />
+                                    <Button variant="secondary" size="sm" onClick={() => logoInput.current?.click()} icon={<Upload className="size-4" aria-hidden />}>
+                                        {shop.logo_url ? 'Replace logo' : 'Upload logo'}
+                                    </Button>
+                                    {shop.logo_url && (
+                                        <Button variant="ghost" size="sm" onClick={() => router.delete(route('admin.settings.logo.destroy'), { preserveScroll: true })} icon={<Trash2 className="size-4" aria-hidden />}>
+                                            Remove
+                                        </Button>
+                                    )}
+                                </div>
+                                <p className="text-xs text-ink-400">Square PNG, JPG or WebP, up to 1 MB. Without a logo the icon below is shown.</p>
+                                {pageErrors.logo && <p className="text-xs font-medium text-brand-400">{pageErrors.logo}</p>}
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <Input
+                                label="Icon (emoji)"
+                                required
+                                maxLength={8}
+                                hint="Also used for menu items without a photo."
+                                value={data.brand.icon}
+                                onChange={(event) => set('brand', 'icon', event.target.value)}
+                                error={errors['brand.icon']}
+                            />
+                            <ColorField label="Main colour" hint="Buttons and highlights." value={data.brand.primary_color} onChange={(value) => set('brand', 'primary_color', value)} error={errors['brand.primary_color']} />
+                            <ColorField label="Accent colour" hint="Prices and badges." value={data.brand.accent_color} onChange={(value) => set('brand', 'accent_color', value)} error={errors['brand.accent_color']} />
+                        </div>
+
+                        <Input
+                            label="Footer text"
+                            maxLength={255}
+                            hint="One line about the shop, shown at the bottom of every customer page."
+                            value={data.brand.footer_text}
+                            onChange={(event) => set('brand', 'footer_text', event.target.value)}
+                            error={errors['brand.footer_text']}
+                        />
+                        <Input
+                            label="Badge"
+                            maxLength={60}
+                            wrapperClassName="sm:max-w-sm"
+                            hint="A short assurance under the footer text, e.g. “100% Halal kitchen”. Leave empty to hide it."
+                            value={data.brand.badge_text}
+                            onChange={(event) => set('brand', 'badge_text', event.target.value)}
+                            error={errors['brand.badge_text']}
+                        />
                     </div>
                 </Section>
 
@@ -270,6 +341,19 @@ export default function SettingsEdit({ settings }: { settings: Settings }) {
                 </div>
             </form>
         </BackOfficeLayout>
+    );
+}
+
+function ColorField({ label, hint, value, onChange, error }: { label: string; hint: string; value: string; onChange: (value: string) => void; error?: string }) {
+    return (
+        <div className="space-y-1.5">
+            <span className="block text-xs font-semibold text-ink-300">{label}</span>
+            <label className="flex h-10 items-center gap-2 rounded-lg border border-ink-600 bg-ink-900 px-2">
+                <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#000000'} onChange={(event) => onChange(event.target.value)} className="size-7 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0" aria-label={label} />
+                <input type="text" value={value} maxLength={7} onChange={(event) => onChange(event.target.value)} className="w-full bg-transparent font-mono text-sm text-ink-100 focus:outline-none" aria-label={`${label} hex code`} />
+            </label>
+            {error ? <p className="text-xs font-medium text-brand-400">{error}</p> : <p className="text-xs text-ink-400">{hint}</p>}
+        </div>
     );
 }
 

@@ -22,6 +22,15 @@ return [
         'shop.maps_url' => 'https://maps.google.com/?q=Boss+Burger',
         'shop.counter' => 'Counter 2',
 
+        // Branding: everything a different shop would want to change to
+        // make the storefront its own. Edited under Admin → Settings.
+        'brand.icon' => '🍔',
+        'brand.logo_path' => null,
+        'brand.primary_color' => '#ee2b32',
+        'brand.accent_color' => '#ffb938',
+        'brand.footer_text' => 'Sizzling smash patties, melted cheddar and bold midnight street grill vibes, crafted fresh daily.',
+        'brand.badge_text' => '100% Halal kitchen',
+
         'hours.open' => '12:00',
         'hours.close' => '23:30',
         'hours.last_order' => '23:00',

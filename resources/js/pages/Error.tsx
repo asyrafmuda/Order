@@ -3,8 +3,8 @@ import { buttonClass } from '@/components/ui/Button';
 
 const messages: Record<number, [string, string]> = {
     403: ['Staff only', 'You do not have access to this page.'],
-    404: ['Page not found', 'That page left the grill a while ago.'],
-    500: ['Something burnt', 'An unexpected error happened on our side. Please try again.'],
+    404: ['Page not found', 'That page is no longer on the menu.'],
+    500: ['Something went wrong', 'An unexpected error happened on our side. Please try again.'],
     503: ['Back shortly', 'We are doing a quick clean-up. Please check back in a few minutes.'],
 };
 

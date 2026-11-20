@@ -117,12 +117,12 @@ export default function StorefrontLayout({ children, search, subheader, bottomBa
                 <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-3">
                         <Logo />
-                        <p className="text-xs leading-relaxed text-ink-400">
-                            Sizzling smash patties, melted cheddar and bold midnight street grill vibes, crafted fresh daily.
-                        </p>
-                        <p className="flex items-center gap-1.5 text-xs font-semibold text-go-400">
-                            <ShieldCheck className="size-4" aria-hidden /> 100% Halal kitchen
-                        </p>
+                        {shop.footer_text && <p className="text-xs leading-relaxed text-ink-400">{shop.footer_text}</p>}
+                        {shop.badge_text && (
+                            <p className="flex items-center gap-1.5 text-xs font-semibold text-go-400">
+                                <ShieldCheck className="size-4" aria-hidden /> {shop.badge_text}
+                            </p>
+                        )}
                     </div>
                     <FooterBlock title="Operating Hours">
                         <p>Monday – Sunday</p>
@@ -195,7 +195,7 @@ function BottomTab({ label, icon: Icon, href, active }: { label: string; icon: L
             aria-current={active ? 'page' : undefined}
             className={cn('flex flex-col items-center justify-center gap-1 text-[11px] font-bold', active ? 'text-brand-400' : 'text-ink-400 hover:text-white')}
         >
-            <Icon className={cn('size-5', active && 'drop-shadow-[0_0_8px_rgb(238_43_50/0.7)]')} aria-hidden />
+            <Icon className={cn('size-5', active && 'drop-shadow-[0_0_8px_color-mix(in_srgb,var(--color-brand-500)_70%,transparent)]')} aria-hidden />
             {label}
         </Link>
     );

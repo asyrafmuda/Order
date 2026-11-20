@@ -23,7 +23,7 @@ export default function OrderTrack({ recent }: { recent: Order[] }) {
 
             <div className="mb-6">
                 <p className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">
-                    <span className="size-1.5 rounded-full bg-brand-500" aria-hidden /> Live from the grill
+                    <span className="size-1.5 rounded-full bg-brand-500" aria-hidden /> Live from the kitchen
                 </p>
                 <h1 className="font-display text-5xl leading-none text-white uppercase">Order Tracking &amp; Digital Ticket</h1>
             </div>

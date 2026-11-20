@@ -127,18 +127,18 @@ function CategoryForm({ category, stations, nextSort, onClose }: CategoryFormPro
         <Modal open onClose={onClose} title={category ? `Edit ${category.name}` : 'New category'}>
             <form onSubmit={submit} className="space-y-4">
                 <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-3">
-                    <Input label="Icon" placeholder="🍔" maxLength={16} value={form.data.icon} onChange={(event) => form.setData('icon', event.target.value)} error={form.errors.icon} />
+                    <Input label="Icon" placeholder="🍜" maxLength={16} value={form.data.icon} onChange={(event) => form.setData('icon', event.target.value)} error={form.errors.icon} />
                     <Input label="Name" required autoFocus value={form.data.name} onChange={(event) => form.setData('name', event.target.value)} error={form.errors.name} />
                 </div>
                 <Input
                     label="Eyebrow"
-                    placeholder="Grill Master Classics"
+                    placeholder="Chef's favourites"
                     hint="Small line above the section title."
                     value={form.data.eyebrow}
                     onChange={(event) => form.setData('eyebrow', event.target.value)}
                     error={form.errors.eyebrow}
                 />
-                <Input label="Tagline" placeholder="Crisp crust smash patties & soft toasted brioche" value={form.data.tagline} onChange={(event) => form.setData('tagline', event.target.value)} error={form.errors.tagline} />
+                <Input label="Tagline" placeholder="A short line shown beside the category title" value={form.data.tagline} onChange={(event) => form.setData('tagline', event.target.value)} error={form.errors.tagline} />
                 <div className="grid gap-3 sm:grid-cols-2">
                     <Select
                         label="Kitchen station"

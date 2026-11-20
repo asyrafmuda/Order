@@ -102,7 +102,7 @@ class Cart
     }
 
     /**
-     * Turn an existing line into a combo (the "Add with Burger" hot deal).
+     * Turn an existing line into a combo (the hot deal banner).
      */
     public function upgradeToCombo(string $lineId, ?string $choice = null): void
     {

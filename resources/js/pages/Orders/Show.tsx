@@ -67,7 +67,7 @@ export default function OrderShow({ order }: { order: Order }) {
 
             <div className="space-y-5">
                 {/* Ticket hero */}
-                <Card className="overflow-hidden bg-[radial-gradient(circle_at_0%_0%,rgb(238_43_50/0.22),transparent_45%)]">
+                <Card className="overflow-hidden bg-[radial-gradient(circle_at_0%_0%,color-mix(in_srgb,var(--color-brand-500)_22%,transparent),transparent_45%)]">
                     <div className="grid gap-6 p-5 md:grid-cols-[minmax(0,1fr)_auto] md:p-6">
                         <div>
                             <div className="flex flex-wrap items-center gap-2">

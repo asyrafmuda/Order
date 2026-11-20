@@ -6,9 +6,13 @@ export function Logo({ className, compact = false }: { className?: string; compa
 
     return (
         <span className={cn('flex items-center gap-2.5', className)}>
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-lg shadow-glow" aria-hidden>
-                🍔
-            </span>
+            {shop.logo_url ? (
+                <img src={shop.logo_url} alt="" className="size-9 shrink-0 rounded-lg object-cover shadow-glow" />
+            ) : (
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-lg shadow-glow" aria-hidden>
+                    {shop.icon}
+                </span>
+            )}
             {!compact && (
                 <span className="leading-none whitespace-nowrap">
                     <span className="block font-display text-xl text-white uppercase">{shop.name}</span>

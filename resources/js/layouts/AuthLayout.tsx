@@ -12,7 +12,7 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
     return (
-        <div className="flex min-h-dvh flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_-10%,rgb(238_43_50/0.22),transparent_50%)] px-4 py-10">
+        <div className="flex min-h-dvh flex-col items-center justify-center bg-[radial-gradient(circle_at_50%_-10%,color-mix(in_srgb,var(--color-brand-500)_22%,transparent),transparent_50%)] px-4 py-10">
             <Link href={route('menu.index')} className="mb-8">
                 <Logo />
             </Link>

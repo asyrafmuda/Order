@@ -54,3 +54,5 @@ Route::post('/integrations/pos/sync-menu', [IntegrationController::class, 'syncM
 
 Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
 Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+Route::post('/settings/logo', [SettingController::class, 'storeLogo'])->name('settings.logo.store');
+Route::delete('/settings/logo', [SettingController::class, 'destroyLogo'])->name('settings.logo.destroy');
