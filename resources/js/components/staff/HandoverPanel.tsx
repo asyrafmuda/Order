@@ -112,9 +112,13 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                 <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     <Fact label="Customer">
                         {order.customer_name}
-                        <a href={`tel:+${order.customer_phone}`} className="flex items-center gap-1 text-xs font-normal text-flame-400 hover:underline">
-                            <Phone className="size-3" aria-hidden />+{order.customer_phone}
-                        </a>
+                        {order.customer_phone ? (
+                            <a href={`tel:+${order.customer_phone}`} className="flex items-center gap-1 text-xs font-normal text-flame-400 hover:underline">
+                                <Phone className="size-3" aria-hidden />+{order.customer_phone}
+                            </a>
+                        ) : (
+                            <span className="block text-xs font-normal text-ink-400">Walk-in, no phone</span>
+                        )}
                     </Fact>
                     <Fact label="Pickup code">
                         <span className="font-mono text-lg tracking-[0.2em] text-flame-400">{order.pickup_code}</span>
@@ -141,52 +145,6 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                 {order.status === 'cancelled' && order.cancel_reason && (
                     <p className="rounded-lg bg-brand-900 px-3 py-2 text-sm font-semibold text-brand-400">Cancelled: {order.cancel_reason}</p>
                 )}
-
-                <section aria-label="Items">
-                    <ul className="divide-y divide-ink-700 rounded-lg border border-ink-700">
-                        {items.map((item) => {
-                            const details = [
-                                item.variant_name,
-                                ...item.modifiers.map((modifier) => modifier.name),
-                                item.combo_name && `${item.combo_name}${item.combo_choice ? `: ${item.combo_choice}` : ''}`,
-                            ].filter(Boolean);
-
-                            return (
-                                <li key={item.id} className="flex items-start gap-3 px-3 py-2.5">
-                                    <span className="w-7 shrink-0 text-sm font-extrabold text-flame-400">{item.quantity}×</span>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-bold text-white">
-                                            {item.code && <span className="text-ink-400">{item.code}. </span>}
-                                            {item.name}
-                                        </p>
-                                        {details.length > 0 && <p className="text-xs text-ink-400">{details.join(' • ')}</p>}
-                                        {item.notes && <p className="text-xs font-medium text-go-400">Notes: {item.notes}</p>}
-                                    </div>
-                                    <div className="flex shrink-0 flex-col items-end gap-1">
-                                        <span className="text-sm font-semibold text-ink-100">{money(item.line_total)}</span>
-                                        <KitchenStatusBadge status={item.kitchen_status} label={item.kitchen_status_label} />
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                    <dl className="mt-3 space-y-1 text-sm">
-                        <div className="flex justify-between text-ink-300">
-                            <dt>Subtotal</dt>
-                            <dd>{money(order.subtotal)}</dd>
-                        </div>
-                        {order.delivery_fee > 0 && (
-                            <div className="flex justify-between text-ink-300">
-                                <dt>Delivery fee</dt>
-                                <dd>{money(order.delivery_fee)}</dd>
-                            </div>
-                        )}
-                        <div className="flex items-end justify-between pt-1">
-                            <dt className="font-bold text-white">Total</dt>
-                            <dd className="font-display text-3xl leading-none text-flame-400">{money(order.total)}</dd>
-                        </div>
-                    </dl>
-                </section>
 
                 {delivery && (
                     <section className="space-y-3 rounded-lg border border-ink-700 bg-ink-900 p-3" aria-label="Delivery">
@@ -305,6 +263,52 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                         </div>
                     </form>
                 )}
+
+                <section aria-label="Items">
+                    <ul className="divide-y divide-ink-700 rounded-lg border border-ink-700">
+                        {items.map((item) => {
+                            const details = [
+                                item.variant_name,
+                                ...item.modifiers.map((modifier) => modifier.name),
+                                item.combo_name && `${item.combo_name}${item.combo_choice ? `: ${item.combo_choice}` : ''}`,
+                            ].filter(Boolean);
+
+                            return (
+                                <li key={item.id} className="flex items-start gap-3 px-3 py-2.5">
+                                    <span className="w-7 shrink-0 text-sm font-extrabold text-flame-400">{item.quantity}×</span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-bold text-white">
+                                            {item.code && <span className="text-ink-400">{item.code}. </span>}
+                                            {item.name}
+                                        </p>
+                                        {details.length > 0 && <p className="text-xs text-ink-400">{details.join(' • ')}</p>}
+                                        {item.notes && <p className="text-xs font-medium text-go-400">Notes: {item.notes}</p>}
+                                    </div>
+                                    <div className="flex shrink-0 flex-col items-end gap-1">
+                                        <span className="text-sm font-semibold text-ink-100">{money(item.line_total)}</span>
+                                        <KitchenStatusBadge status={item.kitchen_status} label={item.kitchen_status_label} />
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                    <dl className="mt-3 space-y-1 text-sm">
+                        <div className="flex justify-between text-ink-300">
+                            <dt>Subtotal</dt>
+                            <dd>{money(order.subtotal)}</dd>
+                        </div>
+                        {order.delivery_fee > 0 && (
+                            <div className="flex justify-between text-ink-300">
+                                <dt>Delivery fee</dt>
+                                <dd>{money(order.delivery_fee)}</dd>
+                            </div>
+                        )}
+                        <div className="flex items-end justify-between pt-1">
+                            <dt className="font-bold text-white">Total</dt>
+                            <dd className="font-display text-3xl leading-none text-flame-400">{money(order.total)}</dd>
+                        </div>
+                    </dl>
+                </section>
 
                 {order.histories && order.histories.length > 0 && (
                     <section aria-label="History">

@@ -55,7 +55,9 @@
             <td style="width: 50%;">
                 <h2>Billed to</h2>
                 <strong>{{ $order->customer_name }}</strong><br>
-                +{{ $showContact ? $order->customer_phone : \App\Support\Phone::mask($order->customer_phone) }}
+                @if ($order->customer_phone)
+                    +{{ $showContact ? $order->customer_phone : \App\Support\Phone::mask($order->customer_phone) }}
+                @endif
                 @if ($showContact && $order->customer_email)
                     <br>{{ $order->customer_email }}
                 @endif

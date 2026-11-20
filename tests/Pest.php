@@ -27,6 +27,9 @@ pest()->extend(TestCase::class)
             'hours.open' => '00:00',
             'hours.close' => '23:59',
             'hours.last_order' => '23:59',
+            // Guests may pay at the counter unless a test is about that rule.
+            'payments.cash_requires_account' => false,
+            'payments.cash_max_amount' => 0,
         ]);
         app(Settings::class)->flush();
     })

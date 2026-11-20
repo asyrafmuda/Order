@@ -22,7 +22,7 @@ class OrderNotifier
 
     public function statusChanged(Order $order, OrderStatus $status): void
     {
-        if (! $this->settings->bool('notifications.enabled')) {
+        if (! $this->settings->bool('notifications.enabled') || blank($order->customer_phone)) {
             return;
         }
 

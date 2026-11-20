@@ -67,7 +67,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
 
                 <span className="ml-auto flex h-9 shrink-0 items-center gap-2 rounded-lg border border-go-500/30 bg-go-900 px-3 text-[11px] font-extrabold tracking-wide text-go-400 uppercase">
                     <span className={cn('size-2 rounded-full', pos.connected ? 'animate-pulse-soft bg-go-400' : 'bg-flame-400')} />
-                    POS {pos.connected ? 'connected' : 'offline'}
+                    POS {pos.simulated ? 'demo mode' : pos.connected ? 'connected' : 'offline'}
                 </span>
                 <span className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-ink-300">
                     <ChefHat className="size-4 text-flame-400" aria-hidden />

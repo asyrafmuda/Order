@@ -1,5 +1,6 @@
 import { router, usePage } from '@inertiajs/react';
 import { useEffect, useRef } from 'react';
+import { getEcho } from '@/echo';
 
 interface LiveChannel {
     name: string;
@@ -42,7 +43,8 @@ export function useLiveReload(channels: LiveChannel[], { only, interval = 8000, 
             }, 150);
         };
 
-        const echo = realtime ? window.Echo : undefined;
+        // Only open a websocket when the server has broadcasting switched on.
+        const echo = realtime ? getEcho() : undefined;
 
         if (echo) {
             channels.forEach((channel) => {

@@ -2,14 +2,15 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 /**
- * Connect to Laravel Reverb when it is configured. Without a key the app
- * still works: live screens fall back to polling (see useLiveReload).
+ * The Laravel Reverb connection, opened the first time a live screen asks for
+ * it. Returns undefined when no key was built in; screens then fall back to
+ * polling (see useLiveReload).
  */
-export function bootEcho(): void {
+export function getEcho(): Window['Echo'] {
     const key = import.meta.env.VITE_REVERB_APP_KEY as string | undefined;
 
     if (!key || window.Echo) {
-        return;
+        return window.Echo;
     }
 
     const scheme = (import.meta.env.VITE_REVERB_SCHEME as string | undefined) ?? 'http';
@@ -25,4 +26,6 @@ export function bootEcho(): void {
         forceTLS: scheme === 'https',
         enabledTransports: ['ws', 'wss'],
     });
+
+    return window.Echo;
 }

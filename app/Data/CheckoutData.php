@@ -2,16 +2,18 @@
 
 namespace App\Data;
 
+use App\Enums\OrderSource;
 use App\Enums\PaymentMethod;
+use App\Models\User;
 
 /**
- * Validated checkout form input.
+ * Validated order details, from the online checkout form or the counter POS.
  */
 final readonly class CheckoutData
 {
     public function __construct(
         public string $customerName,
-        public string $customerPhone,
+        public ?string $customerPhone,
         public ?string $customerEmail,
         public PaymentMethod $paymentMethod,
         public ?string $notes = null,
@@ -22,6 +24,11 @@ final readonly class CheckoutData
         public ?string $city = null,
         public ?string $postcode = null,
         public ?string $deliveryNotes = null,
+        public OrderSource $source = OrderSource::Online,
+        /** Staff member keying the order in at the counter. */
+        public ?User $placedBy = null,
+        /** Counter sales only: the customer already paid at the till. */
+        public bool $paidAtCounter = false,
     ) {}
 
     /**

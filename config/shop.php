@@ -32,6 +32,21 @@ return [
         'ordering.pickup_eta_min' => 15,
         'ordering.pickup_eta_max' => 20,
         'ordering.queue_prefix' => 'A',
+        // Ready pickup orders nobody marked as collected are closed after this many hours.
+        'ordering.auto_close_hours' => 6,
+
+        // Payment methods offered at online checkout.
+        'payments.fpx_enabled' => true,
+        'payments.card_enabled' => true,
+        'payments.ewallet_enabled' => true,
+        'payments.cash_enabled' => true,
+        // Pay-at-counter orders reach the kitchen unpaid, so they are the
+        // easiest to abuse. These two limits keep prank orders small.
+        'payments.cash_requires_account' => true,
+        'payments.cash_max_amount' => 15000,
+
+        // One-tap kitchen instructions on the counter POS.
+        'pos.quick_notes' => ['Pedas', 'Kurang pedas', 'Potong dua', 'Sos asing', 'Bungkus asing', 'Tak nak ais'],
 
         'tax.rate' => 6,
         'tax.inclusive' => true,

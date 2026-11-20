@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
 use App\Services\Cart\Cart;
+use App\Support\PaymentOptions;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +22,8 @@ class CheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
-        $delivery = app(Cart::class)->type() === OrderType::Delivery;
+        $cart = app(Cart::class)->priced();
+        $delivery = $cart->type === OrderType::Delivery;
         $phone = 'regex:/^\+?[0-9\s\-]{9,16}$/';
 
         return [
@@ -30,7 +33,17 @@ class CheckoutRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:500'],
             'payment_method' => [
                 'required',
-                Rule::enum(PaymentMethod::class)->except($delivery ? [PaymentMethod::Cash] : []),
+                Rule::enum(PaymentMethod::class),
+                function (string $attribute, mixed $value, Closure $fail) use ($cart) {
+                    $method = PaymentMethod::tryFrom((string) $value);
+                    $reason = $method
+                        ? app(PaymentOptions::class)->unavailableReason($method, $cart->type, $this->user(), $cart->total())
+                        : null;
+
+                    if ($reason !== null) {
+                        $fail("{$method->label()} cannot be used for this order: {$reason}.");
+                    }
+                },
             ],
 
             'recipient_name' => ['nullable', 'string', 'max:120'],

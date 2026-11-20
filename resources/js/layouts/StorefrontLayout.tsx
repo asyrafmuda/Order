@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { ChevronDown, Clock, LogOut, MapPin, Phone, ReceiptText, ShieldCheck, ShoppingBag, User, UserRound } from 'lucide-react';
+import { ChefHat, ChevronDown, Clock, LogOut, MapPin, Phone, ReceiptText, ShieldCheck, ShoppingBag, User, UserRound, UtensilsCrossed, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from '@/components/Logo';
 import { Flash } from '@/components/ui/Flash';
@@ -12,23 +12,53 @@ interface StorefrontLayoutProps {
     search?: ReactNode;
     /** Full-width bar rendered directly under the header, e.g. order mode or order status. */
     subheader?: ReactNode;
+    /**
+     * Phones only: replaces the bottom tab bar, e.g. with the "Place order"
+     * button during checkout so the call to action is always in reach.
+     */
+    bottomBar?: ReactNode;
 }
 
-const tabs = [
-    { label: 'Menu & Ordering', route: 'menu.index', match: ['menu.*', 'checkout.*'] },
-    { label: 'Order Tracking & Digital Ticket', route: 'orders.track', match: ['orders.*', 'payments.*'] },
-    { label: 'Kitchen & POS Status', route: 'status.index', match: ['status.*'] },
+interface Tab {
+    label: string;
+    /** Short label for the phone tab bar. */
+    short: string;
+    icon: LucideIcon;
+    route: string;
+    match: string[];
+}
+
+const tabs: Tab[] = [
+    { label: 'Menu & Ordering', short: 'Menu', icon: UtensilsCrossed, route: 'menu.index', match: ['menu.*', 'checkout.*', 'legal.*'] },
+    { label: 'Order Tracking & Digital Ticket', short: 'My Order', icon: ReceiptText, route: 'orders.track', match: ['orders.*', 'payments.*'] },
+    { label: 'Kitchen & POS Status', short: 'Kitchen', icon: ChefHat, route: 'status.index', match: ['status.*'] },
 ];
 
-export default function StorefrontLayout({ children, search, subheader }: StorefrontLayoutProps) {
-    const { shop, kitchen, cart } = usePage().props;
+export default function StorefrontLayout({ children, search, subheader, bottomBar }: StorefrontLayoutProps) {
+    const { shop, kitchen, cart, auth } = usePage().props;
+    const header = useRef<HTMLElement>(null);
+
+    // Sticky elements below the header (category pills) position themselves with --header-h.
+    useEffect(() => {
+        const element = header.current;
+
+        if (!element) return;
+
+        const update = () => document.documentElement.style.setProperty('--header-h', `${element.offsetHeight}px`);
+        const observer = new ResizeObserver(update);
+        observer.observe(element);
+        update();
+
+        return () => observer.disconnect();
+    }, []);
+
     const delivery = cart?.type === 'delivery';
     const eta = delivery && cart?.zone ? `${cart.zone.eta_minutes - 10}–${cart.zone.eta_minutes} min` : `${kitchen.eta_min}–${kitchen.eta_max} min`;
 
     return (
         <div className="flex min-h-dvh flex-col">
-            <header className="no-print sticky top-0 z-40 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
-                <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
+            <header ref={header} className="no-print sticky top-0 z-40 border-b border-ink-700 bg-ink-900/95 backdrop-blur">
+                <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 lg:py-3">
                     <Link href={route('menu.index')} aria-label={`${shop.name} home`}>
                         <Logo />
                     </Link>
@@ -69,14 +99,6 @@ export default function StorefrontLayout({ children, search, subheader }: Storef
                         <UserMenu />
                     </div>
                 </div>
-
-                <nav className="scrollbar-none flex gap-1 overflow-x-auto border-t border-ink-800 px-4 py-2 lg:hidden" aria-label="Main">
-                    {tabs.map((tab) => (
-                        <NavTab key={tab.route} {...tab} />
-                    ))}
-                </nav>
-
-                {search && <div className="border-t border-ink-800 px-4 py-2 md:hidden">{search}</div>}
             </header>
 
             {!shop.is_open && (
@@ -87,9 +109,10 @@ export default function StorefrontLayout({ children, search, subheader }: Storef
 
             {subheader}
 
-            <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">{children}</main>
+            <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-4 lg:py-6">{children}</main>
 
-            <footer className="no-print border-t border-ink-700 bg-ink-900">
+            {/* Room for the fixed bottom bar on phones and tablets. */}
+            <footer className="no-print border-t border-ink-700 bg-ink-900 pb-20 lg:pb-0">
                 <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-3">
                         <Logo />
@@ -130,17 +153,54 @@ export default function StorefrontLayout({ children, search, subheader }: Storef
                         </Link>
                     </FooterBlock>
                 </div>
-                <div className="border-t border-ink-800 px-4 py-4 text-center text-xs text-ink-500">
-                    © {new Date().getFullYear()} {shop.name}. All rights reserved.
+                <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-ink-800 px-4 py-4 text-xs text-ink-500">
+                    <span>
+                        © {new Date().getFullYear()} {shop.name}. All rights reserved.
+                    </span>
+                    <Link href={route('legal.terms')} className="hover:text-ink-200">
+                        Terms of Service
+                    </Link>
+                    <Link href={route('legal.privacy')} className="hover:text-ink-200">
+                        Privacy Notice
+                    </Link>
                 </div>
             </footer>
+
+            <div className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-ink-700 bg-ink-900/95 pb-safe backdrop-blur lg:hidden">
+                {bottomBar ?? (
+                    <nav className="mx-auto grid h-16 max-w-xl grid-cols-4" aria-label="Main">
+                        {tabs.map((tab) => (
+                            <BottomTab key={tab.route} label={tab.short} icon={tab.icon} href={route(tab.route)} active={tab.match.some((pattern) => route().current(pattern))} />
+                        ))}
+                        <BottomTab
+                            label={auth.user ? 'Account' : 'Sign in'}
+                            icon={UserRound}
+                            href={auth.user ? route('account.orders') : route('login')}
+                            active={Boolean(route().current('account.*'))}
+                        />
+                    </nav>
+                )}
+            </div>
 
             <Flash />
         </div>
     );
 }
 
-function NavTab({ label, route: name, match }: { label: string; route: string; match: string[] }) {
+function BottomTab({ label, icon: Icon, href, active }: { label: string; icon: LucideIcon; href: string; active: boolean }) {
+    return (
+        <Link
+            href={href}
+            aria-current={active ? 'page' : undefined}
+            className={cn('flex flex-col items-center justify-center gap-1 text-[11px] font-bold', active ? 'text-brand-400' : 'text-ink-400 hover:text-white')}
+        >
+            <Icon className={cn('size-5', active && 'drop-shadow-[0_0_8px_rgb(238_43_50/0.7)]')} aria-hidden />
+            {label}
+        </Link>
+    );
+}
+
+function NavTab({ label, route: name, match }: Pick<Tab, 'label' | 'route' | 'match'>) {
     const active = match.some((pattern) => route().current(pattern));
 
     return (

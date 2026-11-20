@@ -19,6 +19,7 @@ import {
     Users,
     UtensilsCrossed,
     X,
+    Zap,
     type LucideIcon,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
@@ -45,6 +46,7 @@ const sections: NavSection[] = [
         title: 'Service',
         items: [
             { label: 'Dashboard', route: 'admin.dashboard', icon: LayoutDashboard, roles: ['admin'] },
+            { label: 'Take Order (POS)', route: 'pos.index', match: 'pos.*', icon: Zap, roles: ['admin', 'cashier'] },
             { label: 'Kitchen Display', route: 'kitchen.index', match: 'kitchen.*', icon: ChefHat, roles: ['admin', 'kitchen', 'cashier'] },
             { label: 'Counter', route: 'counter.index', match: 'counter.*', icon: Ticket, roles: ['admin', 'cashier'] },
             { label: 'My Deliveries', route: 'rider.index', match: 'rider.*', icon: Bike, roles: ['rider'] },
@@ -188,7 +190,7 @@ export default function BackOfficeLayout({ title, description, actions, children
                     </span>
                     <span className="flex items-center gap-1.5 rounded-lg border border-ink-700 bg-ink-850 px-2.5 py-1.5 text-xs font-semibold text-ink-200">
                         <span className={cn('size-2 rounded-full', pos.connected ? 'bg-go-400' : 'bg-brand-500')} />
-                        POS: {pos.provider}
+                        POS: {pos.label}
                     </span>
                 </div>
                 {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

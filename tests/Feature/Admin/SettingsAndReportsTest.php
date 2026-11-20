@@ -30,8 +30,13 @@ function settingsPayload(array $overrides = []): array
         'hours' => ['open' => '10:00', 'close' => '22:00', 'last_order' => '21:30'],
         'ordering' => [
             'enabled' => true, 'pickup_enabled' => true, 'delivery_enabled' => false,
-            'pickup_eta_min' => 10, 'pickup_eta_max' => 25, 'queue_prefix' => 'b',
+            'pickup_eta_min' => 10, 'pickup_eta_max' => 25, 'queue_prefix' => 'b', 'auto_close_hours' => 4,
         ],
+        'payments' => [
+            'fpx_enabled' => true, 'card_enabled' => true, 'ewallet_enabled' => false, 'cash_enabled' => true,
+            'cash_requires_account' => false, 'cash_max_amount' => 8000,
+        ],
+        'pos' => ['quick_notes' => ['Pedas', ' Potong dua ', '']],
         'tax' => ['rate' => 8, 'inclusive' => false],
         'notifications' => ['enabled' => false],
     ], $overrides);
@@ -210,4 +215,21 @@ describe('integrations', function () {
 
         $this->post(route('admin.integrations.pos.sync-menu'))->assertSessionHas('error');
     });
+});
+
+it('saves payment rules and tidies the POS quick notes', function () {
+    $this->put(route('admin.settings.update'), settingsPayload())->assertSessionHas('success');
+
+    $settings = app(Settings::class);
+
+    expect($settings->bool('payments.ewallet_enabled'))->toBeFalse()
+        ->and($settings->int('payments.cash_max_amount'))->toBe(8000)
+        ->and($settings->int('ordering.auto_close_hours'))->toBe(4)
+        ->and($settings->get('pos.quick_notes'))->toBe(['Pedas', 'Potong dua']);
+});
+
+it('keeps at least one payment method on', function () {
+    $this->put(route('admin.settings.update'), settingsPayload(['payments' => [
+        'fpx_enabled' => false, 'card_enabled' => false, 'ewallet_enabled' => false, 'cash_enabled' => false,
+    ]]))->assertSessionHasErrors('payments.cash_enabled');
 });

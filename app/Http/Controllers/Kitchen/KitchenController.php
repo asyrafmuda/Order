@@ -6,9 +6,11 @@ use App\Enums\KitchenItemStatus;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Models\Category;
 use App\Models\KitchenStation;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,7 +52,36 @@ class KitchenController extends Controller
             'ready' => OrderResource::collection($ready)->resolve($request),
             'stations' => $this->stationLoad($stations),
             'filters' => ['station' => $stationId],
+            'menu' => $this->menu(),
         ]);
+    }
+
+    /**
+     * The menu for the "sold out" panel, grouped by category.
+     *
+     * @return array<int, array{name: string, icon: ?string, products: array<int, array<string, mixed>>}>
+     */
+    private function menu(): array
+    {
+        return Category::query()
+            ->active()
+            ->ordered()
+            ->with(['products' => fn ($query) => $query->visible()->ordered()])
+            ->get()
+            ->filter(fn (Category $category) => $category->products->isNotEmpty())
+            ->map(fn (Category $category) => [
+                'name' => $category->name,
+                'icon' => $category->icon,
+                'products' => $category->products->map(fn (Product $product) => [
+                    'id' => $product->id,
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'status' => $product->status->value,
+                    'status_label' => $product->status->label(),
+                ])->all(),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

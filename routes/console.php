@@ -8,4 +8,5 @@ use Illuminate\Support\Facades\Schedule;
 */
 
 Schedule::command('orders:cancel-unpaid')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('orders:close-stale')->hourly()->withoutOverlapping();
 Schedule::command('queue:prune-failed --hours=168')->daily();

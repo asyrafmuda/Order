@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderSource;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
@@ -19,8 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
-    'uuid', 'business_date', 'queue_number', 'order_number', 'pickup_code', 'user_id', 'customer_name',
-    'customer_phone', 'customer_email', 'type', 'status', 'payment_status', 'payment_method', 'notes',
+    'uuid', 'business_date', 'queue_number', 'order_number', 'pickup_code', 'user_id', 'placed_by_id', 'customer_name',
+    'customer_phone', 'customer_email', 'type', 'source', 'status', 'payment_status', 'payment_method', 'notes',
     'subtotal', 'delivery_fee', 'discount', 'tax_amount', 'tax_rate', 'tax_inclusive', 'total',
     'estimated_ready_at', 'confirmed_at', 'preparing_at', 'ready_at', 'dispatched_at', 'completed_at',
     'cancelled_at', 'cancel_reason', 'pos_sync_status', 'pos_receipt_number', 'pos_synced_at',
@@ -31,12 +32,20 @@ class Order extends Model
     use HasFactory;
 
     /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'source' => 'online',
+    ];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
             'type' => OrderType::class,
+            'source' => OrderSource::class,
             'status' => OrderStatus::class,
             'payment_status' => PaymentStatus::class,
             'payment_method' => PaymentMethod::class,
@@ -81,6 +90,16 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The staff member who keyed the order in at the counter, if any.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function placedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'placed_by_id');
     }
 
     /** @return HasMany<OrderItem, $this> */
@@ -128,6 +147,11 @@ class Order extends Model
     public function isDelivery(): bool
     {
         return $this->type === OrderType::Delivery;
+    }
+
+    public function isCounterSale(): bool
+    {
+        return $this->source === OrderSource::Pos;
     }
 
     public function isPaid(): bool

@@ -15,12 +15,14 @@ class CartController extends Controller
     public function store(AddToCartRequest $request): RedirectResponse
     {
         try {
-            $line = $this->cart->add($request->validated());
+            $this->cart->add($request->validated());
         } catch (InvalidCartLine $exception) {
             return back()->with('error', $exception->getMessage());
         }
 
-        return back()->with('success', "{$line->product->name} added to your ticket.");
+        // No flash message: the ticket and its total update on screen, and a
+        // toast per tap would only cover the menu on a phone.
+        return back();
     }
 
     public function update(Request $request, string $line): RedirectResponse

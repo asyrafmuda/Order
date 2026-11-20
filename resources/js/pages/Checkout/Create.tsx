@@ -26,7 +26,7 @@ interface SavedAddress {
 
 interface CheckoutProps {
     zones: (CartZone & { areas: string | null })[];
-    paymentMethods: { value: PaymentMethod; label: string; pickup_only: boolean }[];
+    paymentMethods: { value: PaymentMethod; label: string; available: boolean; reason: string | null }[];
     customer: { name: string; phone: string; email: string };
     addresses: SavedAddress[];
 }
@@ -54,7 +54,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
         customer_phone: customer.phone,
         customer_email: customer.email,
         notes: '',
-        payment_method: 'fpx' as PaymentMethod,
+        payment_method: (paymentMethods.find((option) => option.available)?.value ?? 'fpx') as PaymentMethod,
         recipient_name: '',
         recipient_phone: '',
         line1: '',
@@ -67,8 +67,10 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
 
     if (!cart) return null;
 
-    const method = delivery && form.data.payment_method === 'cash' ? 'fpx' : form.data.payment_method;
-    const blocked = cart.lines.length === 0 || cart.min_order_shortfall > 0 || !shop.is_open;
+    // Switching to delivery (or a bigger total) can make the chosen method unavailable: fall back to the first that works.
+    const usable = paymentMethods.filter((option) => option.available);
+    const method = usable.some((option) => option.value === form.data.payment_method) ? form.data.payment_method : usable[0]?.value;
+    const blocked = cart.lines.length === 0 || cart.min_order_shortfall > 0 || !shop.is_open || !method;
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -100,15 +102,27 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
         );
 
     return (
-        <StorefrontLayout>
+        <StorefrontLayout
+            bottomBar={
+                <div className="flex items-center gap-3 px-3 py-2.5">
+                    <div className="leading-tight">
+                        <p className="text-[10px] font-bold tracking-wider text-ink-400 uppercase">Total</p>
+                        <p className="font-display text-2xl leading-none whitespace-nowrap text-flame-400">{money(cart.total)}</p>
+                    </div>
+                    <Button type="submit" form="checkout-form" size="lg" className="flex-1" loading={form.processing} disabled={blocked} icon={<Zap className="size-4" aria-hidden />}>
+                        {method === 'cash' ? 'Place Order' : 'Place Order & Pay'}
+                    </Button>
+                </div>
+            }
+        >
             <Head title="Checkout" />
 
             <Link href={route('menu.index')} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-300 hover:text-white">
                 <ArrowLeft className="size-4" aria-hidden /> Back to menu
             </Link>
-            <h1 className="mb-6 font-display text-5xl leading-none text-white uppercase">Checkout</h1>
+            <h1 className="mb-4 font-display text-4xl leading-none text-white uppercase sm:text-5xl lg:mb-6">Checkout</h1>
 
-            <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
+            <form id="checkout-form" onSubmit={submit} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-6">
                 <div className="space-y-5">
                     <Section step={1} title="Your details" aside={!auth.user && <Link href={route('login')} className="text-xs font-semibold text-flame-400 hover:underline">Have an account? Sign in</Link>}>
                         <div className="grid gap-4 sm:grid-cols-2">
@@ -221,7 +235,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Payment method">
                             {paymentMethods.map((option) => {
                                 const Icon = paymentIcons[option.value];
-                                const unavailable = option.pickup_only && delivery;
+                                const unavailable = !option.available;
 
                                 return (
                                     <button
@@ -236,13 +250,26 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                                         <Icon className="mt-0.5 size-5 shrink-0 text-flame-400" aria-hidden />
                                         <span>
                                             <span className="block text-sm font-bold text-white">{option.label}</span>
-                                            <span className="block text-xs text-ink-400">{unavailable ? 'Pickup orders only' : paymentHints[option.value]}</span>
+                                            <span className="block text-xs text-ink-400">{option.reason ?? paymentHints[option.value]}</span>
                                         </span>
                                     </button>
                                 );
                             })}
                         </div>
                         {form.errors.payment_method && <p className="mt-2 text-xs font-medium text-brand-400">{form.errors.payment_method}</p>}
+                        {!auth.user && paymentMethods.some((option) => option.value === 'cash' && option.reason?.startsWith('Sign in')) && (
+                            <p className="mt-3 text-xs text-ink-400">
+                                Want to pay at the counter?{' '}
+                                <Link href={route('login')} className="font-semibold text-flame-400 hover:underline">
+                                    Sign in
+                                </Link>{' '}
+                                or{' '}
+                                <Link href={route('register')} className="font-semibold text-flame-400 hover:underline">
+                                    create an account
+                                </Link>{' '}
+                                — your ticket is kept.
+                            </p>
+                        )}
                     </Section>
 
                     <Section step={4} title="Anything else?">
@@ -253,11 +280,22 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
                 <aside className="lg:sticky lg:top-24 lg:self-start">
                     <TicketPanel
                         action={
-                            <Button type="submit" size="lg" className="w-full" loading={form.processing} disabled={blocked} icon={<Zap className="size-4" aria-hidden />}>
+                            <Button type="submit" size="lg" className="hidden w-full lg:flex" loading={form.processing} disabled={blocked} icon={<Zap className="size-4" aria-hidden />}>
                                 {method === 'cash' ? 'Place Order' : 'Place Order & Pay'} · {money(cart.total)}
                             </Button>
                         }
                     />
+                    <p className="mt-3 text-center text-[11px] text-ink-500">
+                        By placing this order you agree to our{' '}
+                        <Link href={route('legal.terms')} className="underline hover:text-ink-200">
+                            Terms
+                        </Link>{' '}
+                        and{' '}
+                        <Link href={route('legal.privacy')} className="underline hover:text-ink-200">
+                            Privacy Notice
+                        </Link>
+                        .
+                    </p>
                 </aside>
             </form>
         </StorefrontLayout>
@@ -266,7 +304,7 @@ export default function CheckoutCreate({ zones, paymentMethods, customer, addres
 
 function Section({ step, title, aside, children }: { step: number; title: string; aside?: ReactNode; children: ReactNode }) {
     return (
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2.5 text-base font-bold text-white">
                     <span className="flex size-6 items-center justify-center rounded-full bg-brand-600 text-xs font-extrabold">{step}</span>

@@ -139,11 +139,11 @@ class LoyversePosProvider implements PosProvider
             'source' => config('app.name'),
             'receipt_date' => ($order->confirmed_at ?? now())->utc()->format('Y-m-d\TH:i:s.v\Z'),
             'note' => trim(sprintf(
-                '%s %s — %s (%s)%s',
+                '%s %s — %s%s%s',
                 $order->type->label(),
                 $order->order_number,
                 $order->customer_name,
-                $order->customer_phone,
+                $order->customer_phone ? " ({$order->customer_phone})" : '',
                 $order->notes ? ' — '.$order->notes : '',
             )),
             'line_items' => $lineItems,

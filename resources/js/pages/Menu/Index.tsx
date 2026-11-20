@@ -79,12 +79,15 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
         <StorefrontLayout search={search} subheader={<OrderModeBar zones={zones} />}>
             <Head title="Menu & Ordering" />
 
+            {/* On phones the search lives in the page, keeping the sticky header to a single row. */}
+            <div className="mb-3 md:hidden">{search}</div>
+
             {combo && (
-                <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-ink-700 bg-ink-850 px-4 py-3">
+                <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-ink-700 bg-ink-850 px-3 py-2.5 sm:px-4 sm:py-3 lg:mb-4">
                     <Badge tone="solid-flame">Hot deal</Badge>
-                    <p className="min-w-0 flex-1 text-sm">
+                    <p className="min-w-0 flex-1 basis-40 text-sm leading-snug">
                         <strong className="font-extrabold text-white uppercase">Upgrade to {combo.name}</strong>
-                        <span className="text-ink-300"> — {combo.description}</span>
+                        <span className="hidden text-ink-300 sm:inline"> — {combo.description}</span>
                     </p>
                     <span className="text-sm font-extrabold text-flame-400">+{money(combo.price)}</span>
                     <Button size="sm" onClick={applyHotDeal} disabled={!shop.is_open}>
@@ -93,7 +96,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                 </div>
             )}
 
-            <nav className="scrollbar-none sticky top-[7.25rem] z-30 -mx-4 mb-6 flex gap-2 overflow-x-auto bg-ink-950/95 px-4 py-2 backdrop-blur lg:top-[4.25rem]" aria-label="Menu categories">
+            <nav className="scrollbar-none sticky top-[var(--header-h,4rem)] z-30 -mx-4 mb-4 flex gap-2 overflow-x-auto bg-ink-950/95 px-4 py-2 backdrop-blur lg:mb-6" aria-label="Menu categories">
                 <button type="button" className={pill(activeCategory === null)} onClick={() => setActiveCategory(null)} aria-pressed={activeCategory === null}>
                     <span aria-hidden>🔥</span> All Menus
                 </button>
@@ -105,7 +108,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
             </nav>
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-                <div className="space-y-10">
+                <div className="space-y-8 lg:space-y-10">
                     {visible.length === 0 && (
                         <EmptyState icon={<Search className="size-8" />} title="Nothing matches that search">
                             Try a different word, or clear the search to see the whole menu.
@@ -122,13 +125,13 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                                             {category.eyebrow}
                                         </p>
                                     )}
-                                    <h2 id={`category-${category.id}`} className="font-display text-4xl leading-none text-white uppercase">
+                                    <h2 id={`category-${category.id}`} className="font-display text-3xl leading-none text-white uppercase sm:text-4xl">
                                         {category.name}
                                     </h2>
                                 </div>
                                 {category.tagline && <p className="text-xs text-ink-400">{category.tagline}</p>}
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                                 {category.products.map((product) => (
                                     <ProductCard
                                         key={product.id}
@@ -145,7 +148,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
                     ))}
                 </div>
 
-                <aside className="lg:sticky lg:top-32 lg:self-start">
+                <aside id="ticket" className={cn('lg:sticky lg:top-32 lg:self-start', cart && cart.count > 0 && 'mb-16 lg:mb-0')}>
                     <TicketPanel />
                 </aside>
             </div>
@@ -153,7 +156,7 @@ export default function MenuIndex({ categories, combo, zones }: MenuProps) {
             {cart && cart.count > 0 && (
                 <Link
                     href={route('checkout.create')}
-                    className="no-print fixed inset-x-4 bottom-4 z-30 flex h-12 items-center justify-between rounded-xl bg-brand-600 px-4 text-sm font-bold text-white shadow-glow lg:hidden"
+                    className="no-print fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-30 flex h-13 items-center justify-between rounded-xl bg-brand-600 px-4 text-sm font-bold text-white shadow-glow lg:hidden"
                 >
                     <span className="flex items-center gap-2">
                         <ShoppingBag className="size-4" aria-hidden />

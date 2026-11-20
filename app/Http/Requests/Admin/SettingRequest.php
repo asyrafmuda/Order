@@ -41,6 +41,17 @@ class SettingRequest extends FormRequest
             'ordering.pickup_eta_min' => ['required', 'integer', 'min:1', 'max:180'],
             'ordering.pickup_eta_max' => ['required', 'integer', 'max:240', 'gte:ordering.pickup_eta_min'],
             'ordering.queue_prefix' => ['required', 'string', 'alpha', 'max:3'],
+            'ordering.auto_close_hours' => ['required', 'integer', 'min:0', 'max:72'],
+
+            'payments.fpx_enabled' => ['required', 'boolean'],
+            'payments.card_enabled' => ['required', 'boolean'],
+            'payments.ewallet_enabled' => ['required', 'boolean'],
+            'payments.cash_enabled' => ['required', 'boolean'],
+            'payments.cash_requires_account' => ['required', 'boolean'],
+            'payments.cash_max_amount' => ['required', 'integer', 'min:0', 'max:10000000'],
+
+            'pos.quick_notes' => ['present', 'array', 'max:12'],
+            'pos.quick_notes.*' => ['nullable', 'string', 'max:30'],
 
             'tax.rate' => ['required', 'numeric', 'min:0', 'max:100'],
             'tax.inclusive' => ['required', 'boolean'],
@@ -58,6 +69,13 @@ class SettingRequest extends FormRequest
             function (Validator $validator) {
                 if (! $this->boolean('ordering.pickup_enabled') && ! $this->boolean('ordering.delivery_enabled')) {
                     $validator->errors()->add('ordering.delivery_enabled', 'Keep at least one of pickup or delivery switched on.');
+                }
+
+                $anyPayment = collect(['fpx', 'card', 'ewallet', 'cash'])
+                    ->contains(fn (string $method) => $this->boolean("payments.{$method}_enabled"));
+
+                if (! $anyPayment) {
+                    $validator->errors()->add('payments.cash_enabled', 'Keep at least one payment method switched on.');
                 }
             },
         ];
@@ -82,6 +100,9 @@ class SettingRequest extends FormRequest
             'ordering.pickup_eta_min' => 'minimum prep time',
             'ordering.pickup_eta_max' => 'maximum prep time',
             'ordering.queue_prefix' => 'queue prefix',
+            'ordering.auto_close_hours' => 'auto-close time',
+            'payments.cash_max_amount' => 'cash order limit',
+            'pos.quick_notes.*' => 'quick note',
             'tax.rate' => 'SST rate',
         ];
     }
@@ -104,11 +125,27 @@ class SettingRequest extends FormRequest
      */
     public function settings(): array
     {
-        $settings = Arr::dot($this->validated());
+        $validated = $this->validated();
 
-        foreach (['ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'tax.inclusive', 'notifications.enabled'] as $key) {
+        // Lists are stored whole, not as "pos.quick_notes.0", "…1".
+        $quickNotes = array_values(array_unique(array_filter(array_map('trim', $validated['pos']['quick_notes'] ?? []))));
+        unset($validated['pos']['quick_notes']);
+
+        $settings = Arr::dot($validated);
+        $settings['pos.quick_notes'] = $quickNotes;
+
+        $booleans = [
+            'ordering.enabled', 'ordering.pickup_enabled', 'ordering.delivery_enabled', 'tax.inclusive', 'notifications.enabled',
+            'payments.fpx_enabled', 'payments.card_enabled', 'payments.ewallet_enabled', 'payments.cash_enabled',
+            'payments.cash_requires_account',
+        ];
+
+        foreach ($booleans as $key) {
             $settings[$key] = filter_var($settings[$key], FILTER_VALIDATE_BOOLEAN);
         }
+
+        $settings['ordering.auto_close_hours'] = (int) $settings['ordering.auto_close_hours'];
+        $settings['payments.cash_max_amount'] = (int) $settings['payments.cash_max_amount'];
 
         $settings['ordering.pickup_eta_min'] = (int) $settings['ordering.pickup_eta_min'];
         $settings['ordering.pickup_eta_max'] = (int) $settings['ordering.pickup_eta_max'];

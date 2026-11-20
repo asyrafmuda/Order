@@ -11,7 +11,8 @@ use App\Models\User;
 use Illuminate\Support\Str;
 
 /**
- * The cashier took cash for a pay-at-counter order.
+ * The cashier took payment at the till: cash for a pay-at-counter order, or
+ * cash / card terminal / QR for an order keyed in at the counter.
  */
 class CollectCashPayment
 {
@@ -24,14 +25,16 @@ class CollectCashPayment
             return $order;
         }
 
-        if ($order->status->isFinal() || $order->payment_method !== PaymentMethod::Cash) {
+        $payableAtCounter = $order->payment_method === PaymentMethod::Cash || $order->isCounterSale();
+
+        if ($order->status->isFinal() || ! $payableAtCounter) {
             throw new OrderException("Order {$order->order_number} cannot be paid at the counter.");
         }
 
         $order->payments()->create([
-            'reference' => 'CASH-'.strtoupper(Str::random(12)),
+            'reference' => 'TILL-'.strtoupper(Str::random(12)),
             'gateway' => 'counter',
-            'method' => PaymentMethod::Cash,
+            'method' => $order->payment_method,
             'status' => PaymentStatus::Paid,
             'amount' => $order->total,
             'payload' => ['collected_by' => $cashier->id],

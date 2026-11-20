@@ -54,7 +54,7 @@ export default function OrderShow({ order }: { order: Order }) {
                             ) : (
                                 !cancelled && order.status !== 'pending_payment' && <span className="rounded-md bg-flame-900 px-2 py-1 font-bold text-flame-400">POS sync {order.pos.status}</span>
                             )}
-                            <span className="hidden sm:inline">POS: {pos.provider}</span>
+                            <span className="hidden sm:inline">POS: {pos.label}</span>
                         </p>
                     </div>
                 </div>
@@ -141,7 +141,8 @@ export default function OrderShow({ order }: { order: Order }) {
                             )}
                         </div>
 
-                        {!cancelled && order.status !== 'pending_payment' && (
+                        {/* The pass is only useful until the order has been handed over. */}
+                        {!order.is_final && order.status !== 'pending_payment' && (
                             <div className="flex items-center gap-4 rounded-xl border border-ink-700 bg-ink-900 p-4 md:flex-col md:justify-center md:text-center">
                                 <div>
                                     <Badge tone="flame" className="mb-2">
@@ -180,7 +181,7 @@ export default function OrderShow({ order }: { order: Order }) {
                         <CardHeader icon={<FileText className="size-4" />} title="Itemized Order Manifest" action={<Badge>{items.length} line item{items.length === 1 ? '' : 's'}</Badge>} />
                         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-700 px-4 py-2.5 text-xs">
                             <p className="flex items-center gap-1.5 font-semibold text-ink-100">
-                                <User className="size-3.5 text-flame-400" aria-hidden /> {order.customer_name} <span className="font-normal text-ink-400">(+{order.customer_phone})</span>
+                                <User className="size-3.5 text-flame-400" aria-hidden /> {order.customer_name} {order.customer_phone && <span className="font-normal text-ink-400">(+{order.customer_phone})</span>}
                             </p>
                             <p className="font-bold tracking-wider text-flame-400 uppercase">{delivery ? 'Delivery' : `Station: ${shop.counter}`}</p>
                         </div>
