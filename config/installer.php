@@ -48,4 +48,13 @@ return [
     'cron_expected' => (bool) env('SCHEDULER_CRON_EXPECTED', false),
     'queue_from_scheduler' => (bool) env('QUEUE_WORK_FROM_SCHEDULER', false),
 
+    // One-click updates (Admin → System Update): the folder whose files a
+    // release replaces, where downloads and backups of replaced files are
+    // kept, and how many backups to keep.
+    'updates' => [
+        'root' => base_path(),
+        'work_dir' => storage_path('app/updates'),
+        'keep_backups' => 3,
+    ],
+
 ];

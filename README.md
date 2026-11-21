@@ -305,7 +305,7 @@ Setiap salinan yang dijual diaktifkan dengan **purchase code** yang terikat pada
    LICENSE_SERVER_ENABLED=true
    LICENSE_SIGNING_KEY=…
    ```
-3. Di pelayan lesen: tambah dua baris itu ke `.env`, kemudian `php artisan migrate` (jadual `licenses` dan `license_activations`).
+3. Di pelayan lesen: tambah dua baris itu ke `.env`, kemudian `php artisan migrate` (jadual `licenses`, `license_activations` dan `releases`).
 4. **Simpan `LICENSE_SIGNING_KEY` di tempat selamat** (password manager). Jika hilang, tiada laman baru boleh diaktifkan dan laman sedia ada berhenti dalam 30 hari. Jangan sekali-kali commit.
 
 `scripts/package.sh` enggan membina ZIP selagi kunci awam belum diset (`ALLOW_UNLICENSED=1` untuk ZIP tanpa lesen).
@@ -325,6 +325,52 @@ Admin → Licenses (sold) → **New purchase code** (atau `php artisan license:c
 | Client pindah domain | Admin → License → **Move to another domain** di laman lama, kemudian aktifkan di laman baru. Jika laman lama sudah tiada, lepaskan domain itu dari Admin → Licenses (sold) |
 
 Had: kod PHP boleh dibaca dan diubah oleh orang yang betul-betul berniat. Sistem ini menghalang salinan biasa ke domain lain dan memberi kau kawalan (batal, lihat siapa pakai), bukan perlindungan mutlak — sama seperti skrip CodeCanyon.
+
+## Kemas kini satu klik (update untuk client)
+
+Client yang ada lesen aktif nampak versi baru di **Admin → System Update** (dan lencana pada menu) dan pasang dengan satu klik. Tiada FTP, tiada extract ZIP.
+
+### Susun atur yang disyorkan
+
+| Laman | Apa | Siapa log masuk |
+|---|---|---|
+| `lesen.domainkau.com` (atau laman utama kau) | Pelayan lesen: Licenses (sold) + **Releases** | Kau sahaja |
+| `demo.domainkau.com` | Salinan client biasa (pasang dari ZIP) dengan purchase code demo kau sendiri | Bakal pembeli (akaun demo) |
+| Domain setiap client | Salinan client | Client |
+
+Jangan hidupkan pelayan lesen pada laman demo: kata laluan admin demo dikongsi umum, dan sesiapa yang log masuk akan nampak senarai pembeli dan purchase code mereka.
+
+### Terbitkan versi baru
+
+1. Naikkan `VERSION` (contoh `1.0.0` → `1.1.0`) dan commit.
+2. `scripts/package.sh` → `dist/order-system-1.1.0.zip`. ZIP kini membawa senarai setiap fail dengan checksum (`bootstrap/release-manifest.json`).
+3. Di pelayan lesen: Admin → **Releases** → *Upload update* (tulis "What's new", pilih **semua client** atau **client tertentu sahaja**, terbit atau simpan sebagai draf). ZIP ~35 MB: jika had upload PHP lebih kecil, upload ZIP ke server dan jalankan `php artisan release:publish dist/order-system-1.1.0.zip --notes="…"`.
+4. Uji dulu: terbitkan untuk purchase code demo sahaja → update laman demo → kemudian tukar ke *Every customer*.
+
+Pelayan lesen menolak ZIP yang akan merosakkan semua laman: tiada senarai fail, dibina dengan `ALLOW_UNLICENSED`, kunci awam berlainan, atau mengandungi kod pelayan lesen.
+
+### Siapa dapat update
+
+- **Tempoh update** setiap purchase code: Admin → Licenses (sold) → Edit → *Updates until*. Kosong = update seumur hidup. Versi yang diterbitkan selepas tarikh itu tidak ditawarkan; client nampak "update period has ended — contact the seller" (peluang jual pembaharuan).
+- Release untuk **client tertentu** (contoh ciri khas untuk Company A) hanya ditawarkan kepada purchase code yang dipilih. Ingat: versi umum yang seterusnya mesti juga mengandungi perubahan Company A, jika tidak ia hilang bila mereka update.
+- Kod yang dibatalkan tidak dapat update.
+
+### Apa berlaku bila client tekan Update
+
+1. Laman tanya pelayan lesen (purchase code + domain mesti aktif), muat turun ZIP melalui pautan bertandatangan (sah 3 jam), dan semak checksum yang **ditandatangani dengan kunci peribadi kau** — ZIP yang diubah di tengah jalan ditolak.
+2. Bandingkan fail di laman dengan senarai fail versi semasa:
+   - Fail yang **client ubah sendiri** dan yang update akan ganti/buang disenaraikan dulu; client pilih *Replace them and update* atau *Not now*.
+   - Fail yang client ubah tetapi tidak disentuh oleh versi baru (contoh `.htaccess` sendiri) dibiarkan.
+   - Fail yang versi baru tidak ada lagi dibuang (supaya migration lama tidak tertinggal).
+3. Backup setiap fail yang akan diganti/dibuang → `storage/app/updates/backups/` (3 terbaru disimpan).
+4. Pelanggan nampak "Updating…" (maksimum 15 minit; cron berhenti sementara). Fail ditulis satu-satu (fail sementara + rename). Jika apa-apa gagal di tengah jalan, semua fail dipulihkan dari backup dan laman kembali seperti asal.
+5. Permintaan baharu (kod baru) jalankan migration, kosongkan cache, catat versi baru.
+
+Tidak disentuh: `.env`, `storage/` (gambar, log, lesen), `public/storage`. Laman yang dipasang dengan git (ada folder `.git`) tidak boleh update satu klik — guna `git pull`.
+
+Perlu di hosting client: PHP extension **zip**, PHP boleh menulis ke folder app (biasa di cPanel), dan sambungan HTTPS keluar ke pelayan lesen. Semakan automatik setiap malam (`updates:check`, melalui cron).
+
+Versi pertama yang mempunyai ciri ini tidak boleh dikemas kini kepada dirinya sendiri: client yang memasang ZIP lama (tanpa System Update) perlu upload ZIP versi ini sekali secara manual (langkah 8 dalam panduan). Selepas itu semua update satu klik.
 
 ## Production
 

@@ -21,3 +21,5 @@ Route::get('/done', [InstallController::class, 'done'])->name('done');
 
 Route::get('/update', [UpdateController::class, 'show'])->name('update');
 Route::post('/update', [UpdateController::class, 'run'])->middleware('throttle:6,1')->name('update.run');
+// The second half of a one-click update (Admin → System Update), on the new code.
+Route::get('/update/finish/{token}', [UpdateController::class, 'finish'])->middleware('throttle:10,1')->name('update.finish');

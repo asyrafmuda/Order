@@ -51,7 +51,7 @@ git ls-files -z --cached --others --exclude-standard \
     | tar --null -T - -cf - | tar -xf - -C "$BUILD"
 
 # The license server stays with you: customers get only the license check.
-rm -rf "${BUILD:?}"/app/LicenseServer "${BUILD:?}"/database/migrations/license-server "${BUILD:?}"/resources/js/pages/Admin/Licenses
+rm -rf "${BUILD:?}"/app/LicenseServer "${BUILD:?}"/database/migrations/license-server "${BUILD:?}"/resources/js/pages/Admin/Licenses "${BUILD:?}"/resources/js/pages/Admin/Releases
 
 # Development-only files the server does not need.
 rm -rf "${BUILD:?}"/{tests,.github,scripts,packaging,dist} \
@@ -87,6 +87,9 @@ test -f "$BUILD/bootstrap/cache/packages.php" || { echo "packages.php was not ge
 step "Shared hosting extras"
 cp packaging/root.htaccess "$BUILD/.htaccess"
 cp packaging/root-index.php "$BUILD/index.php"
+
+step "Listing every file with its checksum (for one-click updates)"
+php scripts/release-manifest.php "$BUILD" "$VERSION"
 
 step "Zipping"
 (cd "$BUILD" && zip -qr -X "../$(basename "$ZIP")" . -x '*.DS_Store' -x '*/._*')

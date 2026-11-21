@@ -5,12 +5,13 @@ namespace App\LicenseServer\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A purchase code sold to one customer.
  */
-#[Fillable(['code', 'product', 'customer_name', 'customer_email', 'max_activations', 'notes', 'revoked_at', 'revoked_reason'])]
+#[Fillable(['code', 'product', 'customer_name', 'customer_email', 'max_activations', 'updates_until', 'notes', 'revoked_at', 'revoked_reason'])]
 class License extends Model
 {
     /** No 0/O or 1/I, so codes read out over the phone are not mistaken. */
@@ -23,6 +24,7 @@ class License extends Model
     {
         return [
             'max_activations' => 'integer',
+            'updates_until' => 'date',
             'revoked_at' => 'datetime',
         ];
     }
@@ -58,6 +60,12 @@ class License extends Model
     public function activeActivations(): HasMany
     {
         return $this->hasMany(Activation::class)->whereNull('deactivated_at');
+    }
+
+    /** @return BelongsToMany<Release, $this> */
+    public function releases(): BelongsToMany
+    {
+        return $this->belongsToMany(Release::class);
     }
 
     public function isRevoked(): bool

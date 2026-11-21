@@ -238,3 +238,42 @@ function storeLicense(array $overrides = []): void
     file_put_contents(config('licensing.file'), json_encode(signedLicense($overrides)));
     app()->forgetInstance(License::class);
 }
+
+/**
+ * A release ZIP as scripts/package.sh builds it: the given files plus the
+ * parts every release has, VERSION, and the file list with checksums.
+ *
+ * Options: public_key (string, '' for an unlicensed build), manifest (false
+ * to leave the file list out).
+ *
+ * @param  array<string, string>  $files  path => contents
+ * @param  array<string, mixed>  $options
+ */
+function releaseZip(string $version, array $files = [], array $options = []): string
+{
+    $files = [
+        'vendor/autoload.php' => '<?php // autoloader',
+        'public/build/manifest.json' => '{}',
+        'config/licensing.php' => "<?php\n\nreturn [\n    'public_key' => ".var_export($options['public_key'] ?? licenseKeys()['public'], true).",\n];\n",
+        ...$files,
+        'VERSION' => $version."\n",
+    ];
+
+    if ($options['manifest'] ?? true) {
+        $hashes = array_map(fn (string $contents) => hash('sha256', $contents), $files);
+        ksort($hashes, SORT_STRING);
+        $files['bootstrap/release-manifest.json'] = (string) json_encode(['version' => $version, 'files' => $hashes], JSON_UNESCAPED_SLASHES);
+    }
+
+    $path = sys_get_temp_dir().'/release-'.bin2hex(random_bytes(6)).'.zip';
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE);
+
+    foreach ($files as $name => $contents) {
+        $zip->addFromString($name, $contents);
+    }
+
+    $zip->close();
+
+    return $path;
+}

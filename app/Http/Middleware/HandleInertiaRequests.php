@@ -11,6 +11,7 @@ use App\Support\Licensing\License;
 use App\Support\OutletContext;
 use App\Support\Settings;
 use App\Support\ShopHours;
+use App\Support\Updates\UpdateServer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
@@ -69,6 +70,8 @@ class HandleInertiaRequests extends Middleware
             'licensing' => $user->isAdmin() ? [
                 'client' => app(License::class)->configured(),
                 'server' => app(License::class)->isLicenseServer(),
+                // A newer version the last daily check found (no request is made here).
+                'update' => app(License::class)->configured() ? app(UpdateServer::class)->last()['update']?->version : null,
             ] : null,
             'home_url' => route($user->role->homeRoute()),
         ] : null;

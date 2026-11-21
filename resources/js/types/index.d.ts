@@ -33,7 +33,7 @@ export interface AuthUser {
     /** Super admin: manages every outlet and the shared menu, staff and settings. */
     is_admin: boolean;
     /** Super admins only: client = this copy checks its license; server = this is the license server. */
-    licensing: { client: boolean; server: boolean } | null;
+    licensing: { client: boolean; server: boolean; update: string | null } | null;
     home_url: string;
 }
 

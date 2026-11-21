@@ -28,6 +28,8 @@ abstract class TestCase extends BaseTestCase
         ]));
 
         $app['config']->set('installer.lock', self::$installedLock);
+        // Downloads and backups of one-click updates never land in the real storage folder.
+        $app['config']->set('installer.updates.work_dir', sys_get_temp_dir().'/order-updates-'.bin2hex(random_bytes(5)));
 
         return $app;
     }

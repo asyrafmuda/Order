@@ -5,11 +5,14 @@ namespace App\LicenseServer\Http;
 use App\Http\Controllers\Controller;
 use App\LicenseServer\Models\Activation;
 use App\LicenseServer\Models\License;
+use App\LicenseServer\Models\Release;
 use App\LicenseServer\Signer;
 use App\Support\Licensing\License as ClientLicense;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * What customers' sites call: activate a purchase code for a domain, get a
@@ -86,6 +89,66 @@ class ApiController extends Controller
         return response()->json($this->signer->active($license, $activation));
     }
 
+    /**
+     * The newest release this site may install, with a signed checksum and a
+     * download link that works for a few hours.
+     */
+    public function updates(Request $request): JsonResponse
+    {
+        [$code, $domain, $product] = $this->input($request);
+        $current = (string) $request->input('version', '0.0.0');
+        $license = License::query()->where('code', $code)->where('product', $product)->first();
+        $activation = $license?->activeActivations()->where('domain', $domain)->first();
+
+        if (! $license || ! $activation) {
+            return $this->refuse("This purchase code is not activated for {$domain}.");
+        }
+
+        if ($license->isRevoked()) {
+            return $this->refuse('This license was cancelled by the seller, so it gets no updates.');
+        }
+
+        $activation->update(['version' => mb_substr($current, 0, 20), 'ip' => $request->ip(), 'last_checked_at' => now()]);
+
+        $newer = Release::forLicense($license)->filter(fn (Release $release) => version_compare($release->version, $current, '>'));
+        $allowed = $newer->first(fn (Release $release) => $release->isCoveredBy($license));
+        $latest = $newer->first();
+
+        return response()->json([
+            'update' => $allowed ? [
+                'version' => $allowed->version,
+                'notes' => $allowed->notes,
+                'size' => $allowed->size,
+                'published_at' => $allowed->published_at?->toIso8601String(),
+                'download_url' => URL::temporarySignedRoute('license.download', now()->addHours(3), ['release' => $allowed->id, 'activation' => $activation->id]),
+                'manifest' => $this->signer->release($allowed),
+            ] : null,
+            // A newer release the update period does not cover.
+            'locked' => $latest && $latest !== $allowed ? [
+                'version' => $latest->version,
+                'updates_until' => $license->updates_until?->toDateString(),
+            ] : null,
+        ]);
+    }
+
+    /**
+     * The ZIP itself, through the signed link from updates().
+     */
+    public function download(Release $release, Activation $activation): BinaryFileResponse|JsonResponse
+    {
+        $license = $activation->license;
+
+        if ($activation->deactivated_at !== null || ! $license || $license->isRevoked() || ! $release->isFor($license) || ! $release->isCoveredBy($license)) {
+            return $this->refuse('This update is not available for this site.', 403);
+        }
+
+        if (! is_file($release->absolutePath())) {
+            return $this->refuse('The update file is missing on the license server. Please contact the seller.', 404);
+        }
+
+        return response()->download($release->absolutePath(), $release->fileName(), ['Content-Type' => 'application/zip']);
+    }
+
     public function deactivate(Request $request): JsonResponse
     {
         [$code, $domain, $product] = $this->input($request);
@@ -111,8 +174,8 @@ class ApiController extends Controller
         return [ClientLicense::normalizeCode($validated['code']), ClientLicense::normalize($validated['domain']), $validated['product']];
     }
 
-    private function refuse(string $message): JsonResponse
+    private function refuse(string $message, int $status = 422): JsonResponse
     {
-        return response()->json(['message' => $message], 422);
+        return response()->json(['message' => $message], $status);
     }
 }

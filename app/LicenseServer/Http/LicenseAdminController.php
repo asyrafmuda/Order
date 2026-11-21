@@ -34,6 +34,7 @@ class LicenseAdminController extends Controller
                 'customer_name' => $license->customer_name,
                 'customer_email' => $license->customer_email,
                 'max_activations' => $license->max_activations,
+                'updates_until' => $license->updates_until?->toDateString(),
                 'notes' => $license->notes,
                 'revoked' => $license->isRevoked(),
                 'revoked_reason' => $license->revoked_reason,
@@ -110,6 +111,7 @@ class LicenseAdminController extends Controller
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['nullable', 'email', 'max:255'],
             'max_activations' => ['required', 'integer', 'min:1', 'max:100'],
+            'updates_until' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
     }
