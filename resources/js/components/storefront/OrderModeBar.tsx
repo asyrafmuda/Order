@@ -9,9 +9,9 @@ interface OrderModeBarProps {
     zones: (CartZone & { areas: string | null })[];
 }
 
-/** Pickup / delivery switch with the shop, POS and kitchen status chips. */
+/** Pickup / delivery switch with the shop and kitchen status chips. */
 export function OrderModeBar({ zones }: OrderModeBarProps) {
-    const { shop, cart, kitchen, pos, outlet } = usePage().props;
+    const { shop, cart, kitchen, outlet } = usePage().props;
     const pickOutlet = outlet.can_switch && outlet.options.length > 1;
     const type = cart?.type ?? 'pickup';
     const zone = cart?.zone;
@@ -129,11 +129,7 @@ export function OrderModeBar({ zones }: OrderModeBarProps) {
                     </span>
                 )}
 
-                <span className="ml-auto flex h-9 shrink-0 items-center gap-2 rounded-lg border border-go-500/30 bg-go-900 px-3 text-[11px] font-extrabold tracking-wide text-go-400 uppercase">
-                    <span className={cn('size-2 rounded-full', pos.connected ? 'animate-pulse-soft bg-go-400' : 'bg-flame-400')} />
-                    POS {pos.simulated ? 'demo mode' : pos.connected ? 'connected' : 'offline'}
-                </span>
-                <span className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-ink-300">
+                <span className="ml-auto flex h-9 shrink-0 items-center gap-1.5 text-xs text-ink-300">
                     <ChefHat className="size-4 text-flame-400" aria-hidden />
                     Kitchen: <strong className="font-semibold text-ink-100">{kitchen.label}</strong> ({kitchen.active_orders} in queue)
                 </span>

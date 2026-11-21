@@ -15,7 +15,7 @@ import { minutesUntil, money, time } from '@/lib/format';
 import type { KitchenItemStatus, Order, OrderItem } from '@/types';
 
 export default function OrderShow({ order }: { order: Order }) {
-    const { shop: business, pos, outlet: outlets } = usePage().props;
+    const { shop: business, outlet: outlets } = usePage().props;
     // Address, counter and contact come from the outlet the order was placed at.
     const shop = { ...business, ...(order.outlet ?? {}), name: business.name };
     const now = useNow(15000);
@@ -53,14 +53,6 @@ export default function OrderShow({ order }: { order: Order }) {
                             {headline}
                         </p>
                         {order.payment?.transaction_id && <p className="text-ink-400">Transaction ID: #{order.payment.transaction_id}</p>}
-                        <p className="ml-auto flex items-center gap-1.5 font-semibold text-ink-300">
-                            {order.pos.status === 'synced' ? (
-                                <span className="rounded-md bg-go-900 px-2 py-1 font-bold text-go-400 ring-1 ring-go-500/30 ring-inset">POS synced (#{order.pos.receipt_number})</span>
-                            ) : (
-                                !cancelled && order.status !== 'pending_payment' && <span className="rounded-md bg-flame-900 px-2 py-1 font-bold text-flame-400">POS sync {order.pos.status}</span>
-                            )}
-                            <span className="hidden sm:inline">POS: {pos.label}</span>
-                        </p>
                     </div>
                 </div>
             }
