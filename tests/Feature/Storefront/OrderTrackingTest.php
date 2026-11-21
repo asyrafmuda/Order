@@ -104,7 +104,8 @@ it('shows the public kitchen board without customer details', function () {
             ->has('board', 1)
             ->where('board.0.order_number', 'A001')
             ->missing('board.0.customer_name')
-            ->has('stations'));
+            ->missing('stations')
+            ->missing('sync'));
 });
 
 it('cancels unpaid online orders that timed out', function () {

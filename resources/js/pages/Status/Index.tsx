@@ -1,12 +1,12 @@
 import { Head, usePage } from '@inertiajs/react';
-import { BellRing, ChefHat, Flame, Plug, Timer } from 'lucide-react';
+import { BellRing, ChefHat, Flame, Timer } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardHeader, EmptyState } from '@/components/ui/Card';
 import { useLiveReload } from '@/hooks/useLiveReload';
 import { useNow } from '@/hooks/useNow';
 import StorefrontLayout from '@/layouts/StorefrontLayout';
 import { cn } from '@/lib/cn';
-import { minutesUntil, time } from '@/lib/format';
+import { minutesUntil } from '@/lib/format';
 import type { OrderStatus, OrderType } from '@/types';
 
 interface BoardOrder {
@@ -19,37 +19,34 @@ interface BoardOrder {
 
 interface StatusProps {
     board: BoardOrder[];
-    stations: { id: number; name: string; queued: number; cooking: number; done: number }[];
-    sync: { synced_today: number; failed_today: number; completed_today: number; last_synced_at: string | null };
 }
 
 const loadTone = { quiet: 'text-go-400', normal: 'text-go-400', busy: 'text-flame-400', slammed: 'text-danger-400' } as const;
 
-export default function StatusIndex({ board, stations, sync }: StatusProps) {
-    const { kitchen, pos } = usePage().props;
+export default function StatusIndex({ board }: StatusProps) {
+    const { kitchen } = usePage().props;
     const now = useNow(15000);
 
-    useLiveReload([{ name: 'shop', perOutlet: true }], { only: ['board', 'stations', 'sync', 'kitchen'] });
+    useLiveReload([{ name: 'shop', perOutlet: true }], { only: ['board', 'kitchen'] });
 
     const preparing = board.filter((order) => order.status !== 'ready');
     const ready = board.filter((order) => order.status === 'ready');
 
     return (
         <StorefrontLayout>
-            <Head title="Kitchen & POS Status" />
+            <Head title="Kitchen Status" />
 
             <div className="mb-6">
                 <p className="flex items-center gap-1.5 text-[11px] font-extrabold tracking-[0.15em] text-flame-400 uppercase">
                     <span className="size-1.5 animate-pulse-soft rounded-full bg-brand-500" aria-hidden /> Live board
                 </p>
-                <h1 className="font-display text-5xl leading-none text-strong uppercase">Kitchen &amp; POS Status</h1>
+                <h1 className="font-display text-5xl leading-none text-strong uppercase">Kitchen Status</h1>
             </div>
 
-            <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mb-5 grid gap-4 sm:grid-cols-3">
                 <Stat icon={<ChefHat className="size-5" />} label="Kitchen load" value={kitchen.label} valueClassName={loadTone[kitchen.level]} hint={`${kitchen.active_orders} order${kitchen.active_orders === 1 ? '' : 's'} in the queue`} />
                 <Stat icon={<Timer className="size-5" />} label="Current wait" value={`${kitchen.eta_min}–${kitchen.eta_max} min`} hint="For a new pickup order" />
                 <Stat icon={<Flame className="size-5" />} label="Cooking now" value={String(kitchen.cooking_items)} hint="Items cooking right now" />
-                <Stat icon={<Plug className="size-5" />} label={`POS (${pos.label})`} value={pos.simulated ? 'Demo mode' : pos.connected ? 'Connected' : 'Offline'} valueClassName={pos.connected ? 'text-go-400' : 'text-danger-400'} hint={sync.last_synced_at ? `Last ticket synced ${time(sync.last_synced_at)}` : 'No tickets synced yet'} />
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">
@@ -91,29 +88,6 @@ export default function StatusIndex({ board, stations, sync }: StatusProps) {
                 </Card>
             </div>
 
-            <Card className="mt-5">
-                <CardHeader icon={<ChefHat className="size-4" />} title="Kitchen Station Monitor" action={<span className="text-xs text-ink-400">{sync.completed_today} orders served today · {sync.synced_today} synced to POS</span>} />
-                <ul className="grid sm:grid-cols-2 lg:grid-cols-3">
-                    {stations.map((station, index) => {
-                        const busy = station.cooking > 0;
-
-                        return (
-                            <li key={station.id} className="border-t border-ink-800 p-4 first:border-t-0 sm:border-l sm:[&:nth-child(-n+2)]:border-t-0 sm:[&:nth-child(2n+1)]:border-l-0 lg:[&:nth-child(-n+3)]:border-t-0 lg:[&:nth-child(2n+1)]:border-l lg:[&:nth-child(3n+1)]:border-l-0">
-                                <div className="flex items-center justify-between gap-2">
-                                    <p className="flex items-center gap-2 text-sm font-bold text-strong">
-                                        <span className={cn('size-2 rounded-full', busy ? 'animate-pulse-soft bg-brand-500' : station.queued > 0 ? 'bg-flame-400' : 'bg-go-400')} />
-                                        Station {index + 1}: {station.name}
-                                    </p>
-                                    <Badge tone={busy ? 'solid-red' : station.queued > 0 ? 'flame' : 'green'}>{busy ? 'Cooking' : station.queued > 0 ? 'Queued' : 'Clear'}</Badge>
-                                </div>
-                                <p className="mt-2 text-xs text-ink-400">
-                                    {station.cooking} cooking · {station.queued} waiting · {station.done} plated
-                                </p>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </Card>
         </StorefrontLayout>
     );
 }

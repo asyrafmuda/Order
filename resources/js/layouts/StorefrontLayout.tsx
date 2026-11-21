@@ -31,7 +31,7 @@ interface Tab {
 const tabs: Tab[] = [
     { label: 'Menu & Ordering', short: 'Menu', icon: UtensilsCrossed, route: 'menu.index', match: ['menu.*', 'checkout.*', 'legal.*'] },
     { label: 'Order Tracking & Digital Ticket', short: 'My Order', icon: ReceiptText, route: 'orders.track', match: ['orders.*', 'payments.*'] },
-    { label: 'Kitchen & POS Status', short: 'Kitchen', icon: ChefHat, route: 'status.index', match: ['status.*'] },
+    { label: 'Kitchen Status', short: 'Kitchen', icon: ChefHat, route: 'status.index', match: ['status.*'] },
 ];
 
 export default function StorefrontLayout({ children, search, subheader, bottomBar }: StorefrontLayoutProps) {
