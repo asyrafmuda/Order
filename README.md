@@ -326,6 +326,24 @@ Admin → Licenses (sold) → **New purchase code** (atau `php artisan license:c
 
 Had: kod PHP boleh dibaca dan diubah oleh orang yang betul-betul berniat. Sistem ini menghalang salinan biasa ke domain lain dan memberi kau kawalan (batal, lihat siapa pakai), bukan perlindungan mutlak — sama seperti skrip CodeCanyon.
 
+## Landing page jualan (`/web`)
+
+Page jualan dalam Bahasa Melayu di `https://laman-demo-kau/web`: ciri, screenshot sebenar, perbandingan dengan platform berkomisen, cara mula, harga, pautan demo (menu, POS, dapur, admin), akaun demo staf, soalan lazim. Sedia untuk dikongsi di WhatsApp/Facebook (ada imej preview `public/images/landing/og.jpg`).
+
+**Hanya untuk laman demo kau.** Ia mati secara default, jadi kedai client tidak pernah menunjukkannya. Hidupkan dalam `.env` laman demo:
+
+```
+LANDING_PAGE=true
+LANDING_PRODUCT=OrderLa
+LANDING_PRICE="RM 2,500"          # kosongkan untuk "Hubungi kami"
+LANDING_PRICE_NOTE="Bayar sekali · 1 domain · tiada yuran bulanan"
+LANDING_WHATSAPP=60123456789      # butang WhatsApp muncul bila diisi
+LANDING_EMAIL=                    # pilihan
+LANDING_DEMO_URL=                 # kosong = laman ini sendiri
+```
+
+Kemudian `php artisan config:clear` (atau `php artisan optimize` jika config di-cache). Akaun demo staf hanya disenaraikan jika akaun itu wujud di laman tersebut dan kata laluannya masih `password`, jadi page tidak pernah menunjukkan login yang tidak berfungsi. Teks page ada dalam `resources/views/landing.blade.php`; screenshot dalam `public/images/landing/`.
+
 ## Kemas kini satu klik (update untuk client)
 
 Client yang ada lesen aktif nampak versi baru di **Admin → System Update** (dan lencana pada menu) dan pasang dengan satu klik. Tiada FTP, tiada extract ZIP.
