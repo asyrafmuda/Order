@@ -11,6 +11,7 @@
 #
 # Usage: scripts/package.sh            (name defaults to "order-system")
 #        PACKAGE_NAME=kedai scripts/package.sh
+#        ALLOW_UNLICENSED=1 scripts/package.sh   (a ZIP without the license check)
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -27,7 +28,21 @@ ZIP=$DIST/$NAME-$VERSION.zip
 step() { printf '\n\033[1m→ %s\033[0m\n' "$1"; }
 
 step "Version $VERSION"
-rm -rf "$BUILD" "$ZIP"
+
+# A ZIP for customers must carry your public key, or it runs without a license.
+if grep -q "'public_key' => ''," config/licensing.php; then
+    if [ "${ALLOW_UNLICENSED:-}" != "1" ]; then
+        echo "Licensing is not set up: run 'php artisan license:keygen --server=https://your-license-server' first." >&2
+        echo "(Or ALLOW_UNLICENSED=1 $0 for a ZIP without the license check.)" >&2
+        exit 1
+    fi
+    echo "  ! Building WITHOUT the license check (ALLOW_UNLICENSED=1)."
+else
+    echo "  License server: $(grep -o "LICENSE_SERVER_URL', '[^']*'" config/licensing.php | cut -d"'" -f3)"
+fi
+
+# Start from nothing, so no file from an earlier build can end up in this one.
+rm -rf "${BUILD:?}" "${ZIP:?}"
 mkdir -p "$BUILD"
 
 step "Copying the source (everything git tracks or would track, nothing it ignores)"
@@ -35,15 +50,20 @@ git ls-files -z --cached --others --exclude-standard \
     | xargs -0 -I{} sh -c 'test -e "{}" && printf "%s\0" "{}"' \
     | tar --null -T - -cf - | tar -xf - -C "$BUILD"
 
+# The license server stays with you: customers get only the license check.
+rm -rf "${BUILD:?}"/app/LicenseServer "${BUILD:?}"/database/migrations/license-server "${BUILD:?}"/resources/js/pages/Admin/Licenses
+
 # Development-only files the server does not need.
-rm -rf "$BUILD"/{tests,.github,scripts,packaging,dist} \
-       "$BUILD"/{phpunit.xml,pint.json,.editorconfig,.gitattributes,CLAUDE.md,eslint.config.js,.prettierrc,.prettierignore}
+rm -rf "${BUILD:?}"/{tests,.github,scripts,packaging,dist} \
+       "${BUILD:?}"/{phpunit.xml,pint.json,.editorconfig,.gitattributes,CLAUDE.md,eslint.config.js,.prettierrc,.prettierignore}
 
 step "Building JavaScript and CSS"
 npm run build --silent
 rm -f public/hot
-mkdir -p "$BUILD/public"
-cp -R public/build "$BUILD/public/build"
+rm -rf "${BUILD:?}/public/build" "${BUILD:?}/public/hot"
+mkdir -p "$BUILD/public/build"
+cp -R public/build/. "$BUILD/public/build/"
+cmp -s public/build/manifest.json "$BUILD/public/build/manifest.json" || { echo "The built assets were not copied correctly." >&2; exit 1; }
 
 step "PHP packages without the development ones"
 # Copy what is installed (without git metadata), then let Composer remove

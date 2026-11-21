@@ -58,6 +58,7 @@
         <tr><td>Domain</td><td>Domain atau subdomain sendiri, contoh <code>order.kedaianda.com</code>. Pemasangan dalam sub-folder (<code>kedaianda.com/order</code>) <strong>tidak</strong> disokong.</td></tr>
         <tr><td>SSL</td><td>Sangat disyorkan (percuma dalam cPanel → <em>SSL/TLS Status</em> → AutoSSL)</td></tr>
         <tr><td>Fail</td><td><code>order-system-x.y.z.zip</code> (versi ikut nombor)</td></tr>
+        <tr><td>Purchase code</td><td>Kod lesen yang diberi bersama sistem, contoh <code>QGY9-9E4Z-EWTH-DM9Z</code>. Satu kod untuk satu domain.</td></tr>
     </table>
     <div class="box warn"><p><strong>Tiada SSH, Composer atau Node.js diperlukan.</strong> Semua sudah ada dalam ZIP. Jangan jalankan <code>composer install</code> atau <code>npm</code> di server.</p></div>
 
@@ -99,9 +100,10 @@
     <div class="box warn"><p>Jika selepas upload anda nampak halaman <em>“The site is uploaded, but the web server needs one more setting”</em>, server tidak membaca <code>.htaccess</code>. Guna Cara A, atau minta support hosting <em>“enable mod_rewrite and AllowOverride All”</em>.</p></div>
 
     <h2 id="installer">5. Jalankan installer</h2>
-    <p>Buka alamat laman anda (contoh <code>https://order.kedaianda.com</code>). Anda akan dibawa terus ke installer, 4 langkah:</p>
+    <p>Buka alamat laman anda (contoh <code>https://order.kedaianda.com</code>). Anda akan dibawa terus ke installer, 5 langkah:</p>
     <ol class="steps">
         <li><strong>Server</strong> — semakan PHP, extension dan kebenaran folder. Semua mesti ✓ (tanda ! hanya cadangan). Jika ada ✕, ikut arahan di sebelahnya dan tekan <em>Check again</em>.</li>
+        <li><strong>License</strong> — masukkan purchase code anda. Kod akan diikat pada alamat laman ini. <em>Pastikan anda membuka laman melalui alamat sebenar yang akan digunakan</em> (contoh <code>order.kedaianda.com</code>, bukan alamat sementara).</li>
         <li><strong>Database</strong> — host: <code>localhost</code>, port: <code>3306</code>, nama database, user dan kata laluan dari Langkah 3.</li>
         <li><strong>Your shop</strong> — nama kedai, alamat, telefon, WhatsApp, akaun super admin (emel + kata laluan anda), alamat laman dan zon masa. Tanda <em>Add a sample menu</em> jika mahu menu contoh untuk dicuba.</li>
         <li><strong>Done</strong> — salin arahan cron (Langkah 6) dan semak keputusan <em>Security check</em>. Mesti hijau.</li>
@@ -139,6 +141,13 @@
         <p><strong>Bayaran online (FPX, kad, e-wallet) dimatikan</strong> sehingga payment gateway sebenar disambungkan. Pelanggan bayar di kaunter.</p>
         <p><strong>Tiada websocket di shared hosting</strong>, jadi skrin dapur, kaunter dan tiket pelanggan dikemas kini setiap beberapa saat (bukan serta-merta). Ini normal.</p>
     </div>
+
+    <h3>Pindah ke domain lain</h3>
+    <ol class="steps">
+        <li>Di laman lama: Admin → <strong>License</strong> → <em>Move to another domain</em>. Laman lama berhenti serta-merta.</li>
+        <li>Pasang di domain baru, dan masukkan purchase code yang sama di langkah <em>License</em> (atau Admin → License).</li>
+    </ol>
+    <p>Jika laman lama sudah tiada, hubungi penjual untuk melepaskan domain lama.</p>
 
     <h2 id="update">8. Kemas kini ke versi baru</h2>
     <ol class="steps">
@@ -178,6 +187,10 @@ MAIL_FROM_ADDRESS="noreply@kedaianda.com"</pre>
         <tr><td>Gambar produk / logo tidak keluar</td><td>Pastikan alamat laman (<code>APP_URL</code> dalam <code>.env</code>) betul, termasuk <code>https://</code>.</td></tr>
         <tr><td>Pelanggan tak terima WhatsApp, status POS “pending”</td><td>Cron job belum berjalan (Langkah 6). Lihat amaran di Dashboard.</td></tr>
         <tr><td>Laman masih di <code>http://</code> walaupun SSL dipasang</td><td>Ubah <code>APP_URL</code> dalam <code>.env</code> kepada <code>https://…</code>.</td></tr>
+        <tr><td>“This purchase code is not valid”</td><td>Semak kod (huruf O dan nombor 0 tidak digunakan). Jika masih, hubungi penjual.</td></tr>
+        <tr><td>“This purchase code is already in use on …”</td><td>Kod sudah diaktifkan di domain lain. Lepaskan di laman lama (Admin → License → <em>Move to another domain</em>) atau hubungi penjual.</td></tr>
+        <tr><td>“Could not reach the license server”</td><td>Server hosting tidak dapat membuat sambungan HTTPS keluar. Minta support hosting membenarkannya.</td></tr>
+        <tr><td>Laman tunjuk “Temporarily unavailable”</td><td>Ada masalah lesen. Log masuk di <code>/login</code> sebagai super admin — anda akan dibawa ke halaman License yang menerangkan sebabnya.</td></tr>
         <tr><td>Lupa kata laluan super admin</td><td>Guna “Forgot password” (perlu emel, Langkah 9), atau minta super admin lain set semula di <em>Users</em>.</td></tr>
     </table>
 

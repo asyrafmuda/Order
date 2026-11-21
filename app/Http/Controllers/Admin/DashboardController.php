@@ -11,6 +11,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Support\Installer\Installation;
 use App\Support\Installer\SchedulerHeartbeat;
+use App\Support\Licensing\License;
+use App\Support\Licensing\LicenseStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -39,6 +41,7 @@ class DashboardController extends Controller
         $recent = Order::query()->forOutlet($this->outlet())->with('items')->latest()->limit(8)->get();
 
         $heartbeat = app(SchedulerHeartbeat::class);
+        $license = app(License::class)->status($request->getHost());
 
         return Inertia::render('Admin/Dashboard', [
             // Super admins are told when the cron job that sends messages and
@@ -46,6 +49,8 @@ class DashboardController extends Controller
             'cronMissing' => $request->user()->isAdmin() && $heartbeat->isMissing(app(Installation::class))
                 ? ['last_run' => $heartbeat->lastRun()?->toIso8601String(), 'command' => 'php '.base_path('artisan').' schedule:run >> /dev/null 2>&1']
                 : null,
+            // The license server has not answered for a while; the site stops if it goes on.
+            'licenseWarning' => $request->user()->isAdmin() && $license === LicenseStatus::Warning ? $license->help() : null,
             'stats' => [
                 'sales' => (int) $todaySales->sales,
                 'orders' => (int) $todaySales->orders,

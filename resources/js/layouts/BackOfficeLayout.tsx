@@ -7,6 +7,7 @@ import {
     ChefHat,
     ClipboardList,
     Flame,
+    KeyRound,
     LayoutDashboard,
     Layers,
     LogOut,
@@ -39,6 +40,8 @@ interface NavItem {
     roles: Role[];
     /** Only shown while the business has more than one outlet. */
     multiOutlet?: boolean;
+    /** Only shown where this licensing screen applies. */
+    licensing?: 'client' | 'server';
 }
 
 interface NavSection {
@@ -86,6 +89,8 @@ const sections: NavSection[] = [
             { label: 'Users', route: 'admin.users.index', match: 'admin.users.*', icon: Users, roles: ['admin'] },
             { label: 'Integrations', route: 'admin.integrations.index', match: 'admin.integrations.*', icon: Plug, roles: ['admin'] },
             { label: 'Settings', route: 'admin.settings.edit', match: 'admin.settings.*', icon: Settings, roles: ['admin'] },
+            { label: 'License', route: 'admin.license.show', match: 'admin.license.*', icon: KeyRound, roles: ['admin'], licensing: 'client' },
+            { label: 'Licenses (sold)', route: 'admin.licenses.index', match: 'admin.licenses.*', icon: KeyRound, roles: ['admin'], licensing: 'server' },
         ],
     },
 ];
@@ -106,7 +111,7 @@ export default function BackOfficeLayout({ title, description, actions, children
     const role = auth.user?.role ?? 'customer';
 
     const visible = sections
-        .map((section) => ({ ...section, items: section.items.filter((item) => item.roles.includes(role) && (!item.multiOutlet || outlet.multi)) }))
+        .map((section) => ({ ...section, items: section.items.filter((item) => item.roles.includes(role) && (!item.multiOutlet || outlet.multi) && (!item.licensing || Boolean(auth.user?.licensing?.[item.licensing]))) }))
         .filter((section) => section.items.length > 0);
 
     const sidebar = (

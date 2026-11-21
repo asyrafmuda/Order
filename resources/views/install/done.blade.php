@@ -1,4 +1,4 @@
-@extends('install.layout', ['step' => 4])
+@extends('install.layout', ['step' => 5])
 
 @section('title', 'Installed')
 

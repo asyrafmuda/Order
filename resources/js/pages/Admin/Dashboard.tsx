@@ -13,6 +13,8 @@ import type { Order, OrderStatus } from '@/types';
 interface DashboardProps {
     /** Set when the cron job that drives scheduled work has not run recently. */
     cronMissing: { last_run: string | null; command: string } | null;
+    /** Set when the license server has not confirmed the license for a while. */
+    licenseWarning: string | null;
     stats: { sales: number; orders: number; average: number; active: number; awaiting_payment: number; pos_failures: number };
     chart: { date: string; sales: number; orders: number }[];
     topProducts: { name: string; quantity: number; revenue: number }[];
@@ -20,7 +22,7 @@ interface DashboardProps {
     recent: Order[];
 }
 
-export default function Dashboard({ cronMissing, stats, chart, topProducts, statuses, recent }: DashboardProps) {
+export default function Dashboard({ cronMissing, licenseWarning, stats, chart, topProducts, statuses, recent }: DashboardProps) {
     const totalToday = statuses.reduce((sum, status) => sum + status.count, 0);
 
     return (
@@ -34,6 +36,18 @@ export default function Dashboard({ cronMissing, stats, chart, topProducts, stat
             }
         >
             <Head title="Dashboard" />
+
+            {licenseWarning && (
+                <div className="mb-6 rounded-xl border border-flame-500/40 bg-flame-900 p-4" role="alert">
+                    <p className="text-sm font-bold text-flame-300">License not confirmed recently</p>
+                    <p className="mt-1 text-sm text-ink-200">
+                        {licenseWarning}{' '}
+                        <Link href={route('admin.license.show')} className="font-semibold text-flame-400 hover:underline">
+                            Open License
+                        </Link>
+                    </p>
+                </div>
+            )}
 
             {cronMissing && (
                 <div className="mb-6 rounded-xl border border-danger-600/50 bg-danger-900 p-4" role="alert">

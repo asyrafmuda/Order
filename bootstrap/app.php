@@ -2,6 +2,7 @@
 
 use App\Exceptions\OrderException;
 use App\Http\Middleware\EnsureInstalled;
+use App\Http\Middleware\EnsureLicensed;
 use App\Http\Middleware\EnsureOutletAccess;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -45,6 +46,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(prepend: [
             EnsureInstalled::class,
         ], append: [
+            // After the session starts, so it knows whether a super admin is signed in.
+            EnsureLicensed::class,
             HandleInertiaRequests::class,
         ]);
 
