@@ -53,6 +53,19 @@ return [
         'ordering.auto_close_hours' => 6,
 
         // Payment methods offered at online checkout.
+        // Which payment gateway takes online payments: none | billplz | bayarcash
+        // | stripe | fake (a simulated bank page, for demos). Chosen in Admin →
+        // Payment Gateway; credentials are saved there, the secret ones encrypted.
+        'payments.gateway' => env('PAYMENT_GATEWAY', 'fake'),
+        'payments.billplz.api_key' => null,
+        'payments.billplz.collection_id' => null,
+        'payments.billplz.sandbox' => false,
+        'payments.bayarcash.token' => null,
+        'payments.bayarcash.secret_key' => null,
+        'payments.bayarcash.portal_key' => null,
+        'payments.bayarcash.sandbox' => false,
+        'payments.stripe.secret_key' => null,
+
         'payments.fpx_enabled' => true,
         'payments.card_enabled' => true,
         'payments.ewallet_enabled' => true,

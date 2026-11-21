@@ -63,7 +63,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Payment gateways and the POS post to these without a session.
         $middleware->preventRequestForgery(except: [
-            'payments/callback',
+            'payments/*/notify',
             'webhooks/*',
         ]);
 

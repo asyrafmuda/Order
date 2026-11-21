@@ -1,6 +1,9 @@
 <?php
 
+use App\Services\Payments\BayarcashGateway;
+use App\Services\Payments\BillplzGateway;
 use App\Services\Payments\FakeGateway;
+use App\Services\Payments\StripeGateway;
 
 return [
 
@@ -9,15 +12,17 @@ return [
     | Payment Gateway
     |--------------------------------------------------------------------------
     |
-    | The gateway used for online payments (FPX / card / e-wallet). The "fake"
-    | driver simulates a hosted bank page so the whole order flow can be used
-    | without a merchant account. Register real drivers in "drivers" below.
+    | The shop owner picks the gateway in Admin → Payment Gateway. This is only
+    | the starting value before they do (PAYMENT_GATEWAY in .env).
     |
     */
 
     'default' => env('PAYMENT_GATEWAY', 'fake'),
 
     'drivers' => [
+        'billplz' => BillplzGateway::class,
+        'bayarcash' => BayarcashGateway::class,
+        'stripe' => StripeGateway::class,
         'fake' => FakeGateway::class,
     ],
 

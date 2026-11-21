@@ -155,7 +155,9 @@ describe('integrations', function () {
                 ->where('posStatus.configured', true)
                 ->where('posStatus.products_linked', 0)
                 ->where('posStatus.products_unlinked', 1)
-                ->where('payment.gateway', 'fake')
+                ->where('payment.gateway', 'Demo (simulated bank page)')
+                ->where('payment.ready', true)
+                ->where('payment.live', false)
                 ->where('messaging.channel', 'log')
                 ->has('posLogs', 1)
                 ->has('notificationLogs', 1));

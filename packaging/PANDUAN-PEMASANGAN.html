@@ -138,8 +138,21 @@
         <li>Buka <code>/kitchen</code> pada tablet dapur dan <code>/pos</code> pada telefon/tablet kaunter.</li>
     </ol>
     <div class="box warn">
-        <p><strong>Bayaran online (FPX, kad, e-wallet) dimatikan</strong> sehingga payment gateway sebenar disambungkan. Pelanggan bayar di kaunter.</p>
+        <p><strong>Bayaran online (FPX, kad, e-wallet) dimatikan</strong> sehingga payment gateway disambungkan (lihat bawah). Sebelum itu pelanggan bayar di kaunter.</p>
         <p><strong>Tiada websocket di shared hosting</strong>, jadi skrin dapur, kaunter dan tiket pelanggan dikemas kini setiap beberapa saat (bukan serta-merta). Ini normal.</p>
+    </div>
+
+    <h3 id="gateway">Sambung payment gateway (Billplz, Bayarcash atau Stripe)</h3>
+    <p>Pilih <strong>satu</strong> di Admin → <strong>Payment Gateway</strong>, masukkan kunci, dan tekan <em>Save</em>. Sistem terus uji sambungan dan beritahu sama ada berjaya.</p>
+    <ul>
+        <li><strong>Billplz</strong>: di Billplz, <em>Settings → Keys &amp; Integration</em> → salin <em>API Secret Key</em>. Kemudian <em>Billing → Collections</em> → salin ID collection.</li>
+        <li><strong>Bayarcash</strong>: di console Bayarcash, <em>API Keys</em> → salin <em>Personal Access Token</em> dan <em>API Secret Key</em>; <em>Portals</em> → salin <em>portal key</em>. Di checkout, FPX buka FPX, e-wallet buka DuitNow QR, kad buka kad kredit — hidupkan saluran yang sama di portal.</li>
+        <li><strong>Stripe</strong>: <em>Developers → API keys</em> → salin <em>Secret key</em> (<code>sk_live_…</code>, bukan <code>pk_…</code>). Hidupkan kaedah bayaran di <em>Settings → Payment methods</em>. Disyorkan: <em>Developers → Webhooks</em> → tambah URL yang ditunjuk di halaman Payment Gateway untuk event <code>checkout.session.completed</code>.</li>
+    </ul>
+    <p>Kemudian di <strong>Settings → Payment methods</strong>, hidupkan FPX / kad / e-wallet yang mahu ditawarkan.</p>
+    <div class="box">
+        <p><strong>Uji dulu</strong> dengan kunci sandbox (Billplz/Bayarcash: hidupkan suis <em>Sandbox</em>; Stripe: guna <code>sk_test_…</code>), buat satu order, dan pastikan order bertukar ke <em>Confirmed</em>. Kemudian tukar ke kunci sebenar.</p>
+        <p><strong>Refund:</strong> order Stripe yang dibatalkan dipulangkan automatik. Untuk Billplz dan Bayarcash, pulangkan wang secara manual dari dashboard gateway.</p>
     </div>
 
     <h3>Pindah ke domain lain</h3>

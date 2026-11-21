@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
 use App\Models\User;
+use App\Services\Payments\GatewayManager;
 
 /**
  * Which payment methods an online customer may use for a given order, and
@@ -45,9 +46,7 @@ class PaymentOptions
      */
     public function onlineReady(): bool
     {
-        return config('payment.default') !== 'fake'
-            || ! app()->isProduction()
-            || config('payment.fake_in_production');
+        return app(GatewayManager::class)->ready();
     }
 
     /**
