@@ -71,6 +71,12 @@ class SettingRequest extends FormRequest
             'pos.quick_notes' => ['present', 'array', 'max:12'],
             'pos.quick_notes.*' => ['nullable', 'string', 'max:30'],
 
+            'receipt.paper' => ['required', Rule::in(['58', '80'])],
+            'receipt.header' => ['nullable', 'string', 'max:80'],
+            'receipt.footer' => ['nullable', 'string', 'max:160'],
+            'receipt.auto_print' => ['required', 'boolean'],
+            'receipt.kitchen_slip' => ['required', 'boolean'],
+
             'tax.rate' => ['required', 'numeric', 'min:0', 'max:100'],
             'tax.inclusive' => ['required', 'boolean'],
 

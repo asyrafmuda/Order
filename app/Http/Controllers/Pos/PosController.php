@@ -50,6 +50,7 @@ class PosController extends Controller
             'categories' => CategoryResource::collection($categories)->resolve($request),
             'combo' => $prices->currentCombo()?->only(['id', 'name', 'description', 'price', 'choices']),
             'quickNotes' => array_values(array_filter((array) $settings->get('pos.quick_notes', []))),
+            'autoPrint' => (bool) $settings->get('receipt.auto_print', false),
             'tables' => DiningTable::query()->forOutlet($this->outlet())->active()->ordered()->get(['id', 'name', 'seats']),
             'tax' => [
                 'rate' => (float) $settings->get('tax.rate', 0),
@@ -105,6 +106,7 @@ class PosController extends Controller
             source: OrderSource::Pos,
             placedBy: $request->user(),
             paidAtCounter: $paid,
+            cashTendered: $paid && $method === PaymentMethod::Cash ? $tendered : null,
             table: $table,
         ));
 

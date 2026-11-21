@@ -54,7 +54,7 @@ class PlaceOrder
         if ($data->source === OrderSource::Pos) {
             $order = $this->transition->handle($order, OrderStatus::Confirmed, $data->placedBy, 'Taken at the counter');
 
-            return $data->paidAtCounter ? $this->collectPayment->handle($order, $data->placedBy) : $order;
+            return $data->paidAtCounter ? $this->collectPayment->handle($order, $data->placedBy, $data->cashTendered) : $order;
         }
 
         // Online: cash orders go straight to the kitchen; the rest wait for payment.

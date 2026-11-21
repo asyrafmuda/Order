@@ -81,6 +81,16 @@ return [
         // One-tap kitchen instructions on the counter POS.
         'pos.quick_notes' => ['Pedas', 'Kurang pedas', 'Potong dua', 'Sos asing', 'Bungkus asing', 'Tak nak ais'],
 
+        // Printed receipts (thermal printers). Paper: 58 or 80 (mm).
+        'receipt.paper' => '80',
+        // An extra line under the address, e.g. the SSM or SST registration number.
+        'receipt.header' => null,
+        'receipt.footer' => 'Terima kasih! Sila datang lagi.',
+        // POS: print as soon as an order is placed.
+        'receipt.auto_print' => false,
+        // Also print a slip for the kitchen (items and notes, no prices).
+        'receipt.kitchen_slip' => false,
+
         'tax.rate' => 6,
         'tax.inclusive' => true,
 

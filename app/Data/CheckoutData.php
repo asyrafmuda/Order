@@ -30,6 +30,8 @@ final readonly class CheckoutData
         public ?User $placedBy = null,
         /** Counter sales only: the customer already paid at the till. */
         public bool $paidAtCounter = false,
+        /** Counter sales paid in cash: what the customer handed over, in sen. */
+        public ?int $cashTendered = null,
         /** Dine-in: the table the food goes to. */
         public ?DiningTable $table = null,
         /** The customer scanned the shop QR code and is ordering at the counter. */

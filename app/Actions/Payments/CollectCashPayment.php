@@ -17,9 +17,11 @@ use Illuminate\Support\Str;
 class CollectCashPayment
 {
     /**
+     * @param  int|null  $tendered  cash handed over, in sen
+     *
      * @throws OrderException
      */
-    public function handle(Order $order, User $cashier): Order
+    public function handle(Order $order, User $cashier, ?int $tendered = null): Order
     {
         if ($order->isPaid()) {
             return $order;
@@ -37,7 +39,8 @@ class CollectCashPayment
             'method' => $order->payment_method,
             'status' => PaymentStatus::Paid,
             'amount' => $order->total,
-            'payload' => ['collected_by' => $cashier->id],
+            // The cash handed over is kept so a reprinted receipt shows the same change.
+            'payload' => array_filter(['collected_by' => $cashier->id, 'tendered' => $order->payment_method === PaymentMethod::Cash ? $tendered : null], fn ($value) => $value !== null),
             'paid_at' => now(),
         ]);
 

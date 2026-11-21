@@ -156,6 +156,15 @@ Untuk order walk-in yang diambil oleh staf. Direka untuk laju:
 
 Tiket disimpan dalam tab browser, jadi reload tak hilangkan order yang separuh siap. Harga dikira semula di server semasa hantar.
 
+### Cetak resit (printer thermal)
+
+- Butang **Print receipt** ada di POS (selepas order dihantar), di panel serah order di `/counter`, dan di halaman order dalam admin.
+- Resit dicetak melalui dialog cetak browser, jadi ia berfungsi dengan mana-mana printer yang peranti itu boleh guna: thermal USB / rangkaian di PC, atau Bluetooth di tablet Android (melalui aplikasi print service printer itu). Tiada driver khas dalam sistem.
+- Admin → Settings → **Receipt printing**: lebar kertas (58 atau 80 mm), satu baris tambahan di bawah alamat (contoh no. SSM / SST), mesej di bawah resit, *Print when an order is placed at the POS* (cetak automatik), dan *Also print a kitchen slip* (slip kedua untuk dapur: item dan nota dalam huruf besar, tanpa harga). Butang **Print a test receipt** untuk cuba printer.
+- Kali pertama: dalam dialog cetak pilih printer resit, saiz kertas 58/80 mm, dan margin **None**. Untuk cetak tanpa dialog di PC kaunter, jalankan Chrome dengan `--kiosk-printing`.
+- Resit menunjukkan wang tunai diterima dan baki; jumlah itu disimpan bersama bayaran supaya cetakan semula sama.
+- Slip dapur automatik hanya untuk order yang dibuat di POS. Order dari QR / online dicetak dari `/counter` jika diperlukan (skrin dapur tetap menunjukkannya).
+
 ## Dapur
 
 - **Bunyi amaran** bila order baru masuk (butang *Sound* di KDS). Browser hanya benarkan bunyi selepas skrin disentuh sekali.

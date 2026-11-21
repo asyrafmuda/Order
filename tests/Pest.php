@@ -112,6 +112,7 @@ function settingsPayload(array $overrides = []): array
         ],
         'pos' => ['quick_notes' => ['Pedas', ' Potong dua ', '']],
         'tax' => ['rate' => 8, 'inclusive' => false],
+        'receipt' => ['paper' => '80', 'header' => null, 'footer' => 'Terima kasih!', 'auto_print' => false, 'kitchen_slip' => false],
         'notifications' => ['enabled' => false],
     ], $overrides);
 }

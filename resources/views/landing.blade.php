@@ -4,7 +4,7 @@
     $primaryContact = $whatsapp ?? ($email ? 'mailto:'.$email : null);
     $features = [
         ['📱', 'QR order — meja & kaunter', 'Tampal QR di meja atau di kaunter. Pelanggan pilih menu, ubah suai (tak nak sos, extra cheese), bayar dan terus dapat nombor giliran.'],
-        ['⚡', 'POS kaunter yang pantas', 'Order lisan "burger ayam 3, daging 2, satu tak nak sos"? Cashier tekan, tambah nota, hantar ke dapur. Dibina untuk waktu puncak.'],
+        ['⚡', 'POS kaunter yang pantas', 'Order lisan "burger ayam 3, daging 2, satu tak nak sos"? Cashier tekan, tambah nota, hantar ke dapur, dan cetak resit di printer thermal 58/80 mm.'],
         ['👨‍🍳', 'Skrin dapur (KDS)', 'Tiket ikut stesen — grill, fryer, minuman. Masa menunggu jelas, bunyi bila order baru masuk, dan tanda habis stok terus dari dapur.'],
         ['💳', 'Bayaran online', 'FPX, kad dan e-wallet melalui Billplz, Bayarcash atau Stripe. Duit masuk terus ke akaun merchant anda. Tunai di kaunter pun boleh.'],
         ['🛵', 'Pickup, delivery & dine-in', 'Zon penghantaran dengan caj sendiri, skrin rider, dan tiket pelanggan yang dikemas kini sendiri sampai order siap.'],

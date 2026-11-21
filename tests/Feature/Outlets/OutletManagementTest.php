@@ -56,6 +56,7 @@ function businessSettings(array $overrides = []): array
         ],
         'pos' => ['quick_notes' => []],
         'tax' => ['rate' => 6, 'inclusive' => true],
+        'receipt' => ['paper' => '80', 'header' => null, 'footer' => 'Terima kasih!', 'auto_print' => false, 'kitchen_slip' => false],
         'notifications' => ['enabled' => false],
     ], $overrides);
 }

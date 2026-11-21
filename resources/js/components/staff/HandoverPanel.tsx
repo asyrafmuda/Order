@@ -1,6 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { Banknote, Bike, Ban, ExternalLink, FileDown, HandPlatter, MapPin, Phone, Send, StickyNote } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
+import { PrintReceiptButton } from '@/components/staff/PrintReceiptButton';
 import { DeliveryStatusBadge, KitchenStatusBadge, OrderStatusBadge, PaymentStatusBadge, SyncStatusBadge } from '@/components/ui/Badge';
 import { Button, buttonClass } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Form';
@@ -97,6 +98,7 @@ export function HandoverPanel({ order, riders, onClose }: HandoverPanelProps) {
                     <a href={route('orders.show', order.uuid)} target="_blank" rel="noreferrer" className={buttonClass('ghost', 'sm')}>
                         <ExternalLink className="size-4" aria-hidden /> Public ticket
                     </a>
+                    <PrintReceiptButton uuid={order.uuid} />
                     <a href={route('orders.invoice', order.uuid)} className={buttonClass('ghost', 'sm')}>
                         <FileDown className="size-4" aria-hidden /> Invoice
                     </a>
