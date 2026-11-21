@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\UserRole;
 use App\Models\Outlet;
 use App\Models\User;
+use App\Rules\MalaysianMobile;
 use App\Rules\PinOrPassword;
 use App\Rules\UniquePhone;
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,7 +33,7 @@ class UserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             // Customers sign in with their mobile number; everyone else with an email.
             'email' => [$customer ? 'nullable' : 'required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user?->id)],
-            'phone' => [$customer ? 'required' : 'nullable', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/', new UniquePhone($user?->id)],
+            'phone' => [$customer ? 'required' : 'nullable', 'string', new MalaysianMobile, new UniquePhone($user?->id)],
             'role' => ['required', Rule::enum(UserRole::class)],
             'is_active' => ['required', 'boolean'],
             'outlet_id' => ['nullable', Rule::exists(Outlet::class, 'id')],
@@ -74,7 +75,6 @@ class UserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.regex' => 'Enter a valid phone number, e.g. 012-345 6789.',
         ];
     }
 }

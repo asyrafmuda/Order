@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
+use App\Rules\MalaysianMobile;
 use App\Services\Cart\Cart;
 use App\Support\PaymentOptions;
 use Closure;
@@ -29,7 +30,7 @@ class CheckoutRequest extends FormRequest
         // The same goes for someone who scanned the shop QR code and is standing at the counter.
         $atCounter = app(Cart::class)->atCounter();
         $optional = $dineIn || $atCounter;
-        $phone = 'regex:/^\+?[0-9\s\-]{9,16}$/';
+        $phone = new MalaysianMobile;
 
         return [
             'customer_name' => [$optional ? 'nullable' : 'required', 'string', 'max:120'],
@@ -81,8 +82,6 @@ class CheckoutRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'customer_phone.regex' => 'Enter a valid mobile number, e.g. 012-345 6789.',
-            'recipient_phone.regex' => 'Enter a valid mobile number, e.g. 012-345 6789.',
             'payment_method.enum' => 'Please choose an available payment method.',
         ];
     }

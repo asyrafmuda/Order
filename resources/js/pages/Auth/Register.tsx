@@ -32,9 +32,10 @@ export default function Register() {
                 <Input
                     label="Mobile number"
                     type="tel"
+                    inputMode="tel"
                     autoComplete="tel"
                     placeholder="012-345 6789"
-                    hint="This is how you sign in, and where we send order updates."
+                    hint="Type it any way: 0123456789, 012-345 6789 or +60. You sign in with it, and order updates go here."
                     required
                     value={form.data.phone}
                     onChange={(event) => form.setData('phone', event.target.value)}

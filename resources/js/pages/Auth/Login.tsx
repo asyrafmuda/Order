@@ -39,7 +39,7 @@ export default function Login({ demo }: { demo: boolean }) {
             <form onSubmit={submit} className="space-y-4">
                 <Input
                     label="Mobile number"
-                    hint="Crew: sign in with your email."
+                    hint="Any format works, e.g. 0123456789. Crew: sign in with your email."
                     autoComplete="username"
                     inputMode="email"
                     placeholder="012-345 6789"

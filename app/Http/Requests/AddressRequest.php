@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\DeliveryZone;
+use App\Rules\MalaysianMobile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +24,7 @@ class AddressRequest extends FormRequest
         return [
             'label' => ['required', 'string', 'max:40'],
             'recipient_name' => ['required', 'string', 'max:120'],
-            'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/'],
+            'phone' => ['required', 'string', new MalaysianMobile],
             'line1' => ['required', 'string', 'max:255'],
             'line2' => ['nullable', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:80'],

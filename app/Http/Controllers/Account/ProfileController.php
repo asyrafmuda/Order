@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Account;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryZone;
 use App\Models\User;
+use App\Rules\MalaysianMobile;
 use App\Rules\UniquePhone;
 use App\Support\Phone;
 use Illuminate\Http\RedirectResponse;
@@ -31,7 +32,7 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             // Staff sign in with their email, so it stays required for them.
             'email' => [$user->isStaff() ? 'required' : 'nullable', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
-            'phone' => ['required', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/', new UniquePhone($user->id)],
+            'phone' => ['required', 'string', new MalaysianMobile, new UniquePhone($user->id)],
         ]);
 
         $user->update([...$validated, 'phone' => Phone::normalize($validated['phone'])]);

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Staff;
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
 use App\Models\DiningTable;
+use App\Rules\MalaysianMobile;
 use App\Support\OutletContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,7 +29,7 @@ class PosOrderRequest extends FormRequest
             'type' => ['required', Rule::in([OrderType::Pickup->value, OrderType::DineIn->value])],
             'dining_table_id' => ['nullable', Rule::exists(DiningTable::class, 'id')->where('is_active', true)->where('outlet_id', app(OutletContext::class)->current()->id)],
             'customer_name' => ['nullable', 'string', 'max:80'],
-            'customer_phone' => ['nullable', 'string', 'regex:/^\+?[0-9\s\-]{9,16}$/'],
+            'customer_phone' => ['nullable', 'string', new MalaysianMobile],
             'notes' => ['nullable', 'string', 'max:500'],
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
             'paid' => ['required', 'boolean'],
@@ -53,7 +54,6 @@ class PosOrderRequest extends FormRequest
     {
         return [
             'lines.required' => 'Add at least one item to the order.',
-            'customer_phone.regex' => 'Enter a valid mobile number, e.g. 012-345 6789.',
         ];
     }
 

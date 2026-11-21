@@ -17,7 +17,7 @@ it('signs a customer in with just a mobile number and PIN', function (string $ty
         ->assertRedirect(route('menu.index'));
 
     $this->assertAuthenticatedAs($customer);
-})->with(['012-345 6789', '0123456789', '+60 12 345 6789', '60123456789']);
+})->with(['012-345 6789', '0123456789', '123456789', '+60 12 345 6789', '60123456789']);
 
 it('still signs in with an email address', function () {
     $user = userWithRole(UserRole::Customer);
@@ -108,6 +108,17 @@ it('allows one account per mobile number, however it is typed', function () {
     $this->post(route('register.store'), ['name' => 'Other', 'phone' => '+60 19-888 7766', 'pin' => '246813'])
         ->assertSessionHasErrors('phone');
 });
+
+it('saves a mobile number the same way however it is typed', function (string $typed) {
+    $this->post(route('register.store'), ['name' => 'Aina', 'phone' => $typed, 'pin' => '246813'])->assertSessionHasNoErrors();
+
+    expect(User::query()->sole()->phone)->toBe('60123456789');
+})->with(['0123456789', '012-345 6789', '60123456789', '+60 12-345 6789', '123456789']);
+
+it('only accepts Malaysian mobile numbers when registering', function (string $typed) {
+    $this->post(route('register.store'), ['name' => 'Aina', 'phone' => $typed, 'pin' => '246813'])
+        ->assertSessionHasErrors(['phone' => 'Enter a Malaysian mobile number, e.g. 012-345 6789.']);
+})->with(['03-1234 5678', '0123', 'abc0123456789', '0123456789012']);
 
 it('never lets registration choose a role', function () {
     $this->post(route('register.store'), ['name' => 'Sneaky', 'phone' => '0123456789', 'pin' => '246813', 'role' => 'admin']);

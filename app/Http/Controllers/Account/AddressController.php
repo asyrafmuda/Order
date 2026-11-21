@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AddressRequest;
 use App\Models\Address;
 use App\Models\User;
+use App\Support\Phone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +15,7 @@ class AddressController extends Controller
 {
     public function store(AddressRequest $request): RedirectResponse
     {
-        $address = $request->user()->addresses()->create($request->validated());
+        $address = $request->user()->addresses()->create($this->attributes($request));
 
         $this->syncDefault($request->user(), $address);
 
@@ -23,7 +24,7 @@ class AddressController extends Controller
 
     public function update(AddressRequest $request, Address $address): RedirectResponse
     {
-        $address->update($request->validated());
+        $address->update($this->attributes($request));
 
         $this->syncDefault($request->user(), $address);
 
@@ -47,5 +48,13 @@ class AddressController extends Controller
         if ($address->is_default) {
             $user->addresses()->whereKeyNot($address->id)->update(['is_default' => false]);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function attributes(AddressRequest $request): array
+    {
+        return [...$request->validated(), 'phone' => Phone::normalize($request->validated('phone'))];
     }
 }
