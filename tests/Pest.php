@@ -15,6 +15,8 @@ use App\Models\Outlet;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Cart\CartPricer;
+use App\Support\Licensing\Certificate;
+use App\Support\Licensing\License;
 use App\Support\OutletContext;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -177,4 +179,62 @@ function placeOrder(array $options = []): Order
     }
 
     return $order->refresh();
+}
+
+/**
+ * A key pair standing in for the seller's, made once per test run.
+ *
+ * @return array{private: string, public: string}
+ */
+function licenseKeys(): array
+{
+    static $keys = null;
+
+    if ($keys === null) {
+        $key = openssl_pkey_new(['private_key_type' => OPENSSL_KEYTYPE_EC, 'curve_name' => 'prime256v1']);
+        openssl_pkey_export($key, $private);
+        $keys = ['private' => $private, 'public' => openssl_pkey_get_details($key)['key']];
+    }
+
+    return $keys;
+}
+
+/**
+ * Switch licensing on for this test, with the certificate kept in a temp file.
+ */
+function enableLicensing(): void
+{
+    config([
+        'licensing.public_key' => licenseKeys()['public'],
+        'licensing.server_url' => 'https://licenses.seller.com',
+        'licensing.file' => sys_get_temp_dir().'/license-'.bin2hex(random_bytes(4)).'.json',
+    ]);
+    app()->forgetInstance(License::class);
+}
+
+/**
+ * What the license server would answer.
+ *
+ * @param  array<string, mixed>  $overrides
+ * @return array{payload: string, signature: string}
+ */
+function signedLicense(array $overrides = [], ?string $privateKey = null): array
+{
+    return Certificate::sign([
+        'product' => 'order-system',
+        'code' => 'ABCD-EFGH-JKLM-NPQR',
+        'domain' => 'shop.example.com',
+        'customer' => 'Kedai Ali',
+        'status' => 'active',
+        'issued_at' => now()->toIso8601String(),
+        'checked_at' => now()->toIso8601String(),
+        ...$overrides,
+    ], $privateKey ?? licenseKeys()['private']);
+}
+
+/** Put a certificate in place as an activation would have. */
+function storeLicense(array $overrides = []): void
+{
+    file_put_contents(config('licensing.file'), json_encode(signedLicense($overrides)));
+    app()->forgetInstance(License::class);
 }

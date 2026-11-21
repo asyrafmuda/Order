@@ -7,6 +7,7 @@ use App\Models\Outlet;
 use App\Services\Cart\Cart;
 use App\Support\BrandPalette;
 use App\Support\KitchenLoad;
+use App\Support\Licensing\License;
 use App\Support\OutletContext;
 use App\Support\Settings;
 use App\Support\ShopHours;
@@ -64,6 +65,11 @@ class HandleInertiaRequests extends Middleware
             'role_label' => $user->role->label(),
             'is_staff' => $user->isStaff(),
             'is_admin' => $user->isAdmin(),
+            // Which licensing screens the back office offers.
+            'licensing' => $user->isAdmin() ? [
+                'client' => app(License::class)->configured(),
+                'server' => app(License::class)->isLicenseServer(),
+            ] : null,
             'home_url' => route($user->role->homeRoute()),
         ] : null;
     }

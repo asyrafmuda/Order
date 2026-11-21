@@ -12,6 +12,7 @@ use App\Services\Pos\LoyversePosProvider;
 use App\Support\Installer\EnvironmentFile;
 use App\Support\Installer\Installation;
 use App\Support\KitchenLoad;
+use App\Support\Licensing\License;
 use App\Support\OutletContext;
 use App\Support\OutletPrices;
 use App\Support\OutletStock;
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Installation::class);
+        $this->app->singleton(License::class);
         $this->app->singleton(EnvironmentFile::class, fn ($app) => new EnvironmentFile($app->basePath('.env')));
         $this->app->scoped(Settings::class);
         $this->app->scoped(OutletContext::class);

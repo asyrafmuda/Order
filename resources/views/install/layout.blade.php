@@ -20,10 +20,10 @@
             </header>
 
             @isset($step)
-                <ol class="mb-6 grid grid-cols-4 gap-2 text-[11px] font-bold tracking-wide uppercase" aria-label="Progress">
-                    @foreach (['Server', 'Database', 'Shop', 'Done'] as $index => $label)
+                <ol class="mb-6 grid grid-cols-5 gap-1.5 text-[10px] font-bold tracking-wide uppercase sm:gap-2 sm:text-[11px]" aria-label="Progress">
+                    @foreach (['Server', 'License', 'Database', 'Shop', 'Done'] as $index => $label)
                         <li @class([
-                            'rounded-lg border px-2 py-2 text-center',
+                            'rounded-lg border px-1 py-2 text-center',
                             'border-brand-500 bg-brand-900 text-strong' => $index + 1 === $step,
                             'border-go-500/40 bg-go-900 text-go-400' => $index + 1 < $step,
                             'border-ink-700 bg-ink-850 text-ink-400' => $index + 1 > $step,

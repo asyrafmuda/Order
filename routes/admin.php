@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DeliveryZoneController;
 use App\Http\Controllers\Admin\DiningTableController;
 use App\Http\Controllers\Admin\IntegrationController;
 use App\Http\Controllers\Admin\KitchenStationController;
+use App\Http\Controllers\Admin\LicenseController;
 use App\Http\Controllers\Admin\ModifierGroupController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OutletController;
@@ -75,6 +76,12 @@ Route::middleware('role:admin')->group(function () use ($crud) {
     Route::get('/integrations', [IntegrationController::class, 'index'])->name('integrations.index');
     Route::post('/integrations/pos/test', [IntegrationController::class, 'testPos'])->name('integrations.pos.test');
     Route::post('/integrations/pos/sync-menu', [IntegrationController::class, 'syncMenu'])->name('integrations.pos.sync-menu');
+
+    // This copy's license (stays reachable while the site is locked).
+    Route::get('/license', [LicenseController::class, 'show'])->name('license.show');
+    Route::post('/license', [LicenseController::class, 'activate'])->middleware('throttle:10,1')->name('license.activate');
+    Route::post('/license/check', [LicenseController::class, 'check'])->middleware('throttle:10,1')->name('license.check');
+    Route::delete('/license', [LicenseController::class, 'release'])->name('license.release');
 
     Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');

@@ -266,7 +266,7 @@ ZIP itu siap-upload: pakej PHP (tanpa pakej dev), JavaScript/CSS yang sudah di-b
 
 Di server client:
 
-1. Upload & extract ZIP → buka domain → **installer web** di `/install` (semak server → database → kedai & akaun super admin → siap). `.env` dicipta sendiri dengan kunci baru; installer dikunci selepas siap (`storage/app/installed.json`).
+1. Upload & extract ZIP → buka domain → **installer web** di `/install` (semak server → purchase code → database → kedai & akaun super admin → siap). `.env` dicipta sendiri dengan kunci baru; installer dikunci selepas siap (`storage/app/installed.json`).
 2. Tambah **satu cron job** setiap minit (arahan ditunjuk di skrin terakhir). Ia menjalankan tugas berjadual *dan* queue — shared hosting tiada queue worker. Semua tugas berjalan dalam proses yang sama, jadi ia berfungsi walaupun `proc_open` dimatikan. Dashboard memberi amaran jika cron tidak berjalan.
 3. **Kemas kini:** naikkan nombor dalam fail `VERSION`, bina ZIP baru, client upload & overwrite. Jika ada migration baru, laman menunjukkan skrin *Finish the update* sehingga super admin mengesahkan dengan kata laluan; jika tiada, versi direkod senyap-senyap. `.env` dan gambar yang dimuat naik tidak tersentuh.
 
@@ -279,6 +279,42 @@ Ujian pemasangan penuh terhadap MySQL (pilihan):
 ```bash
 INSTALLER_TEST_DB=nama_db_kosong INSTALLER_TEST_USER=user INSTALLER_TEST_PASSWORD=pass php artisan test tests/Feature/Install
 ```
+
+## Sistem lesen (purchase code)
+
+Setiap salinan yang dijual diaktifkan dengan **purchase code** yang terikat pada satu domain. Bahagian-bahagiannya:
+
+- **Pelayan lesen** — salinan app ini *milik kau sendiri* dengan `LICENSE_SERVER_ENABLED=true`. Admin → **Licenses (sold)**: cipta purchase code, lihat domain mana setiap kod dipakai (dan versi), batalkan kod (refund/chargeback), pulihkan, atau lepaskan domain bila client pindah.
+- **Semakan dalam produk** — installer minta purchase code; pelayan lesen pulangkan sijil yang ditandatangani dengan kunci peribadi kau (ECDSA P-256), dan produk mengesahkannya dengan kunci awam dalam `config/licensing.php`. Kod pelayan lesen (`app/LicenseServer`) **tidak** dimasukkan dalam ZIP client.
+
+### Sediakan sekali sahaja
+
+1. Pasang pelayan lesen di domain https kau sendiri (contoh `https://lesen.domainkau.com`) — repo yang sama, di Laravel Cloud atau hosting lain.
+2. Di MacBook: `php artisan license:keygen --server=https://lesen.domainkau.com`. Ia menulis kunci awam dan alamat pelayan ke `config/licensing.php` (**commit fail ini**) dan mencetak dua baris untuk `.env` pelayan lesen:
+   ```
+   LICENSE_SERVER_ENABLED=true
+   LICENSE_SIGNING_KEY=…
+   ```
+3. Di pelayan lesen: tambah dua baris itu ke `.env`, kemudian `php artisan migrate` (jadual `licenses` dan `license_activations`).
+4. **Simpan `LICENSE_SIGNING_KEY` di tempat selamat** (password manager). Jika hilang, tiada laman baru boleh diaktifkan dan laman sedia ada berhenti dalam 30 hari. Jangan sekali-kali commit.
+
+`scripts/package.sh` enggan membina ZIP selagi kunci awam belum diset (`ALLOW_UNLICENSED=1` untuk ZIP tanpa lesen).
+
+### Setiap jualan
+
+Admin → Licenses (sold) → **New purchase code** (atau `php artisan license:create "Kedai Ali" --email=ali@… --max=1`) → hantar ZIP + purchase code + panduan kepada client.
+
+### Kelakuan di laman client
+
+| Keadaan | Apa berlaku |
+|---|---|
+| Alamat tempatan (`localhost`, `127.0.0.1`, `*.test`, `*.local`, IP rangkaian dalaman) | Tiada lesen diperlukan — untuk dev dan ujian |
+| Belum diaktifkan, domain lain, kod dibatalkan, atau fail lesen rosak | Laman berhenti: pelanggan dan staf nampak "Temporarily unavailable"; super admin masih boleh log masuk dan dibawa ke Admin → **License** |
+| Semakan harian | Sijil baharu diambil setiap 7 hari (cron, atau di latar belakang semasa laman dibuka) |
+| Pelayan lesen tidak dapat dihubungi | Laman terus berjalan; amaran di Dashboard selepas 14 hari; berhenti selepas 30 hari |
+| Client pindah domain | Admin → License → **Move to another domain** di laman lama, kemudian aktifkan di laman baru. Jika laman lama sudah tiada, lepaskan domain itu dari Admin → Licenses (sold) |
+
+Had: kod PHP boleh dibaca dan diubah oleh orang yang betul-betul berniat. Sistem ini menghalang salinan biasa ke domain lain dan memberi kau kawalan (batal, lihat siapa pakai), bukan perlindungan mutlak — sama seperti skrip CodeCanyon.
 
 ## Production
 

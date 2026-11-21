@@ -6,7 +6,7 @@
     <section class="rounded-xl border border-ink-700 bg-ink-850">
         <div class="border-b border-ink-700 px-4 py-3">
             <h1 class="text-base font-bold text-strong">Welcome</h1>
-            <p class="mt-1 text-sm text-ink-300">This sets up your online ordering system in about two minutes. You will need the name, user and password of an empty MySQL database (create one in cPanel → MySQL Databases).</p>
+            <p class="mt-1 text-sm text-ink-300">This sets up your online ordering system in about two minutes. You will need your purchase code and the name, user and password of an empty MySQL database (create one in cPanel → MySQL Databases).</p>
         </div>
 
         @foreach ($checks as $group => $items)
@@ -37,7 +37,7 @@
     <div class="mt-5 flex items-center justify-between gap-3">
         @if ($passes)
             <p class="text-sm text-go-400">Everything needed is in place.</p>
-            <a href="{{ route('install.database') }}" class="inline-flex h-11 items-center rounded-lg bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-500">Next: database</a>
+            <a href="{{ route('install.license') }}" class="inline-flex h-11 items-center rounded-lg bg-brand-600 px-5 text-sm font-bold text-white hover:bg-brand-500">Next</a>
         @else
             <p class="text-sm text-danger-400">Fix the items marked ✕, then reload this page.</p>
             <a href="{{ route('install.welcome') }}" class="inline-flex h-11 items-center rounded-lg bg-ink-700 px-5 text-sm font-bold text-ink-100 hover:bg-ink-600">Check again</a>

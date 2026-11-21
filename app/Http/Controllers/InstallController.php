@@ -7,6 +7,7 @@ use App\Support\Installer\DatabaseCredentials;
 use App\Support\Installer\EnvironmentFile;
 use App\Support\Installer\Installation;
 use App\Support\Installer\Requirements;
+use App\Support\Licensing\License;
 use DateTimeZone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,12 +37,50 @@ class InstallController extends Controller
         ]);
     }
 
+    /**
+     * The purchase code, tied to this address on the license server. Skipped
+     * where no license is needed (local addresses, licensing not set up).
+     */
+    public function license(Request $request, Requirements $requirements, License $license): View|RedirectResponse
+    {
+        $this->ensureNotInstalled();
+
+        if (! $requirements->passes()) {
+            return redirect()->route('install.welcome');
+        }
+
+        if ($license->status($request->getHost())->allowsUse()) {
+            return redirect()->route('install.database');
+        }
+
+        return view('install.license', ['host' => License::normalize($request->getHost())]);
+    }
+
+    public function storeLicense(Request $request, License $license): RedirectResponse
+    {
+        $this->ensureNotInstalled();
+
+        $validated = $request->validate(['code' => ['required', 'string', 'max:64']], [], ['code' => 'purchase code']);
+
+        try {
+            $certificate = $license->activate($validated['code'], $request->getHost());
+        } catch (RuntimeException $exception) {
+            throw ValidationException::withMessages(['code' => $exception->getMessage()]);
+        }
+
+        return redirect()->route('install.database')->with('success', 'License activated for '.$certificate->domain().'.');
+    }
+
     public function database(Request $request, Requirements $requirements): View|RedirectResponse
     {
         $this->ensureNotInstalled();
 
         if (! $requirements->passes()) {
             return redirect()->route('install.welcome');
+        }
+
+        if ($redirect = $this->licenseFirst($request)) {
+            return $redirect;
         }
 
         return view('install.database', [
@@ -53,6 +92,10 @@ class InstallController extends Controller
     public function storeDatabase(Request $request): RedirectResponse
     {
         $this->ensureNotInstalled();
+
+        if ($redirect = $this->licenseFirst($request)) {
+            return $redirect;
+        }
 
         $validated = $request->validate([
             'host' => ['required', 'string', 'max:255'],
@@ -155,6 +198,10 @@ class InstallController extends Controller
     public function install(Request $request, InstallApplication $install): RedirectResponse
     {
         $this->ensureNotInstalled();
+
+        if ($redirect = $this->licenseFirst($request)) {
+            return $redirect;
+        }
         $credentials = $this->credentials($request);
 
         $site = $request->validate([
@@ -219,6 +266,11 @@ class InstallController extends Controller
     private function ensureNotInstalled(): void
     {
         abort_if($this->installation->isInstalled(), 404);
+    }
+
+    private function licenseFirst(Request $request): ?RedirectResponse
+    {
+        return app(License::class)->status($request->getHost())->allowsUse() ? null : redirect()->route('install.license');
     }
 
     private function credentials(Request $request): DatabaseCredentials

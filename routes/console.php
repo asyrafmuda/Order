@@ -21,6 +21,7 @@ Schedule::call(fn () => app(SchedulerHeartbeat::class)->beat())->everyMinute()->
 Schedule::call($artisan('orders:cancel-unpaid'))->everyFiveMinutes()->name('orders:cancel-unpaid')->withoutOverlapping();
 Schedule::call($artisan('orders:close-stale'))->hourly()->name('orders:close-stale')->withoutOverlapping();
 Schedule::call($artisan('queue:prune-failed', ['--hours' => 168]))->daily()->name('queue:prune-failed');
+Schedule::call($artisan('license:check'))->dailyAt('03:17')->name('license:check');
 
 // Shared hosting has no long-running queue worker: each minute the scheduler
 // works through what is waiting (POS receipts, customer messages) and stops
