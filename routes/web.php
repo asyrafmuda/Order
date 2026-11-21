@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CartPreferenceController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\KitchenStatusController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderLookupController;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', MenuController::class)->name('menu.index');
+// The page that sells this system, on the seller's demo site only (LANDING_PAGE=true).
+Route::get('/web', LandingController::class)->name('landing');
 Route::get('/kitchen-status', KitchenStatusController::class)->name('status.index');
 
 // Multi-outlet: the customer picks which branch to order from.
