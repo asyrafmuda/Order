@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ShopQrController;
+use App\Http\Controllers\Admin\SystemUpdateController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -83,6 +84,12 @@ Route::middleware('role:admin')->group(function () use ($crud) {
     Route::post('/license', [LicenseController::class, 'activate'])->middleware('throttle:10,1')->name('license.activate');
     Route::post('/license/check', [LicenseController::class, 'check'])->middleware('throttle:10,1')->name('license.check');
     Route::delete('/license', [LicenseController::class, 'release'])->name('license.release');
+
+    // One-click updates from the seller.
+    Route::get('/system-update', [SystemUpdateController::class, 'show'])->name('system-update.show');
+    Route::post('/system-update/check', [SystemUpdateController::class, 'check'])->middleware('throttle:10,1')->name('system-update.check');
+    Route::post('/system-update/install', [SystemUpdateController::class, 'install'])->middleware('throttle:6,1')->name('system-update.install');
+    Route::delete('/system-update', [SystemUpdateController::class, 'cancel'])->name('system-update.cancel');
 
     Route::get('/payment-gateway', [PaymentGatewayController::class, 'edit'])->name('payment-gateway.edit');
     Route::put('/payment-gateway', [PaymentGatewayController::class, 'update'])->middleware('throttle:20,1')->name('payment-gateway.update');

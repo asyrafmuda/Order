@@ -197,7 +197,7 @@ describe('a licensed build', function () {
 
     it('shows the license screens only to super admins of a licensed build', function () {
         $this->actingAs(userWithRole(UserRole::Admin))->get('http://localhost/admin')
-            ->assertInertia(fn (Assert $page) => $page->where('auth.user.licensing', ['client' => true, 'server' => false]));
+            ->assertInertia(fn (Assert $page) => $page->where('auth.user.licensing', ['client' => true, 'server' => false, 'update' => null]));
 
         $this->actingAs(userWithRole(UserRole::Manager))->get('http://localhost/admin')
             ->assertInertia(fn (Assert $page) => $page->where('auth.user.licensing', null));

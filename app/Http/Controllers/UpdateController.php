@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Support\Installer\Installation;
+use App\Support\Updates\Updater;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -34,6 +35,25 @@ class UpdateController extends Controller
             'to' => $this->installation->version(),
             'pending' => count($this->installation->pendingMigrations()),
         ]);
+    }
+
+    /**
+     * The second half of a one-click update: the new files are in place and
+     * this request runs on them, so the database changes can run.
+     */
+    public function finish(string $token, Updater $updater): RedirectResponse
+    {
+        try {
+            $version = $updater->finish($token);
+        } catch (Throwable $exception) {
+            Log::error('Finishing the update failed', ['exception' => $exception]);
+
+            // The update page (password protected) can run the rest.
+            return redirect()->to($this->installation->needsUpdate() ? route('install.update') : '/admin/system-update')
+                ->with('error', 'The update could not finish: '.$exception->getMessage());
+        }
+
+        return redirect()->to('/admin/system-update')->with('success', "Updated to version {$version}.");
     }
 
     public function run(Request $request): RedirectResponse

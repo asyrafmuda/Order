@@ -10,7 +10,7 @@ import { Input, Textarea } from '@/components/ui/Form';
 import { Modal } from '@/components/ui/Modal';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
 import { cn } from '@/lib/cn';
-import { dateTime } from '@/lib/format';
+import { date, dateTime } from '@/lib/format';
 
 interface Activation {
     id: number;
@@ -27,6 +27,7 @@ interface LicenseRow {
     customer_name: string;
     customer_email: string | null;
     max_activations: number;
+    updates_until: string | null;
     notes: string | null;
     revoked: boolean;
     revoked_reason: string | null;
@@ -131,7 +132,8 @@ function LicenseCard({ license, onEdit }: { license: LicenseRow; onEdit: () => v
                         {license.customer_email && <span className="font-normal text-ink-400"> · {license.customer_email}</span>}
                     </p>
                     <p className="text-xs text-ink-400">
-                        Sold {dateTime(license.created_at)} · {active.length} of {license.max_activations} {license.max_activations === 1 ? 'domain' : 'domains'} in use
+                        Sold {dateTime(license.created_at)} · {active.length} of {license.max_activations} {license.max_activations === 1 ? 'domain' : 'domains'} in use ·{' '}
+                        {license.updates_until ? `updates until ${date(license.updates_until)}` : 'updates for life'}
                     </p>
                     {license.revoked && license.revoked_reason && <p className="mt-1 text-xs text-danger-400">Reason: {license.revoked_reason}</p>}
                     {license.notes && <p className="mt-1 text-xs whitespace-pre-line text-ink-300">{license.notes}</p>}
@@ -197,6 +199,7 @@ function LicenseForm({ license, onClose }: { license: LicenseRow | null; onClose
         customer_name: license?.customer_name ?? '',
         customer_email: license?.customer_email ?? '',
         max_activations: String(license?.max_activations ?? 1),
+        updates_until: license?.updates_until ?? '',
         notes: license?.notes ?? '',
     });
 
@@ -241,6 +244,15 @@ function LicenseForm({ license, onClose }: { license: LicenseRow | null; onClose
                     value={form.data.max_activations}
                     onChange={(event) => form.setData('max_activations', event.target.value)}
                     error={form.errors.max_activations}
+                />
+                <Input
+                    label="Updates until"
+                    type="date"
+                    wrapperClassName="max-w-56"
+                    hint="Releases published after this day are not offered to this customer. Leave empty for updates for life."
+                    value={form.data.updates_until}
+                    onChange={(event) => form.setData('updates_until', event.target.value)}
+                    error={form.errors.updates_until}
                 />
                 <Textarea label="Notes (only you see these)" value={form.data.notes} onChange={(event) => form.setData('notes', event.target.value)} error={form.errors.notes} />
             </form>

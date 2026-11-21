@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\Installer\SchedulerHeartbeat;
+use App\Support\Updates\Updater;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
@@ -15,13 +16,17 @@ use Illuminate\Support\Facades\Schedule;
 
 $artisan = fn (string $command, array $parameters = []) => fn () => Artisan::call($command, $parameters);
 
+// Nothing runs while a one-click update is replacing files.
+$updating = fn () => Updater::applying();
+
 // Lets the admin dashboard tell whether the cron job is running.
 Schedule::call(fn () => app(SchedulerHeartbeat::class)->beat())->everyMinute()->name('scheduler-heartbeat');
 
-Schedule::call($artisan('orders:cancel-unpaid'))->everyFiveMinutes()->name('orders:cancel-unpaid')->withoutOverlapping();
-Schedule::call($artisan('orders:close-stale'))->hourly()->name('orders:close-stale')->withoutOverlapping();
-Schedule::call($artisan('queue:prune-failed', ['--hours' => 168]))->daily()->name('queue:prune-failed');
-Schedule::call($artisan('license:check'))->dailyAt('03:17')->name('license:check');
+Schedule::call($artisan('orders:cancel-unpaid'))->everyFiveMinutes()->name('orders:cancel-unpaid')->withoutOverlapping()->skip($updating);
+Schedule::call($artisan('orders:close-stale'))->hourly()->name('orders:close-stale')->withoutOverlapping()->skip($updating);
+Schedule::call($artisan('queue:prune-failed', ['--hours' => 168]))->daily()->name('queue:prune-failed')->skip($updating);
+Schedule::call($artisan('license:check'))->dailyAt('03:17')->name('license:check')->skip($updating);
+Schedule::call($artisan('updates:check'))->dailyAt('04:23')->name('updates:check')->skip($updating);
 
 // Shared hosting has no long-running queue worker: each minute the scheduler
 // works through what is waiting (POS receipts, customer messages) and stops
@@ -30,4 +35,5 @@ Schedule::call($artisan('queue:work', ['--stop-when-empty' => true, '--max-time'
     ->everyMinute()
     ->name('queue:work')
     ->withoutOverlapping(2)
+    ->skip($updating)
     ->when(fn () => (bool) config('installer.queue_from_scheduler'));

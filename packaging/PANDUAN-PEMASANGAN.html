@@ -163,6 +163,14 @@
     <p>Jika laman lama sudah tiada, hubungi penjual untuk melepaskan domain lama.</p>
 
     <h2 id="update">8. Kemas kini ke versi baru</h2>
+    <p><strong>Cara mudah (satu klik):</strong> Admin → <strong>System Update</strong>. Bila versi baru keluar, menu itu tunjuk nombor versi. Baca <em>What's new</em> → tekan <em>Update to …</em>. Laman tunjuk “Updating…” kepada pelanggan lebih kurang seminit; pilih masa kedai lengang.</p>
+    <ul>
+        <li>Semua fail yang diganti disimpan dalam backup (<code>storage/app/updates/backups</code>). Jika update gagal di tengah jalan, laman dipulihkan seperti asal secara automatik.</li>
+        <li>Jika sesiapa pernah ubah kod laman ini, fail itu disenaraikan dulu sebelum diganti. Tanya orang yang ubah sebelum tekan <em>Replace them and update</em>.</li>
+        <li>Perlu: PHP extension <strong>zip</strong> dihidupkan (cPanel → <em>Select PHP Version</em> → <em>Extensions</em>) dan lesen aktif. Halaman System Update beritahu jika ada yang kurang.</li>
+        <li>Backup database tetap digalakkan sebelum update (phpMyAdmin → <em>Export</em>).</li>
+    </ul>
+    <p><strong>Cara manual</strong> (jika satu klik tidak boleh digunakan, atau dari versi lama yang belum ada System Update):</p>
     <ol class="steps">
         <li><strong>Backup dahulu</strong>: cPanel → <em>phpMyAdmin</em> → pilih database → <em>Export</em> → <em>Go</em>. Juga muat turun fail <code>.env</code> dan folder <code>storage/app/public</code> (gambar produk &amp; logo).</li>
         <li>Upload ZIP versi baru ke folder yang sama → <em>Extract</em> → pilih untuk <strong>overwrite</strong> fail sedia ada.

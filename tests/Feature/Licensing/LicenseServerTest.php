@@ -141,7 +141,7 @@ describe('the admin', function () {
             ->where('licenses.0.code', $this->license->code)
             ->where('licenses.0.activations.0.domain', 'shop.example.com')
             ->where('licenses.0.activations.0.active', true)
-            ->where('auth.user.licensing', ['client' => false, 'server' => true]));
+            ->where('auth.user.licensing', ['client' => false, 'server' => true, 'update' => null]));
 
         $this->get('/admin/licenses?search=shop.example')->assertInertia(fn (Assert $page) => $page->has('licenses', 1));
         $this->get('/admin/licenses?search=nothing-like-this')->assertInertia(fn (Assert $page) => $page->has('licenses', 0));

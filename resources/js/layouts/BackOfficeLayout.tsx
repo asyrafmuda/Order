@@ -7,6 +7,7 @@ import {
     ChefHat,
     ClipboardList,
     CreditCard,
+    DownloadCloud,
     Flame,
     KeyRound,
     LayoutDashboard,
@@ -14,6 +15,7 @@ import {
     LogOut,
     MapPinned,
     Menu as MenuIcon,
+    PackagePlus,
     Plug,
     QrCode,
     Settings,
@@ -92,7 +94,9 @@ const sections: NavSection[] = [
             { label: 'Integrations', route: 'admin.integrations.index', match: 'admin.integrations.*', icon: Plug, roles: ['admin'] },
             { label: 'Settings', route: 'admin.settings.edit', match: 'admin.settings.*', icon: Settings, roles: ['admin'] },
             { label: 'License', route: 'admin.license.show', match: 'admin.license.*', icon: KeyRound, roles: ['admin'], licensing: 'client' },
+            { label: 'System Update', route: 'admin.system-update.show', match: 'admin.system-update.*', icon: DownloadCloud, roles: ['admin'], licensing: 'client' },
             { label: 'Licenses (sold)', route: 'admin.licenses.index', match: 'admin.licenses.*', icon: KeyRound, roles: ['admin'], licensing: 'server' },
+            { label: 'Releases', route: 'admin.releases.index', match: 'admin.releases.*', icon: PackagePlus, roles: ['admin'], licensing: 'server' },
         ],
     },
 ];
@@ -147,6 +151,9 @@ export default function BackOfficeLayout({ title, description, actions, children
                                         >
                                             <item.icon className="size-4 shrink-0" aria-hidden />
                                             {item.label}
+                                            {item.route === 'admin.system-update.show' && auth.user?.licensing?.update && (
+                                                <span className="ml-auto rounded-full bg-flame-500 px-1.5 py-0.5 text-[10px] leading-none font-bold text-white">{auth.user.licensing.update}</span>
+                                            )}
                                         </Link>
                                     </li>
                                 );

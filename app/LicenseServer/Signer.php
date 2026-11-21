@@ -4,6 +4,7 @@ namespace App\LicenseServer;
 
 use App\LicenseServer\Models\Activation;
 use App\LicenseServer\Models\License;
+use App\LicenseServer\Models\Release;
 use App\Support\Licensing\Certificate;
 use RuntimeException;
 
@@ -44,6 +45,23 @@ class Signer
             'status' => 'revoked',
             'message' => $message,
             'checked_at' => now()->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Vouches for an update package: a site installs a downloaded ZIP only
+     * if its checksum matches this signed one.
+     *
+     * @return array{payload: string, signature: string}
+     */
+    public function release(Release $release): array
+    {
+        return $this->sign([
+            'type' => 'release',
+            'product' => $release->product,
+            'version' => $release->version,
+            'sha256' => $release->sha256,
+            'size' => $release->size,
         ]);
     }
 
