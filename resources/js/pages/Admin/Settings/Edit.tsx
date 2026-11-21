@@ -1,14 +1,15 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Bell, Building2, MapPin, Palette, Percent, ShoppingBag, Store, Trash2, Upload, Wallet, Zap } from 'lucide-react';
+import { Bell, Building2, MapPin, Palette, Percent, Printer, ShoppingBag, Store, Trash2, Upload, Wallet, Zap } from 'lucide-react';
 import { useRef, type FormEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { MoneyInput } from '@/components/admin/MoneyInput';
 import { OutletFields, toOutletForm, type OutletSettings } from '@/components/admin/OutletFields';
-import { Input, Textarea, Toggle } from '@/components/ui/Form';
+import { Input, Select, Textarea, Toggle } from '@/components/ui/Form';
 import BackOfficeLayout from '@/layouts/BackOfficeLayout';
 import { cn } from '@/lib/cn';
 import { inputToSen, senToInput } from '@/lib/format';
+import { printSampleReceipt } from '@/lib/receipt';
 
 type Theme = 'dark' | 'light';
 
@@ -37,6 +38,7 @@ interface Settings extends OutletSettings {
     ordering: OutletSettings['ordering'] & { auto_close_hours: number };
     payments: { fpx_enabled: boolean; card_enabled: boolean; ewallet_enabled: boolean; cash_enabled: boolean; cash_requires_account: boolean; cash_max_amount: number; dine_in_pay_at_counter: boolean };
     pos: { quick_notes: string[] };
+    receipt: { paper: '58' | '80'; header: string | null; footer: string | null; auto_print: boolean; kitchen_slip: boolean };
     tax: { rate: number; inclusive: boolean };
     notifications: { enabled: boolean };
 }
@@ -52,6 +54,7 @@ export default function SettingsEdit({ settings, multi, onlinePaymentReady }: { 
         ordering: { ...outlet.ordering, auto_close_hours: String(settings.ordering.auto_close_hours) },
         payments: { ...settings.payments, cash_max_amount: senToInput(settings.payments.cash_max_amount) },
         pos: { quick_notes: (settings.pos?.quick_notes ?? []).join('\n') },
+        receipt: { ...settings.receipt, header: settings.receipt.header ?? '', footer: settings.receipt.footer ?? '' },
         tax: { ...settings.tax, rate: String(settings.tax.rate) },
         notifications: settings.notifications,
     });
@@ -340,6 +343,64 @@ export default function SettingsEdit({ settings, multi, onlinePaymentReady }: { 
                         onChange={(event) => set('pos', 'quick_notes', event.target.value)}
                         error={errors['pos.quick_notes'] ?? Object.entries(errors).find(([key]) => key.startsWith('pos.quick_notes.'))?.[1]}
                     />
+                </Section>
+
+                <Section title="Receipt printing" icon={<Printer className="size-4" />}>
+                    <div className="space-y-4">
+                        <p className="text-sm text-ink-300">
+                            Receipts print through the browser on any printer this device can use (USB, network or Bluetooth thermal printers). In the print dialog pick the receipt printer once, with margins
+                            set to &ldquo;None&rdquo;.
+                        </p>
+                        <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
+                            <Select label="Paper width" value={data.receipt.paper} onChange={(event) => set('receipt', 'paper', event.target.value as '58' | '80')} error={errors['receipt.paper']}>
+                                <option value="80">80 mm (most counter printers)</option>
+                                <option value="58">58 mm (small and portable printers)</option>
+                            </Select>
+                            <Input
+                                label="Extra line under the address"
+                                maxLength={80}
+                                placeholder="e.g. SSM 202401012345 · SST W10-1234-56789012"
+                                value={data.receipt.header}
+                                onChange={(event) => set('receipt', 'header', event.target.value)}
+                                error={errors['receipt.header']}
+                            />
+                        </div>
+                        <Input
+                            label="Message at the bottom"
+                            maxLength={160}
+                            value={data.receipt.footer}
+                            onChange={(event) => set('receipt', 'footer', event.target.value)}
+                            error={errors['receipt.footer']}
+                        />
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <Toggle
+                                checked={data.receipt.auto_print}
+                                onChange={(checked) => set('receipt', 'auto_print', checked)}
+                                label="Print when an order is placed at the POS"
+                                description="Off: the cashier presses Print receipt when the customer wants one."
+                            />
+                            <Toggle
+                                checked={data.receipt.kitchen_slip}
+                                onChange={(checked) => set('receipt', 'kitchen_slip', checked)}
+                                label="Also print a kitchen slip"
+                                description="A second slip with the items and notes in large letters, without prices."
+                            />
+                        </div>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={<Printer className="size-4" aria-hidden />}
+                            onClick={() =>
+                                printSampleReceipt({
+                                    paper: data.receipt.paper,
+                                    kitchenSlip: data.receipt.kitchen_slip,
+                                    shop: { name: data.shop.name, outlet: null, address: data.shop.address ?? null, phone: data.shop.phone ?? null, header: data.receipt.header || null, footer: data.receipt.footer || null },
+                                })
+                            }
+                        >
+                            Print a test receipt
+                        </Button>
+                    </div>
                 </Section>
 
                 <Section title="Tax" icon={<Percent className="size-4" />}>

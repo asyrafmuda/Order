@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Ban, Bike, ExternalLink, FileDown, History, MessageSquareText, Plug, ReceiptText, RefreshCw, UserRound } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
+import { PrintReceiptButton } from '@/components/staff/PrintReceiptButton';
 import { Badge, DeliveryStatusBadge, KitchenStatusBadge, OrderStatusBadge, PaymentStatusBadge, SyncStatusBadge } from '@/components/ui/Badge';
 import { Button, buttonClass } from '@/components/ui/Button';
 import { Card, CardHeader, EmptyState } from '@/components/ui/Card';
@@ -50,6 +51,7 @@ export default function OrderShow({ order, posLogs, notifications }: OrderShowPr
             description={`Placed ${dateTime(order.created_at)} · ${order.type_label}`}
             actions={
                 <>
+                    <PrintReceiptButton uuid={order.uuid} variant="outline" />
                     <a href={route('orders.invoice', order.uuid)} className={buttonClass('outline', 'sm')}>
                         <FileDown className="size-4" aria-hidden /> Invoice
                     </a>

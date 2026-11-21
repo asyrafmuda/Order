@@ -11,12 +11,15 @@ import { useNow } from '@/hooks/useNow';
 import { cn } from '@/lib/cn';
 import { money, time } from '@/lib/format';
 import { hasOptions, needsChoice, signature, unitPrice, type PosLine, type PosLineInput } from '@/lib/pos';
+import { printReceipt } from '@/lib/receipt';
 import type { Category, ComboOffer, PosReceipt, Product } from '@/types';
 
 interface PosProps {
     categories: Category[];
     combo: ComboOffer | null;
     quickNotes: string[];
+    /** Print the receipt as soon as an order is placed (Admin → Settings). */
+    autoPrint: boolean;
     tables: { id: number; name: string; seats: number | null }[];
     tax: { rate: number; inclusive: boolean };
     recent: { uuid: string; order_number: string; customer_name: string; total: number; status_label: string; is_paid: boolean }[];
@@ -29,7 +32,7 @@ const STORAGE_KEY = 'pos.ticket';
 let nextKey = 0;
 const newKey = () => `line-${Date.now()}-${nextKey++}`;
 
-export default function PosIndex({ categories, combo, quickNotes, tables, tax, recent }: PosProps) {
+export default function PosIndex({ categories, combo, quickNotes, autoPrint, tables, tax, recent }: PosProps) {
     const { auth, flash, outlet } = usePage().props;
     const now = useNow(30000);
     const searchRef = useRef<HTMLInputElement>(null);
@@ -73,6 +76,11 @@ export default function PosIndex({ categories, combo, quickNotes, tables, tax, r
             setPaying(false);
             setErrors({});
             setTicketOpen(true);
+
+            // If the printer is not reachable, the cashier still has the Print button on the receipt.
+            if (autoPrint) {
+                printReceipt(flash.receipt.uuid, 'order').catch(() => undefined);
+            }
         }
     }, [flash.receipt?.uuid]);
 

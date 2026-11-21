@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { CircleCheckBig, Minus, Pencil, Plus, ReceiptText, ShoppingBag, Trash2, UtensilsCrossed, X } from 'lucide-react';
+import { PrintReceiptButton } from '@/components/staff/PrintReceiptButton';
 import { cn } from '@/lib/cn';
 import { money } from '@/lib/format';
 import { describe, unitPrice, type PosLine } from '@/lib/pos';
@@ -120,12 +121,13 @@ export function PosTicket(props: PosTicketProps) {
                                 <span className="font-display text-4xl leading-none text-flame-400">{money(receipt.change)}</span>
                             </p>
                         )}
-                        <div className="mt-3 flex gap-2 text-xs font-bold">
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold">
+                            <PrintReceiptButton uuid={receipt.uuid} copies="order" variant="secondary" />
                             <Link href={route('counter.index', { order: receipt.uuid })} className="rounded-lg bg-ink-800 px-3 py-2 text-ink-100 hover:bg-ink-700">
                                 Open at counter
                             </Link>
                             <a href={route('orders.invoice', receipt.uuid)} className="rounded-lg bg-ink-800 px-3 py-2 text-ink-100 hover:bg-ink-700">
-                                Receipt (PDF)
+                                PDF
                             </a>
                         </div>
                     </div>

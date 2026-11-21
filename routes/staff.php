@@ -7,6 +7,7 @@ use App\Http\Controllers\Kitchen\KitchenItemController;
 use App\Http\Controllers\Kitchen\KitchenOrderController;
 use App\Http\Controllers\Kitchen\KitchenStockController;
 use App\Http\Controllers\Pos\PosController;
+use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\Rider\RiderController;
 use App\Http\Controllers\Rider\RiderDeliveryController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,9 @@ Route::middleware('role:admin,manager,cashier,waiter')->prefix('counter')->name(
     Route::post('/orders/{order}/dispatch', [CounterOrderController::class, 'dispatch'])->name('orders.dispatch');
     Route::post('/orders/{order}/cancel', [CounterOrderController::class, 'cancel'])->name('orders.cancel');
 });
+
+// What a printed receipt (and kitchen slip) shows, for the till, the counter and the back office.
+Route::get('/receipts/{order}', ReceiptController::class)->middleware('role:admin,manager,cashier,waiter')->name('receipts.show');
 
 Route::middleware('role:rider')->prefix('rider')->name('rider.')->group(function () {
     Route::get('/', RiderController::class)->name('index');
