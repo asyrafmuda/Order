@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'order_id', 'reference', 'gateway', 'method', 'status', 'amount', 'gateway_transaction_id', 'payload',
+    'order_id', 'reference', 'gateway', 'gateway_reference', 'method', 'status', 'amount', 'gateway_transaction_id', 'payload',
     'paid_at', 'refunded_at',
 ])]
 class Payment extends Model

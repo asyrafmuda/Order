@@ -203,18 +203,28 @@ Nota penting:
 
 Setiap integrasi ada interface dan driver yang dipilih melalui `.env`.
 
-### Payment gateway — `PAYMENT_GATEWAY`
+### Payment gateway — Admin → Payment Gateway
 
-Default `fake`: halaman bank simulasi (Approve / Decline) supaya aliran penuh boleh diuji tanpa akaun merchant.
+Super admin pilih **satu** gateway di Admin → Payment Gateway dan masukkan kuncinya di situ (tiada `.env` perlu diubah). Kunci rahsia disimpan berenkripsi dengan `APP_KEY` dan tidak pernah dihantar ke browser. Bila disimpan, sistem terus uji sambungan dan tunjuk hasilnya.
 
-Untuk gateway sebenar (ToyyibPay, Billplz, Stripe…):
+| Gateway | Perlu | Kaedah di checkout |
+|---|---|---|
+| **Billplz** | API Secret Key + Collection ID | FPX, kad, e-wallet (halaman bil Billplz) |
+| **Bayarcash** | Personal Access Token + Portal Key (+ API Secret Key, disyorkan) | FPX → FPX, e-wallet → DuitNow QR, kad → kad kredit |
+| **Stripe** | Secret key `sk_live_…` / `sk_test_…` | Stripe Checkout (kad, FPX, GrabPay ikut yang dihidupkan di dashboard Stripe) |
+| **Demo** (`fake`) | – | Halaman bank simulasi. Tidak boleh dipilih di production (kecuali `PAYMENT_FAKE_IN_PRODUCTION=true`) |
+| **None** | – | Bayar di kaunter sahaja |
 
-1. Buat class dalam `app/Services/Payments` yang implement `App\Contracts\PaymentGateway`:
-   - `checkoutUrl(Payment)` — cipta bil di gateway, pulangkan URL untuk redirect pelanggan.
-   - `parseCallback(Request)` — sahkan signature dan pulangkan `PaymentCallback`.
-   - `refund(Payment)`.
-2. Daftar dalam `config/payment.php` → `drivers`, set `PAYMENT_GATEWAY`.
-3. Set return URL dan callback URL gateway kepada `/payments/callback` (dikecualikan daripada CSRF).
+Billplz dan Bayarcash ada mod **sandbox** (suis di halaman yang sama).
+
+Cara bayaran disahkan: gateway hantar pelanggan balik ke `/payments/{gateway}/return` dan panggil `/payments/{gateway}/notify` (server ke server; dikecualikan daripada CSRF). Data dalam panggilan itu hanya petunjuk — sistem sentiasa **tanya API gateway itu sendiri** (bil Billplz, transaksi Bayarcash, Checkout Session Stripe) dan semak rujukan, jumlah dan mata wang sebelum order disahkan. Jadi X-Signature Billplz atau webhook secret Stripe tidak diperlukan. Jika kedua-dua panggilan hilang, `orders:cancel-unpaid` tanya gateway sekali lagi sebelum membatalkan order.
+
+- **Stripe webhook (pilihan, disyorkan):** Developers → Webhooks → tambah endpoint `https://domain-kau/payments/stripe/notify` untuk event `checkout.session.completed`. Event lain dijawab `200 Ignored`.
+- **Refund:** order online yang dibatalkan selepas dibayar dipulangkan automatik untuk Stripe. Billplz dan Bayarcash tiada API refund — pulangkan wang secara manual dari dashboard gateway (atau pindahan bank).
+- Bayaran lama sentiasa disemak dengan gateway tempat ia dibuat, walaupun super admin sudah tukar gateway.
+- `PAYMENT_GATEWAY` dalam `.env` hanya nilai permulaan sebelum apa-apa dipilih di admin.
+
+Tambah gateway lain: buat class dalam `app/Services/Payments` (lanjutkan `HostedGateway`, implement `App\Contracts\PaymentGateway`: `checkoutUrl`, `verify`, `refund`, `test`), daftar dalam `config/payment.php` → `drivers`, dan tambah medan kuncinya di `PaymentGatewayController` / halaman admin.
 
 ### Loyverse POS — `POS_PROVIDER`
 
@@ -319,7 +329,7 @@ Had: kod PHP boleh dibaca dan diubah oleh orang yang betul-betul berniat. Sistem
 ## Production
 
 - `APP_ENV=production`, `APP_DEBUG=false`, `npm run build`, `php artisan optimize`.
-- Set `PAYMENT_GATEWAY` kepada gateway sebenar. Driver `fake` meluluskan bayaran dengan satu klik — untuk demo dan ujian sahaja.
+- Pilih gateway sebenar di Admin → Payment Gateway. Driver `fake` meluluskan bayaran dengan satu klik — untuk demo dan ujian sahaja, dan dianggap "None" di production.
 - Queue worker mesti jalan (`php artisan queue:work`) — sync POS, mesej pelanggan dan broadcast semuanya atas queue. Guna Supervisor.
 - Scheduler: `* * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1`.
 - Reverb: `php artisan reverb:start` di belakang reverse proxy dengan TLS; set `REVERB_HOST` / `REVERB_SCHEME=https`.

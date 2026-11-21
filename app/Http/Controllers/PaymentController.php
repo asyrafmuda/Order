@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\Payments\ConfirmPayment;
-use App\Actions\Payments\FailPayment;
-use App\Contracts\PaymentGateway;
+use App\Actions\Payments\ReconcilePayment;
 use App\Enums\PaymentStatus;
 use App\Exceptions\PaymentException;
 use App\Models\Payment;
 use App\Services\Payments\FakeGateway;
+use App\Services\Payments\GatewayManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
 
 class PaymentController extends Controller
 {
     /**
-     * The simulated bank page of the "fake" gateway.
+     * The simulated bank page of the demo gateway.
      */
     public function showFake(Payment $payment): Response|RedirectResponse
     {
-        abort_unless(config('payment.default') === 'fake', 404);
+        abort_unless($payment->gateway === 'fake', 404);
 
         $payment->load('order');
 
@@ -43,7 +44,7 @@ class PaymentController extends Controller
 
     public function completeFake(Request $request, Payment $payment, FakeGateway $gateway): RedirectResponse
     {
-        abort_unless(config('payment.default') === 'fake', 404);
+        abort_unless($payment->gateway === 'fake', 404);
 
         $validated = $request->validate(['action' => ['required', 'in:approve,decline']]);
 
@@ -51,30 +52,77 @@ class PaymentController extends Controller
     }
 
     /**
-     * Return / webhook endpoint for the configured gateway.
+     * The customer comes back from the gateway's page.
      */
-    public function callback(Request $request, PaymentGateway $gateway, ConfirmPayment $confirm, FailPayment $fail): RedirectResponse
+    public function return(Request $request, string $gateway, ReconcilePayment $reconcile): RedirectResponse
     {
+        $payment = $this->payment($request, $gateway);
+
         try {
-            $callback = $gateway->parseCallback($request);
+            $result = $reconcile->handle($payment, $request);
         } catch (PaymentException $exception) {
             report($exception);
             abort(400, 'Invalid payment callback.');
         }
 
-        $payment = Payment::query()
-            ->where('reference', $callback->reference)
-            ->where('gateway', $gateway->name())
-            ->firstOrFail();
+        $order = $payment->order()->firstOrFail();
 
-        if ($callback->successful) {
-            $order = $confirm->handle($payment, $callback->transactionId, $callback->payload);
+        return match ($result->status) {
+            'paid' => redirect()->route('orders.show', $order)->with('success', "Payment received. Order {$order->order_number} is confirmed!"),
+            'failed' => redirect()->route('orders.show', $order)->with('error', 'The payment was not completed. You can try again below.'),
+            // E.g. FPX waiting for the bank: the gateway's own call confirms it shortly.
+            default => redirect()->route('orders.show', $order)->with('success', 'Thank you! We are waiting for the bank to confirm your payment; this page updates by itself.'),
+        };
+    }
 
-            return redirect()->route('orders.show', $order)->with('success', "Payment received. Order {$order->order_number} is confirmed!");
+    /**
+     * The gateway reports a result server to server. Always answered with
+     * 200 once handled, so the gateway stops retrying.
+     */
+    public function notify(Request $request, string $gateway, ReconcilePayment $reconcile): HttpResponse
+    {
+        $payment = $this->payment($request, $gateway, required: false);
+
+        // E.g. a Stripe event about something else: nothing to do, and no reason to retry.
+        if (! $payment) {
+            return response('Ignored');
         }
 
-        $fail->handle($payment, $callback->payload);
+        try {
+            $reconcile->handle($payment, $request);
+        } catch (PaymentException $exception) {
+            report($exception);
 
-        return redirect()->route('orders.show', $payment->order)->with('error', 'The payment was not completed. You can try again below.');
+            // Not a forgery we can tell apart from an outage: let the gateway try again.
+            return response('Could not confirm the payment yet.', 503);
+        }
+
+        return response('OK');
+    }
+
+    /**
+     * The payment a return or notify call is about: our reference is in the
+     * URL we gave the gateway, or (Stripe webhooks, Bayarcash callbacks) in
+     * the body.
+     */
+    private function payment(Request $request, string $gateway, bool $required = true): ?Payment
+    {
+        try {
+            app(GatewayManager::class)->driver($gateway);
+        } catch (InvalidArgumentException) {
+            abort(404);
+        }
+
+        $reference = $request->query('payment')
+            ?? $request->input('data.object.client_reference_id')
+            ?? $request->input('order_number');
+
+        $payment = is_string($reference) && $reference !== ''
+            ? Payment::query()->where('reference', $reference)->where('gateway', $gateway)->first()
+            : null;
+
+        abort_if($required && ! $payment, 404);
+
+        return $payment;
     }
 }

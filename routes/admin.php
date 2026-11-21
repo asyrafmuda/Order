@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ModifierGroupController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OutletController;
 use App\Http\Controllers\Admin\OutletPriceController;
+use App\Http\Controllers\Admin\PaymentGatewayController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RiderController;
@@ -82,6 +83,10 @@ Route::middleware('role:admin')->group(function () use ($crud) {
     Route::post('/license', [LicenseController::class, 'activate'])->middleware('throttle:10,1')->name('license.activate');
     Route::post('/license/check', [LicenseController::class, 'check'])->middleware('throttle:10,1')->name('license.check');
     Route::delete('/license', [LicenseController::class, 'release'])->name('license.release');
+
+    Route::get('/payment-gateway', [PaymentGatewayController::class, 'edit'])->name('payment-gateway.edit');
+    Route::put('/payment-gateway', [PaymentGatewayController::class, 'update'])->middleware('throttle:20,1')->name('payment-gateway.update');
+    Route::post('/payment-gateway/test', [PaymentGatewayController::class, 'test'])->middleware('throttle:20,1')->name('payment-gateway.test');
 
     Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');

@@ -3,11 +3,11 @@
 namespace App\Actions\Payments;
 
 use App\Actions\Orders\TransitionOrder;
-use App\Contracts\PaymentGateway;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\Payments\GatewayManager;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -18,7 +18,7 @@ class ConfirmPayment
 {
     public function __construct(
         private readonly TransitionOrder $transition,
-        private readonly PaymentGateway $gateway,
+        private readonly GatewayManager $gateways,
     ) {}
 
     /**
@@ -53,7 +53,7 @@ class ConfirmPayment
 
         // Paid after the order was cancelled (e.g. it timed out): give the money back.
         if ($order->status === OrderStatus::Cancelled) {
-            if ($this->gateway->refund($payment)) {
+            if ($this->gateways->driver($payment->gateway)->refund($payment)) {
                 $payment->update(['status' => PaymentStatus::Refunded, 'refunded_at' => now()]);
                 $order->update(['payment_status' => PaymentStatus::Refunded]);
             }

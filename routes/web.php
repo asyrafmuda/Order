@@ -74,11 +74,14 @@ Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name(
 |--------------------------------------------------------------------------
 */
 
+// Every gateway sends the customer back to /return and reports to /notify.
+// Registered before the demo bank page, whose {payment} would swallow them.
+Route::get('/payments/{gateway}/return', [PaymentController::class, 'return'])->whereAlpha('gateway')->name('payments.return');
+Route::post('/payments/{gateway}/notify', [PaymentController::class, 'notify'])->whereAlpha('gateway')->middleware('throttle:120,1')->name('payments.notify');
 Route::get('/payments/fake/{payment}', [PaymentController::class, 'showFake'])
     ->middleware('signed')
     ->name('payments.fake.show');
 Route::post('/payments/fake/{payment}', [PaymentController::class, 'completeFake'])->name('payments.fake.complete');
-Route::match(['get', 'post'], '/payments/callback', [PaymentController::class, 'callback'])->name('payments.callback');
 
 Route::post('/webhooks/loyverse', LoyverseWebhookController::class)->name('webhooks.loyverse');
 

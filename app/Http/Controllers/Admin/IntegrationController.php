@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Pos\SyncPosMenu;
 use App\Contracts\MessageChannel;
-use App\Contracts\PaymentGateway;
 use App\Contracts\PosProvider;
 use App\Enums\SyncStatus;
 use App\Exceptions\PosException;
@@ -13,13 +12,14 @@ use App\Models\NotificationLog;
 use App\Models\Order;
 use App\Models\PosSyncLog;
 use App\Models\Product;
+use App\Services\Payments\GatewayManager;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class IntegrationController extends Controller
 {
-    public function index(PosProvider $pos, PaymentGateway $gateway, MessageChannel $channel): Response
+    public function index(PosProvider $pos, GatewayManager $gateways, MessageChannel $channel): Response
     {
         $products = Product::query()->count();
         $linked = Product::query()->whereNotNull('pos_item_id')->count();
@@ -34,7 +34,7 @@ class IntegrationController extends Controller
                 'orders_failed' => Order::query()->forOutlet($this->outlet())->where('pos_sync_status', SyncStatus::Failed)->count(),
                 'webhook_url' => route('webhooks.loyverse'),
             ],
-            'payment' => ['gateway' => $gateway->name(), 'callback_url' => route('payments.callback')],
+            'payment' => ['gateway' => $gateways->active()?->label() ?? 'None', 'ready' => $gateways->ready(), 'live' => (bool) $gateways->active()?->live()],
             'messaging' => ['channel' => $channel->name()],
             'posLogs' => PosSyncLog::query()->with('order')->latest('id')->limit(30)->get()->map(fn (PosSyncLog $log) => [
                 'id' => $log->id,

@@ -2,13 +2,13 @@
 
 namespace App\Actions\Orders;
 
-use App\Contracts\PaymentGateway;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Exceptions\OrderException;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Payments\GatewayManager;
 
 /**
  * Cancels an order and refunds whatever was paid for it.
@@ -17,7 +17,7 @@ class CancelOrder
 {
     public function __construct(
         private readonly TransitionOrder $transition,
-        private readonly PaymentGateway $gateway,
+        private readonly GatewayManager $gateways,
     ) {}
 
     /**
@@ -39,8 +39,8 @@ class CancelOrder
     {
         $order->payments()->where('status', PaymentStatus::Paid)->get()->each(function (Payment $payment) {
             // Counter (cash) payments are handed back by the cashier.
-            $refunded = $payment->gateway === $this->gateway->name()
-                ? $this->gateway->refund($payment)
+            $refunded = array_key_exists($payment->gateway, (array) config('payment.drivers'))
+                ? $this->gateways->driver($payment->gateway)->refund($payment)
                 : true;
 
             if ($refunded) {

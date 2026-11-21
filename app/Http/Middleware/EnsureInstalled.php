@@ -38,7 +38,7 @@ class EnsureInstalled
 
     private function away(Request $request, string $to, string $message): Response
     {
-        if ($request->expectsJson() || $request->is('webhooks/*', 'payments/callback')) {
+        if ($request->expectsJson() || $request->is('webhooks/*', 'payments/*/notify')) {
             // Gateways and the POS retry later.
             return response()->json(['message' => $message], Response::HTTP_SERVICE_UNAVAILABLE, ['Retry-After' => '120']);
         }

@@ -285,7 +285,10 @@ export default function SettingsEdit({ settings, multi, onlinePaymentReady }: { 
                     <div className="space-y-4">
                         {!onlinePaymentReady && (
                             <p className="rounded-lg border border-flame-500/40 bg-flame-900 px-3 py-2 text-sm text-flame-300">
-                                No payment gateway is connected yet, so customers cannot pay online — FPX, card and e-wallet stay hidden at checkout even if switched on. Cash at the counter works.
+                                No payment gateway is connected yet, so customers cannot pay online — FPX, card and e-wallet stay hidden at checkout even if switched on. Cash at the counter works.{' '}
+                                <Link href={route('admin.payment-gateway.edit')} className="font-bold underline">
+                                    Set up a payment gateway
+                                </Link>
                             </p>
                         )}
                         <div className="grid gap-4 sm:grid-cols-3">

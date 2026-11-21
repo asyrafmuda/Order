@@ -34,7 +34,7 @@ interface NotificationLog {
 
 interface IntegrationsProps {
     posStatus: { provider: string; configured: boolean; products_linked: number; products_unlinked: number; orders_failed: number; webhook_url: string };
-    payment: { gateway: string; callback_url: string };
+    payment: { gateway: string; ready: boolean; live: boolean };
     messaging: { channel: string };
     posLogs: PosLog[];
     notificationLogs: NotificationLog[];
@@ -86,15 +86,19 @@ export default function IntegrationsIndex({ posStatus: pos, payment, messaging, 
                 </Card>
 
                 <Card>
-                    <CardHeader title="Payment gateway" icon={<CreditCard className="size-4" />} action={<Badge tone={payment.gateway === 'fake' ? 'flame' : 'green'}>{payment.gateway === 'fake' ? 'Simulated' : 'Live'}</Badge>} />
+                    <CardHeader
+                        title="Payment gateway"
+                        icon={<CreditCard className="size-4" />}
+                        action={<Badge tone={payment.ready ? (payment.live ? 'green' : 'flame') : 'red'}>{payment.ready ? (payment.live ? 'Live' : 'Simulated') : 'Off'}</Badge>}
+                    />
                     <dl className="space-y-2 px-4 py-3 text-sm">
-                        <Row label="Driver" value={<span className="font-bold text-strong capitalize">{payment.gateway}</span>} />
+                        <Row label="Gateway" value={<span className="font-bold text-strong">{payment.gateway}</span>} />
                     </dl>
                     <p className="border-t border-ink-700 px-4 py-3 text-xs leading-relaxed text-ink-400">
-                        {payment.gateway === 'fake'
-                            ? 'Customers see a simulated bank page — no real money moves. Add a real driver and set PAYMENT_GATEWAY in .env to go live.'
-                            : 'Online payments are processed by the configured gateway.'}{' '}
-                        Callback URL: <code className="break-all text-ink-200">{payment.callback_url}</code>
+                        {payment.ready ? (payment.live ? 'Online payments go through this gateway.' : 'Customers see a simulated bank page — no real money moves.') : 'Customers cannot pay online until a gateway is set up.'}{' '}
+                        <Link href={route('admin.payment-gateway.edit')} className="font-semibold text-flame-400 hover:underline">
+                            Set up the payment gateway
+                        </Link>
                     </p>
                 </Card>
 

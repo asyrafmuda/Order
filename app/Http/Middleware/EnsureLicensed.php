@@ -36,7 +36,7 @@ class EnsureLicensed
             return redirect()->route('admin.license.show');
         }
 
-        if ($request->expectsJson() || $request->is('webhooks/*', 'payments/callback')) {
+        if ($request->expectsJson() || $request->is('webhooks/*', 'payments/*/notify')) {
             return response()->json(['message' => 'This site is not available right now.'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 

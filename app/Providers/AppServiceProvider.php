@@ -8,6 +8,7 @@ use App\Contracts\PosProvider;
 use App\Services\Cart\Cart;
 use App\Services\Cart\CartPricer;
 use App\Services\Messaging\WhatsAppChannel;
+use App\Services\Payments\GatewayManager;
 use App\Services\Pos\LoyversePosProvider;
 use App\Support\Installer\EnvironmentFile;
 use App\Support\Installer\Installation;
@@ -48,9 +49,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Integrations are chosen by name in config, so swapping a provider
         // is an .env change rather than a code change.
-        $this->app->bind(PaymentGateway::class, fn ($app) => $app->make(
-            $this->driver('payment', 'Payment gateway'),
-        ));
+        // The gateway chosen in Admin → Payment Gateway (the demo one until then).
+        $this->app->scoped(GatewayManager::class);
+        $this->app->bind(PaymentGateway::class, fn ($app) => $app->make(GatewayManager::class)->active()
+            ?? $app->make(GatewayManager::class)->driver('fake'));
 
         $this->app->when(LoyversePosProvider::class)->needs('$config')->giveConfig('pos.loyverse');
         $this->app->bind(PosProvider::class, fn ($app) => $app->make($this->driver('pos', 'POS provider')));
